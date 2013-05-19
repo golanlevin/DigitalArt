@@ -8,7 +8,7 @@ protected:
 	vector<ofPixels> images;
 	int loaded;
 	ofTexture texture;
-	bool newFrame;
+	bool newFrame, playing;
 	int currentFrame;
 	DelayTimer timer;
 	ofDirectory directory;
@@ -18,9 +18,14 @@ protected:
 			loaded++;
 		}
 	}
+	void updateFrame() {
+		texture.loadData(images[currentFrame]);
+		newFrame = true;
+	}
 public:
 	BufferedVideo()
 	:currentFrame(0)
+	,playing(true)
 	,newFrame(false)
 	,loaded(0) {
 		timer.setFramerate(30);
@@ -45,11 +50,22 @@ public:
 	ofPixels& getFrame(int i) {
 		return images[i];
 	}
+	void setPlaying(bool playing) {
+		this->playing = playing;
+	}
+	void goToPrevious() {
+		currentFrame = (currentFrame - 1 + images.size()) % images.size();
+		updateFrame();
+	}
+	void goToNext() {
+		currentFrame = (currentFrame + 1) % images.size();
+		updateFrame();
+	}
 	void update() {
-		if(timer.tick()) {
-			texture.loadData(images[currentFrame]);
-			newFrame = true;
-			currentFrame = (currentFrame + 1) % images.size();
+		if(playing) {
+			if(timer.tick()) {
+				goToNext();
+			}
 		}
 		loadNextAvailable();
 	}

@@ -8,6 +8,7 @@ void ofApp::setup() {
 	thresholdValue = 30;
 	active = true;
 	intermediate = false;
+	playing = true;
 	mask.loadImage("mask.png");
 	
 	minAllowableContourAreaAsAPercentOfImageSize = 0.04;
@@ -25,6 +26,7 @@ void ofApp::setupGui() {
 	gui->addSpacer();
 	gui->addLabelToggle("Active", &active);
 	gui->addLabelToggle("Intermediate", &intermediate);
+	gui->addLabelToggle("Play", &playing);
 	gui->autoSizeToFitWidgets();
 }
 
@@ -32,7 +34,7 @@ void ofApp::setupGui() {
 //==============================================================
 void ofApp::update() {
 	video.update();
-	if(video.isFrameNew()) {
+	if(video.isFrameNew() || !playing) {
 		
 		// Fetch the (color) video, and convert to (properly weighted) grayscale.
 		Mat videoMat = toCv(video);
@@ -70,6 +72,7 @@ void ofApp::update() {
 		
 		 
 	}
+	video.setPlaying(playing);
 }
 
 //==============================================================
@@ -117,4 +120,16 @@ void ofApp::draw() {
 		drawMat(thresholded, imgW * xItem, 0); xItem++;
 		ofPopMatrix();
 	}		
+}
+
+void ofApp::keyPressed(int key) {
+	if(key == ' ') {
+		playing = !playing;
+	}
+	if(key == OF_KEY_LEFT) {
+		video.goToPrevious();
+	}
+	if(key == OF_KEY_RIGHT) {
+		video.goToNext();
+	}
 }
