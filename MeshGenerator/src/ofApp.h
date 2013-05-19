@@ -8,6 +8,8 @@
 using namespace ofxCv;
 using namespace cv;
 
+#define NO_VALID_HAND -1
+
 class ofApp : public ofBaseApp {
 public:
 	void setup();
@@ -21,5 +23,17 @@ public:
 	bool active, intermediate;
 	ofImage mask;
 	Mat gray, equalized, thresholded;
+	
+	void doMorphologicalCleanupOnThresholdedVideo();
+	Mat thresholdedCleaned;  // the thresholded input, after morphological filtering.
+	Mat tempGrayscaleMat; 
+
+	int imgW; // width of our images for computer vision
+	int imgH; // height of our images
+	
+	
+	
 	ContourFinder contourFinder;
+	float minAllowableContourAreaAsAPercentOfImageSize;
+	float maxAllowableContourAreaAsAPercentOfImageSize;
 };
