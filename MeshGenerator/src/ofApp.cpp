@@ -5,9 +5,10 @@ void ofApp::setup() {
 	sharedSetup();
 	setupGui();
 	video.load("recording");
-	thresholdValue = 128;
+	thresholdValue = 197;
 	active = true;
 	intermediate = false;
+	mask.loadImage("mask.png");
 }
 
 void ofApp::setupGui() {
@@ -29,12 +30,15 @@ void ofApp::update() {
 		convertColor(videoMat, gray, CV_RGB2GRAY);
 		equalizeHist(gray, equalized);
 		threshold(equalized, thresholded, thresholdValue);
+		bitwise_and(mask, thresholded, thresholded);
+		contourFinder.findContours(thresholded);
 	}
 }
 
 void ofApp::draw() {
 	if(active) {
 		drawMat(thresholded, 0, 0);
+		contourFinder.draw();
 	} else {
 		video.draw(0, 0);
 	}

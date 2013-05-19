@@ -19,5 +19,7 @@ public:
 	BufferedVideo video;
 	float thresholdValue;
 	bool active, intermediate;
+	ofImage mask;
 	Mat gray, equalized, thresholded;
+	ContourFinder contourFinder;
 };
