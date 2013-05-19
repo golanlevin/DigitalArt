@@ -14,11 +14,12 @@ public:
 	void setupGui();
 	void update();
 	void draw();
+	void keyPressed(int key);
 	
 	ofxUICanvas* gui;
 	BufferedVideo video;
 	float thresholdValue;
-	bool active, intermediate;
+	bool active, intermediate, playing;
 	ofImage mask;
 	Mat gray, equalized, thresholded;
 	ContourFinder contourFinder;

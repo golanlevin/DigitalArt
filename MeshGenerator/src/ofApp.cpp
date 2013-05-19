@@ -8,6 +8,7 @@ void ofApp::setup() {
 	thresholdValue = 197;
 	active = true;
 	intermediate = false;
+	playing = true;
 	mask.loadImage("mask.png");
 }
 
@@ -20,6 +21,7 @@ void ofApp::setupGui() {
 	gui->addSpacer();
 	gui->addLabelToggle("Active", &active);
 	gui->addLabelToggle("Intermediate", &intermediate);
+	gui->addLabelToggle("Play", &playing);
 	gui->autoSizeToFitWidgets();
 }
 
@@ -33,6 +35,7 @@ void ofApp::update() {
 		bitwise_and(mask, thresholded, thresholded);
 		contourFinder.findContours(thresholded);
 	}
+	video.setPlaying(playing);
 }
 
 void ofApp::draw() {
@@ -51,4 +54,16 @@ void ofApp::draw() {
 		drawMat(thresholded, 768 * 2, 0);
 		ofPopMatrix();
 	}		
+}
+
+void ofApp::keyPressed(int key) {
+	if(key == ' ') {
+		playing = !playing;
+	}
+	if(key == OF_KEY_LEFT) {
+		video.goToPrevious();
+	}
+	if(key == OF_KEY_RIGHT) {
+		video.goToNext();
+	}
 }
