@@ -5,6 +5,11 @@
 *.app*
 *.DS_*
 
+
+*.sdf
+*.opensdf
+*.suo
+
 .svn/
 obj/
 bin/
