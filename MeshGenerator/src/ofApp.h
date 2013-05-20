@@ -5,6 +5,8 @@
 #include "ofxUI.h"
 #include "BufferedVideo.h"
 
+#include "HandContourAnalyzerAndMeshBuilder.h"
+
 using namespace ofxCv;
 using namespace cv;
 
@@ -42,6 +44,8 @@ public:
 	float maxAllowableContourAreaAsAPercentOfImageSize;
 	
 	bool		bValidHandContourExists;
-	ofPolyline	handContourPolyline; 
+	ofPolyline	handContourPolyline;
+	cv::Point2f	handContourCentroid; 
+	HandContourAnalyzerAndMeshBuilder HCAAMB;
 	
 };

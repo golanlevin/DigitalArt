@@ -30,13 +30,28 @@ void ofApp::setupGui() {
 	gui->addSlider("Threshold", 0.0, 255.0, &thresholdValue);
 	gui->addSlider("MinContourArea%", 0.0, 0.10, &minAllowableContourAreaAsAPercentOfImageSize);
 	gui->addSlider("MaxContourArea%", 0.0, 0.25, &maxAllowableContourAreaAsAPercentOfImageSize);
+	gui->addSlider("ContourSmoothing", 0.0, 50.0,&(HCAAMB.contourSmoothingSize));
+	gui->addSlider("ContourResampling", 1.0, 20.0, &(HCAAMB.contourResampleSpacing));
+	
 	gui->addSpacer();
+	
+	gui->addSlider("Sample offset", 1, 40, &(HCAAMB.sampleOffset));
+	gui->addSlider("Peak angle cutoff", 0, 60, &(HCAAMB.peakAngleCutoff));
+	gui->addSlider("Peak neighbor distance", 0, 100, &(HCAAMB.peakNeighborDistance));
+	
+	gui->addSpacer();
+	
+	float			sampleOffset;
+	float			peakAngleCutoff;
+	float			peakNeighborDistance;
+	
 	gui->addLabelToggle("Active", &active);
 	gui->addLabelToggle("Intermediate", &intermediate);
 	gui->addLabelToggle("Play", &playing);
 	gui->addLabelToggle("Morphological", &bDoMorphologicalCleanup);
 	gui->autoSizeToFitWidgets();
 }
+
 
 
 //==============================================================
@@ -61,10 +76,8 @@ void ofApp::update() {
 		doMorphologicalCleanupOnThresholdedVideo();
 		
 		// Extract the contour(s) of the binarized image, and FIND THE CONTOURS
-		float minArea = minAllowableContourAreaAsAPercentOfImageSize * (imgW * imgH);
-		float maxArea = maxAllowableContourAreaAsAPercentOfImageSize * (imgW * imgH);
-		contourFinder.setMinArea ( minArea );
-		contourFinder.setMaxArea ( maxArea );
+		contourFinder.setMinAreaNorm( minAllowableContourAreaAsAPercentOfImageSize );
+		contourFinder.setMaxAreaNorm( maxAllowableContourAreaAsAPercentOfImageSize );
 		contourFinder.findContours(thresholdedCleaned);
 		
 		// Find the index ID of the largest contour, which is most likely the hand.
@@ -84,6 +97,8 @@ void ofApp::update() {
 		if (indexOfHandContour != NO_VALID_HAND){
 			bValidHandContourExists = true;
 			handContourPolyline = contourFinder.getPolyline(indexOfHandContour);
+			handContourCentroid = contourFinder.getCentroid(indexOfHandContour);
+			HCAAMB.process(handContourPolyline, handContourCentroid);
 		}
 		
 		 
@@ -124,16 +139,17 @@ void ofApp::draw() {
 		
 		ofPushStyle();
 		
-		ofSetColor(180);
+		ofSetColor(64);
 		drawMat(thresholdedCleaned, 0, 0);
 		
 		//ofSetColor(255,0,0);
 		//contourFinder.draw();
 		
 		if (bValidHandContourExists){
-			ofSetColor(0,255,0);
-			ofSetLineWidth(2);
-			handContourPolyline.draw();
+			//ofSetColor(0,255,0);
+			//ofSetLineWidth(2);
+			//handContourPolyline.draw();
+			HCAAMB.drawAnalytics();
 		}
 		ofPopStyle();
 		
