@@ -19,7 +19,9 @@ protected:
 		}
 	}
 	void updateFrame() {
-		texture.loadData(images[currentFrame]);
+		if(images[currentFrame].getWidth() > 0) {
+			texture.loadData(images[currentFrame]);
+		}
 		newFrame = true;
 	}
 public:
@@ -62,12 +64,12 @@ public:
 		updateFrame();
 	}
 	void update() {
+		loadNextAvailable();
 		if(playing) {
 			if(timer.tick()) {
 				goToNext();
 			}
 		}
-		loadNextAvailable();
 	}
 	bool isFrameNew() {
 		bool cur = newFrame;
