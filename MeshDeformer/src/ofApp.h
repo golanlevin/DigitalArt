@@ -4,6 +4,7 @@
 #include "ofxCv.h"
 #include "ofxUI.h"
 #include "ofxPuppetInteractive.h"
+#include "Skeleton.h"
 
 using namespace ofxCv;
 using namespace cv;
@@ -17,9 +18,12 @@ public:
 	void keyPressed(int key);
 	
 	ofxUICanvas* gui;
-	bool showWireframe;
+	ofxUIRadio* sceneRadio;
+	bool showImage, showWireframe, showSkeleton;
 	
 	ofMesh mesh;
 	ofImage hand;
 	ofxPuppetInteractive puppet;
+	Skeleton skeleton;
+	vector<string> sceneNames;
 };

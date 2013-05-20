@@ -122,6 +122,7 @@
 		271986121749E32B00BB96FF /* ofxPuppet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxPuppet.h; sourceTree = "<group>"; };
 		271986131749E32B00BB96FF /* ofxPuppetInteractive.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxPuppetInteractive.cpp; sourceTree = "<group>"; };
 		271986141749E32B00BB96FF /* ofxPuppetInteractive.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxPuppetInteractive.h; sourceTree = "<group>"; };
+		272F826D174AA82C00A9DB83 /* Skeleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Skeleton.h; sourceTree = "<group>"; };
 		2790D1B7174966D200118422 /* ofApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofApp.cpp; sourceTree = "<group>"; };
 		2790D1B8174966D200118422 /* ofApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofApp.h; sourceTree = "<group>"; };
 		2790D1BB1749671800118422 /* SharedUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SharedUtils.h; sourceTree = "<group>"; };
@@ -512,6 +513,7 @@
 			children = (
 				2790D1BB1749671800118422 /* SharedUtils.h */,
 				2790D1BC1749688E00118422 /* BufferedVideo.h */,
+				272F826D174AA82C00A9DB83 /* Skeleton.h */,
 			);
 			name = SharedCode;
 			path = ../SharedCode;
