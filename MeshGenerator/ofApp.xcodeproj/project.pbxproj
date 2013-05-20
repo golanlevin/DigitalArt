@@ -123,6 +123,7 @@
 		36f0ff7f8d7342d220cc6319cac5ad59 /* dummy.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = dummy.h; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/dummy.h; sourceTree = SOURCE_ROOT; };
 		3BC5DAC61749B91000500E2D /* HandContourAnalyzerAndMeshBuilder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HandContourAnalyzerAndMeshBuilder.cpp; sourceTree = "<group>"; };
 		3BC5DAC71749B91000500E2D /* HandContourAnalyzerAndMeshBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HandContourAnalyzerAndMeshBuilder.h; sourceTree = "<group>"; };
+		3BC5DACA174ABC4000500E2D /* Graveyard.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Graveyard.h; sourceTree = "<group>"; };
 		3c232045833313b99efe0b14840b6108 /* ofxCvMain.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxCvMain.h; path = ../../../addons/ofxOpenCv/src/ofxCvMain.h; sourceTree = SOURCE_ROOT; };
 		402c8f4015542356d362ac883b9c826c /* Calibration.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = Calibration.cpp; path = ../../../addons/ofxCv/libs/ofxCv/src/Calibration.cpp; sourceTree = SOURCE_ROOT; };
 		4117b8c24d49837d3df9c23bd2405bdc /* ofxUIToggle.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxUIToggle.h; path = ../../../addons/ofxUI/src/ofxUIToggle.h; sourceTree = SOURCE_ROOT; };
@@ -717,6 +718,7 @@
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
 				3BC5DAC61749B91000500E2D /* HandContourAnalyzerAndMeshBuilder.cpp */,
 				3BC5DAC71749B91000500E2D /* HandContourAnalyzerAndMeshBuilder.h */,
+				3BC5DACA174ABC4000500E2D /* Graveyard.h */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
