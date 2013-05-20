@@ -68,9 +68,9 @@ void ofApp::update() {
 		imgH = videoMat.rows;
 		imgW = videoMat.cols;
 		
-		// Threshold the result, and mask against relevant-area quad.
+		// Mask against relevant-area quad, and then threshold. 
+		bitwise_and(mask, gray, gray);
 		threshold(gray, thresholded, thresholdValue);
-		bitwise_and(mask, thresholded, thresholded);
 		
 		// Morphological cleanup filtering here. Uses thresholded; puts results in thresholdedCleaned
 		doMorphologicalCleanupOnThresholdedVideo();
