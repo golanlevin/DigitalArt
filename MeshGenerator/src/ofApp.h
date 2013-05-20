@@ -27,7 +27,10 @@ public:
 	
 	void doMorphologicalCleanupOnThresholdedVideo();
 	Mat thresholdedCleaned;  // the thresholded input, after morphological filtering.
-	Mat tempGrayscaleMat; 
+	
+	Mat tempGrayscaleMat;
+	bool bDoMorphologicalCleanup; 
+	bool bHandyBool; 
 
 	int imgW; // width of our images for computer vision
 	int imgH; // height of our images
@@ -37,4 +40,8 @@ public:
 	ContourFinder contourFinder;
 	float minAllowableContourAreaAsAPercentOfImageSize;
 	float maxAllowableContourAreaAsAPercentOfImageSize;
+	
+	bool		bValidHandContourExists;
+	ofPolyline	handContourPolyline; 
+	
 };

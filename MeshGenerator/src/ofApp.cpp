@@ -10,9 +10,16 @@ void ofApp::setup() {
 	intermediate = false;
 	playing = true;
 	mask.loadImage("mask.png");
+
+	//allocate (T& img, int width, int height, int cvType)
+	//imitate(dst, src);
+	//copy (thresholded, thresholdedCleaned);
 	
-	minAllowableContourAreaAsAPercentOfImageSize = 0.04;
+	minAllowableContourAreaAsAPercentOfImageSize = 0.05;
 	maxAllowableContourAreaAsAPercentOfImageSize = 0.12; // approx 100000.0 / (768*1024);
+	
+	bHandyBool = false;
+	bDoMorphologicalCleanup = true;
 }
 
 void ofApp::setupGui() {
@@ -27,6 +34,7 @@ void ofApp::setupGui() {
 	gui->addLabelToggle("Active", &active);
 	gui->addLabelToggle("Intermediate", &intermediate);
 	gui->addLabelToggle("Play", &playing);
+	gui->addLabelToggle("Morphological", &bDoMorphologicalCleanup);
 	gui->autoSizeToFitWidgets();
 }
 
@@ -34,7 +42,10 @@ void ofApp::setupGui() {
 //==============================================================
 void ofApp::update() {
 	video.update();
+	
+	
 	if(video.isFrameNew() || !playing) {
+		
 		
 		// Fetch the (color) video, and convert to (properly weighted) grayscale.
 		Mat videoMat = toCv(video);
@@ -49,12 +60,12 @@ void ofApp::update() {
 		// Morphological cleanup filtering here. Uses thresholded; puts results in thresholdedCleaned
 		doMorphologicalCleanupOnThresholdedVideo();
 		
-		// Extract the contour(s) of the binarized image
+		// Extract the contour(s) of the binarized image, and FIND THE CONTOURS
 		float minArea = minAllowableContourAreaAsAPercentOfImageSize * (imgW * imgH);
 		float maxArea = maxAllowableContourAreaAsAPercentOfImageSize * (imgW * imgH);
 		contourFinder.setMinArea ( minArea );
 		contourFinder.setMaxArea ( maxArea );
-		contourFinder.findContours(thresholded);
+		contourFinder.findContours(thresholdedCleaned);
 		
 		// Find the index ID of the largest contour, which is most likely the hand.
 		int indexOfHandContour = NO_VALID_HAND;
@@ -62,12 +73,17 @@ void ofApp::update() {
 		vector <ofPolyline> polylineContours = contourFinder.getPolylines();
 		int nPolylineContours = polylineContours.size();
 		for (int i=0; i<nPolylineContours; i++){
-			// ofPolyLine p = contourFinder.getPolyline(i);
+			// 
 			float contourArea = contourFinder.getContourArea(i);
 			if (contourArea > largestContourArea){
 				contourArea = largestContourArea; 
 				indexOfHandContour = i; 
 			}
+		}
+		bValidHandContourExists = false;
+		if (indexOfHandContour != NO_VALID_HAND){
+			bValidHandContourExists = true;
+			handContourPolyline = contourFinder.getPolyline(indexOfHandContour);
 		}
 		
 		 
@@ -78,16 +94,27 @@ void ofApp::update() {
 //==============================================================
 void ofApp::doMorphologicalCleanupOnThresholdedVideo(){
 	
-	//cv::Rect myROI(0, 0, imgW, imgH); // y, x, h, w
-	//thresholdedCleaned = Mat(thresholded, myROI);
+	if (bDoMorphologicalCleanup){
+		
+		bool bUseRoundMorphologicalStructuringElement = false;
+		int elementSize = 5;
+		cv::Mat structuringElement = Mat();
+		if (bUseRoundMorphologicalStructuringElement){
+			structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE,
+														   cv::Size(2*elementSize + 1, 2*elementSize + 1),
+														   cv::Point(elementSize, elementSize) );
+		}
+		
+		// Opening: 
+		// cv::erode  (thresholded, thresholdedCleaned, structuringElement);
+		// cv::dilate (thresholded, thresholdedCleaned, structuringElement);
+		
+		cv::medianBlur(thresholded, thresholdedCleaned, elementSize);
 	
-	
-	for (int i=0; i<1; i++){
-		cv::dilate(thresholded, thresholdedCleaned, Mat());
-		cv::dilate(thresholdedCleaned, thresholded, Mat());
+	} else {
+		copy (thresholded, thresholdedCleaned);
+		
 	}
-	// tempGrayscaleMat
-	
 }
 
 
@@ -96,9 +123,18 @@ void ofApp::draw() {
 	if(active) {
 		
 		ofPushStyle();
+		
+		ofSetColor(180);
 		drawMat(thresholdedCleaned, 0, 0);
-		ofSetColor(255,0,0); 
-		contourFinder.draw();
+		
+		//ofSetColor(255,0,0);
+		//contourFinder.draw();
+		
+		if (bValidHandContourExists){
+			ofSetColor(0,255,0);
+			ofSetLineWidth(2);
+			handContourPolyline.draw();
+		}
 		ofPopStyle();
 		
 	} else {
@@ -131,5 +167,8 @@ void ofApp::keyPressed(int key) {
 	}
 	if(key == OF_KEY_RIGHT) {
 		video.goToNext();
+	}
+	if (key == 'b'){
+		bHandyBool = !bHandyBool; 
 	}
 }
