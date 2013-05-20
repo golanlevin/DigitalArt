@@ -65,7 +65,7 @@ void ofApp::update() {
 	skeleton.setup(mesh);
 	
 	if(mouseControl) {
-		//skeleton.setPositionAbsolute(Bone::PALM, ofVec2f(mouseX, mouseY));
+		skeleton.setPositionAbsolute(Bone::PALM, ofVec2f(mouseX, mouseY));
 	}
 	
 	// then we modify the skeleton with one of our scenes
@@ -93,7 +93,7 @@ void ofApp::update() {
 	} else if(scene == 2) {
 		float wiggleRange = 50;
 		float t = ofGetElapsedTimef();
-		skeleton.setPositionAbsoluteIndependent(Bone::PALM, wiggleRange * ofVec2f(ofNoise(t, 0), ofNoise(t, 1)));
+		skeleton.setPositionRelativeIndependent(Bone::PALM, wiggleRange * ofVec2f(ofNoise(t, 0), ofNoise(t, 1)));
 	}
 	
 	// we update the puppet using that skeleton

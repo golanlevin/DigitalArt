@@ -33,10 +33,18 @@ public:
 	bool forwardOriented;
 };
 
+// add specialized skeletons: hand skeleton, three point skeleton
+
 class Skeleton {
 protected:
 	vector<Bone> bones;
 public:
+	enum MovementMode {
+		MOVE_ABSOLUTE,
+		MOVE_RELATIVE_TO_SELF,
+		MOVE_RELATIVE_TO_PARENT
+	};
+	
 	void setup(ofMesh& mesh) {
 		bones.clear();
 		bones.resize(Bone::BONE_COUNT);
@@ -111,12 +119,27 @@ public:
 	ofVec2f getPositionAbsolute(Bone::Label label) {
 		return bones[label].getGlobalPosition();
 	}
+	void setPosition(Bone::Label label, MovementMode mode, bool independent = false) {
+		
+	}
 	void setPositionAbsolute(Bone::Label label, ofVec2f position) {
 		bones[label].setGlobalPosition(position);
 	}
-	void setPositionAbsoluteIndependent(Bone::Label label, ofVec2f position) {
-		vector<ofVec2f> cachedChildren;
-		bones[label].setGlobalPosition(position);
+	void setPositionRelativeIndependent(Bone::Label label, ofVec2f position) {
+		Bone& bone = bones[label];
+		vector<Bone::Label> cachedChildren;
+		vector<ofVec2f> cachedPositions;
+		for(int i = 0; i < size(); i++) {
+			Bone* parent = (Bone*) bones[i].getParent();
+			if(parent == &bone) {
+				cachedChildren.push_back((Bone::Label) i);
+				cachedPositions.push_back(bones[i].getGlobalPosition());
+			}
+		}
+		setPositionRelativeToSelf(label, position);
+		for(int i = 0; i < cachedChildren.size(); i++) {
+			setPositionAbsolute(cachedChildren[i], cachedPositions[i]);
+		}
 	}
 	void setPositionRelativeToSelf(Bone::Label label, ofVec2f position) {
 		setPositionAbsolute(label, position + getPositionAbsolute(label));
