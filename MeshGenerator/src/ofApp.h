@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxOpenCv.h"
 #include "ofxCv.h"
 #include "ofxUI.h"
 #include "BufferedVideo.h"
@@ -23,15 +24,31 @@ public:
 	ofxUICanvas* gui;
 	BufferedVideo video;
 	float thresholdValue;
+	float prevThresholdValue;
+	float blurKernelSize;
+	float blurredStrengthWeight;
+	
 	bool active, intermediate, playing;
 	ofImage mask;
-	Mat gray, equalized, thresholded;
+	
+	Mat gray;				// grayscale version of hand input
+	Mat thresholded;		// binarized hand, black-white only
+	Mat graySmall;
+	Mat blurredSmall;
+	Mat blurred;
+	Mat thresholdConstMat; 
+	Mat adaptiveThreshImg;	// blurred minus Constant; the per-pixel thresholds. 
+	
+	Mat tempGrayscaleMat;
+	ofxCvGrayscaleImage tempGrayscaleImg;
 	
 	void doMorphologicalCleanupOnThresholdedVideo();
 	Mat thresholdedCleaned;  // the thresholded input, after morphological filtering.
 	
-	Mat tempGrayscaleMat;
-	bool bDoMorphologicalCleanup; 
+	
+	bool bDoAdaptiveThresholding;
+	bool bDoMorphologicalCleanup;
+	bool bDoMorphologicalOpening; 
 	bool bHandyBool; 
 
 	int imgW; // width of our images for computer vision
