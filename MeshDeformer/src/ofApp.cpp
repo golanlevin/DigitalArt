@@ -8,8 +8,8 @@ void updatePuppet(Skeleton& skeleton, ofxPuppet& puppet) {
 }
 
 void ofApp::setup() {
-	setupGui();
 	sharedSetup();
+	setupGui();
 	
 	mouseControl = true;
 	showImage = true;
@@ -35,7 +35,6 @@ void ofApp::setupGui() {
 	sceneNames.push_back("Wobble");
 	
 	gui = new ofxUICanvas();
-	gui->setFont("GUI/NewMedia Fett.ttf");
 	gui->addLabel("Mesh Deformer");
 	gui->addSpacer();
 	gui->addFPS();
@@ -66,7 +65,7 @@ void ofApp::update() {
 	skeleton.setup(mesh);
 	
 	if(mouseControl) {
-		skeleton.setPositionAbsolute(Bone::PALM, ofVec2f(mouseX, mouseY));
+		skeleton.setPosition(Bone::PALM, ofVec2f(mouseX, mouseY), true);
 	}
 	
 	// then we modify the skeleton with one of our scenes
@@ -89,12 +88,14 @@ void ofApp::update() {
 		for(int i = 0; i < toWiggleCount; i++) {
 			Bone::Label index = toWiggle[i];
 			ofVec2f original = puppet.getOriginalMesh().getVertex(index);
-			skeleton.setPositionRelativeToSelf(index, wiggleRange * ofVec2f(ofNoise(i, t, 0), ofNoise(i, t, 1)));
+			ofVec2f position(wiggleRange * ofVec2f(ofNoise(i, t, 0), ofNoise(i, t, 1)));
+			skeleton.setPosition(index, position, false, false);
 		}
 	} else if(scene == 2) {
 		float wiggleRange = 50;
 		float t = ofGetElapsedTimef();
-		skeleton.setPositionRelativeIndependent(Bone::PALM, wiggleRange * ofVec2f(ofNoise(t, 0), ofNoise(t, 1)));
+		ofVec2f position(wiggleRange * ofVec2f(ofNoise(t, 0), ofNoise(t, 1)));
+		skeleton.setPosition(Bone::PALM, position, false, true);
 	}
 	
 	// we update the puppet using that skeleton

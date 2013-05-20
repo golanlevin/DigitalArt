@@ -40,13 +40,7 @@ public:
 class Skeleton {
 protected:
 	vector<Bone> bones;
-public:
-	enum MovementMode {
-		MOVE_ABSOLUTE,
-		MOVE_RELATIVE_TO_SELF,
-		MOVE_RELATIVE_TO_PARENT
-	};
-	
+public:	
 	void setup(ofMesh& mesh) {
 		bones.clear();
 		bones.resize(Bone::BONE_COUNT);
@@ -91,7 +85,7 @@ public:
 					cur.setGlobalOrientation(orientation);
 				}
 			} 
-			setPositionAbsolute((Bone::Label) i, curPosition);
+			setPosition((Bone::Label) i, curPosition, true);
 		}
 	}
 	int size() {
@@ -121,33 +115,29 @@ public:
 	ofVec2f getPositionAbsolute(Bone::Label label) {
 		return bones[label].getGlobalPosition();
 	}
-	void setPosition(Bone::Label label, MovementMode mode, bool independent = false) {
-		
-	}
-	void setPositionAbsolute(Bone::Label label, ofVec2f position) {
-		bones[label].setGlobalPosition(position);
-	}
-	void setPositionRelativeIndependent(Bone::Label label, ofVec2f position) {
-		Bone& bone = bones[label];
+	void setPosition(Bone::Label label, ofVec2f position, bool absolute = true, bool independent = false, bool localCoordinates = false) {
 		vector<Bone::Label> cachedChildren;
 		vector<ofVec2f> cachedPositions;
-		for(int i = 0; i < size(); i++) {
-			Bone* parent = (Bone*) bones[i].getParent();
-			if(parent == &bone) {
-				cachedChildren.push_back((Bone::Label) i);
-				cachedPositions.push_back(bones[i].getGlobalPosition());
+		if(independent) {
+			Bone& bone = bones[label];
+			for(int i = 0; i < size(); i++) {
+				Bone* parent = (Bone*) bones[i].getParent();
+				if(parent == &bone) {
+					cachedChildren.push_back((Bone::Label) i);
+					cachedPositions.push_back(bones[i].getGlobalPosition());
+				}
 			}
 		}
-		setPositionRelativeToSelf(label, position);
-		for(int i = 0; i < cachedChildren.size(); i++) {
-			setPositionAbsolute(cachedChildren[i], cachedPositions[i]);
+		if(absolute) {
+			bones[label].setGlobalPosition(position);
+		} else {
+			bones[label].setGlobalPosition(bones[label].getGlobalPosition() + position);
 		}
-	}
-	void setPositionRelativeToSelf(Bone::Label label, ofVec2f position) {
-		setPositionAbsolute(label, position + getPositionAbsolute(label));
-	}
-	void setPositionRelativeToParent(Bone::Label label, ofVec2f position) {
-		bones[label].setPosition(position);
+		if(independent) {
+			for(int i = 0; i < cachedChildren.size(); i++) {
+				bones[cachedChildren[i]].setGlobalPosition(cachedPositions[i]);
+			}		
+		}
 	}
 	void setRotation(Bone::Label label, float rotation) {
 		bones[label].setOrientation(ofVec3f(0, 0, rotation));
