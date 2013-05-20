@@ -13,7 +13,24 @@ public:
 		BONE_COUNT,
 		NONE
 	};
+	static string getLabelName(Label label) {
+		switch(label) {
+			case WRIST: return "WRIST";
+			case PALM: return "PALM";
+			case PINKY_BASE: return "PINKY_BASE"; case PINKY_MID: return "PINKY_MID"; case PINKY_TIP: return "PINKY_TIP";
+			case RING_BASE: return "RING_BASE"; case RING_MID: return "RING_MID"; case RING_TIP: return "RING_TIP";
+			case MIDDLE_BASE: return "MIDDLE_BASE"; case MIDDLE_MID: return "MIDDLE_MID"; case MIDDLE_TIP: return "MIDDLE_TIP";
+			case INDEX_BASE: return "INDEX_BASE"; case INDEX_MID: return "INDEX_MID"; case INDEX_TIP: return "INDEX_TIP";
+			case THUMB_BASE: return "THUMB_BASE"; case THUMB_MID: return "THUMB_MID"; case THUMB_TIP: return "THUMB_TIP";
+			case BONE_COUNT: return "BONE_COUNT";
+			case NONE: return "NONE";
+		}
+	}
+	string getLabelName() {
+		return getLabelName(label);
+	}
 	Label label;
+	bool forwardOriented;
 };
 
 class Skeleton {
@@ -32,14 +49,39 @@ public:
 			Bone::PALM, Bone::INDEX_BASE, Bone::INDEX_MID,
 			Bone::PALM, Bone::THUMB_BASE, Bone::THUMB_MID
 		};
+		bool forwardOriented[] = {
+			true,
+			false,
+			true, true, false,
+			true, true, false,
+			true, true, false,
+			true, true, false,
+			true, true, false
+		};
 		for(int i = 0; i < size(); i++) {
 			bones[i].label = (Bone::Label) i;
+			bones[i].forwardOriented = forwardOriented[i];
 			if(topology[i] != Bone::NONE) {
 				bones[i].setParent(bones[topology[i]]);
 			}
 		}
 		for(int i = 0; i < size(); i++) {
-			setPositionAbsolute((Bone::Label) i, mesh.getVertex(i));
+			ofVec2f curPosition = mesh.getVertex(i);
+			Bone& cur = bones[i];
+			if(cur.getParent() != NULL) {
+				Bone& parent = *((Bone*) cur.getParent());
+				ofVec2f parentPosition = parent.getGlobalPosition();
+				float rotation = ofVec2f(1, 0).angle(curPosition - parentPosition);
+				ofQuaternion orientation;
+				orientation.makeRotate(rotation, 0, 0, 1);
+				if(parent.forwardOriented) {
+					parent.setGlobalOrientation(orientation);
+				}
+				if(!cur.forwardOriented) {
+					cur.setGlobalOrientation(orientation);
+				}
+			} 
+			setPositionAbsolute((Bone::Label) i, curPosition);
 		}
 	}
 	int size() {
@@ -50,15 +92,19 @@ public:
 		ofFill();
 		ofSetLineWidth(2);
 		for(int i = 0; i < size(); i++) {
-			ofSetColor(ofColor::green);
-			ofCircle(bones[i].getPosition(), 3);
-			ofSetColor(ofColor::white);
 			Bone& cur = bones[i];
+			ofSetColor(ofColor::green);
+			ofCircle(cur.getGlobalPosition(), 3);
+			ofSetColor(ofColor::white);
 			if(cur.getParent() != NULL) {
 				ofNode& parent = *(cur.getParent());
 				ofLine(cur.getGlobalPosition(), parent.getGlobalPosition());
 			}
-			//bones[i].draw();
+			bones[i].draw();
+		}
+		for(int i = 0; i < size(); i++) {
+			ofVec2f cur = bones[i].getGlobalPosition();
+			//ofDrawBitmapStringHighlight(Bone::getLabelName((Bone::Label) i), cur);
 		}
 		ofPopStyle();
 	}

@@ -44,7 +44,7 @@ void ofApp::setupGui() {
 	gui->addLabelToggle("Show Skeleton", &showSkeleton);
 	gui->autoSizeToFitWidgets();
 	
-	sceneRadio->getToggles()[0]->setValue(true);
+	//sceneRadio->getToggles()[0]->setValue(true);
 }
 
 int getSelection(ofxUIRadio* radio) {
