@@ -9,23 +9,25 @@ void ofApp::setup() {
 	thresholdValue			= 26;
 	prevThresholdValue		= 0;
 	blurKernelSize			= 4;
-	blurredStrengthWeight	= 0.08;
+	blurredStrengthWeight	= 0.09;
+	handyFloat01			= 0;
+	minLaplaceEdgeStrength  = 184;
 	
 	bHandyBool = false;
 	bDoAdaptiveThresholding = true;
-	bDoMorphologicalCleanup = true;
-	bDoMorphologicalOpening = false; 
+	bDoLaplacianEdgeDetect  = true;
 	
 	active = true;
 	intermediate = false;
 	playing = true;
 	mask.loadImage("mask.png");
+	lineFormationGradientImage.loadImage("lineFormationGradient.png");
 
 	allocate (thresholdConstMat, 768, 1024, CV_8UC1);
 	allocate (adaptiveThreshImg, 768, 1024, CV_8UC1);
-	
-	//imitate(dst, src);
-	//copy (thresholded, thresholdedCleaned);
+	allocate (goodEdgesImg,      768, 1024, CV_8UC1);
+	allocate (tempGrayscaleMat1, 768, 1024, CV_8UC1);
+	allocate (tempGrayscaleMat2, 768, 1024, CV_8UC1);
 	
 	minAllowableContourAreaAsAPercentOfImageSize = 0.05;
 	maxAllowableContourAreaAsAPercentOfImageSize = 0.12; // approx 100000.0 / (768*1024);
@@ -50,6 +52,7 @@ void ofApp::setupGui() {
 	gui->addSlider("Sample offset", 1, 40, &(HCAAMB.sampleOffset));
 	gui->addSlider("Peak angle cutoff", 0, 60, &(HCAAMB.peakAngleCutoff));
 	gui->addSlider("Peak neighbor distance", 0, 100, &(HCAAMB.peakNeighborDistance));
+	gui->addSlider("MinLaplaceEdgeStrength", 1, 255, &minLaplaceEdgeStrength);
 	
 	gui->addSpacer();
 	
@@ -60,9 +63,8 @@ void ofApp::setupGui() {
 	gui->addLabelToggle("Active", &active);
 	gui->addLabelToggle("Intermediate", &intermediate);
 	gui->addLabelToggle("Play", &playing);
-	gui->addLabelToggle("Morphological", &bDoMorphologicalCleanup);
-	gui->addLabelToggle("Morph-Opening", &bDoMorphologicalOpening);
 	gui->addLabelToggle("Adaptive", &bDoAdaptiveThresholding);
+	gui->addLabelToggle("LaplacianEdges", &bDoLaplacianEdgeDetect);
 	gui->autoSizeToFitWidgets();
 }
 
@@ -86,6 +88,10 @@ void ofApp::update() {
 		bitwise_and(mask, gray, gray);
 		
 		
+		
+		
+	
+		//-----------------------------------------------------------
 		if (bDoAdaptiveThresholding){
 			
 			// Copy the gray image to a very small version
@@ -112,9 +118,9 @@ void ofApp::update() {
 			cv::scaleAdd (blurred, blurredStrengthWeight, thresholdConstMat, adaptiveThreshImg);
 			
 			// Do the actual (adaptive thresholding. 
-			cv::subtract (gray, adaptiveThreshImg, tempGrayscaleMat);
+			cv::subtract (gray, adaptiveThreshImg, tempGrayscaleMat1);
 			int thresholdMode = cv::THRESH_BINARY; // cv::THRESH_BINARY_INV
-			cv::threshold (tempGrayscaleMat, thresholded, 1, 255, thresholdMode);
+			cv::threshold (tempGrayscaleMat1, thresholded, 1, 255, thresholdMode);
 		
 		} else {
 			// If we are not adaptive thresholding, just use a regular threshold. 
@@ -122,14 +128,47 @@ void ofApp::update() {
 		}
 		
 		
-		// Morphological cleanup filtering here.
-		// Uses thresholded image; puts results in thresholdedCleaned
-		doMorphologicalCleanupOnThresholdedVideo();
+		//-----------------------------------------------------------
+		// Compute the Laplacian edges of the gray image, and threshold them.
+		if (bDoLaplacianEdgeDetect){
+			
+			int kSize = 7;
+			double delta = 128;
+			double sensitivity = 0.01;
+			int edgeThreshold = (int) minLaplaceEdgeStrength;
+			Laplacian (gray, edgeDetected, -1, kSize, sensitivity, delta, BORDER_DEFAULT );
+			cv::threshold (edgeDetected, tempGrayscaleMat1, edgeThreshold, 255, cv::THRESH_BINARY);
+			
+			// Extract contours of the thresholded blobs (= "edges").
+			// Exclusively render these edges into a new (temporary) image, tempGrayscaleMat2
+			edgeContourFinder.setMinArea(128);
+			edgeContourFinder.findContours(tempGrayscaleMat1);
+			tempGrayscaleMat2.setTo( (unsigned char) (255));
+			//Not using: goodEdgesImg = Mat::zeros(imgH, imgW, CV_8UC1);
+			int nGoodEdges = edgeContourFinder.getContours().size();
+			cv::Mat dstMat = toCv(tempGrayscaleMat2);
+			for (int i=0; i<nGoodEdges; i++){
+				vector <cv::Point> aGoodEdgeContour = edgeContourFinder.getContour(i);
+				const cv::Point* ppt[1] = { &(aGoodEdgeContour[0]) };
+				int npt[] = { aGoodEdgeContour.size() };
+				fillPoly(dstMat, ppt, npt, 1, Scalar(0));//Scalar(255));
+			}
+			
+			// Erode tempGrayscaleMat2 into goodEdgesImg
+			cv::Mat structuringElt = Mat();
+			cv::erode  (tempGrayscaleMat2, goodEdgesImg, structuringElt);
+			
+			// Mask ('and') the good edge blobs against the thresholded image. 
+			cv::bitwise_and(thresholded, goodEdgesImg, thresholded); 
+
+		}
 		
+		
+		//-----------------------------------------------------------
 		// Extract the contour(s) of the binarized image, and FIND THE CONTOURS
 		contourFinder.setMinAreaNorm( minAllowableContourAreaAsAPercentOfImageSize );
 		contourFinder.setMaxAreaNorm( maxAllowableContourAreaAsAPercentOfImageSize );
-		contourFinder.findContours(thresholdedCleaned);
+		contourFinder.findContours(thresholded);
 		
 		// Find the index ID of the largest contour, which is most likely the hand.
 		int indexOfHandContour = NO_VALID_HAND;
@@ -158,51 +197,18 @@ void ofApp::update() {
 }
 
 //==============================================================
-void ofApp::doMorphologicalCleanupOnThresholdedVideo(){
-	
-	if (bDoMorphologicalCleanup){
-		
-		
-		int elementSize = 5;
-		
-		if (bDoMorphologicalOpening){
-			bool bUseRoundMorphologicalStructuringElement = true;
-			cv::Mat structuringElement = Mat();
-			if (bUseRoundMorphologicalStructuringElement){
-				structuringElement = cv::getStructuringElement(cv::MORPH_ELLIPSE,
-															   cv::Size(2*elementSize + 1, 2*elementSize + 1),
-															   cv::Point(elementSize, elementSize) );
-			}
-	 
-			cv::erode  (thresholded, thresholdedCleaned, structuringElement);
-			//cv::dilate (thresholded, thresholdedCleaned, structuringElement);
-		}
-		
-		cv::medianBlur(thresholded, thresholdedCleaned, elementSize);
-	
-	} else {
-		copy (thresholded, thresholdedCleaned);
-		
-	}
-}
-
-
-
 void ofApp::draw() {
 	if(active) {
 		
 		ofPushStyle();
 		
 		ofSetColor(64);
-		drawMat(thresholdedCleaned, 0, 0);
+		drawMat(thresholded, 0, 0);
 		
 		//ofSetColor(255,0,0);
 		//contourFinder.draw();
 		
 		if (bValidHandContourExists){
-			//ofSetColor(0,255,0);
-			//ofSetLineWidth(2);
-			//handContourPolyline.draw();
 			HCAAMB.drawAnalytics();
 		}
 		ofPopStyle();
@@ -210,11 +216,13 @@ void ofApp::draw() {
 	} else {
 		
 		ofPushStyle();
-		ofSetColor(255);
-		
-		// drawMat(thresholdedCleaned, 0,0);
+		// drawMat(thresholded, 0,0);
 		// drawMat(blurred, 0,0);
+		// drawMat(goodEdgesImg, 0,0);
+		
+		ofSetColor(255);
 		video.draw(0, 0);
+		
 		ofPopStyle();
 	}
 	if(intermediate) {
@@ -228,6 +236,7 @@ void ofApp::draw() {
 		drawMat(gray,				imgW * xItem, 0); xItem++;
 		drawMat(thresholded,		imgW * xItem, 0); xItem++;
 		drawMat(adaptiveThreshImg,	imgW * xItem, 0); xItem++;
+		drawMat(goodEdgesImg,		imgW * xItem, 0); xItem++;
 		ofPopMatrix();
 	}		
 }

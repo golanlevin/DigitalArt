@@ -27,28 +27,32 @@ public:
 	float prevThresholdValue;
 	float blurKernelSize;
 	float blurredStrengthWeight;
+	float minLaplaceEdgeStrength;
+	float handyFloat01;
 	
 	bool active, intermediate, playing;
 	ofImage mask;
+	ofImage lineFormationGradientImage; 
 	
 	Mat gray;				// grayscale version of hand input
 	Mat thresholded;		// binarized hand, black-white only
+	Mat edgeDetected;
+	Mat goodEdgesImg; 
 	Mat graySmall;
 	Mat blurredSmall;
 	Mat blurred;
 	Mat thresholdConstMat; 
 	Mat adaptiveThreshImg;	// blurred minus Constant; the per-pixel thresholds. 
 	
-	Mat tempGrayscaleMat;
+	Mat tempGrayscaleMat1;
+	Mat tempGrayscaleMat2;
 	ofxCvGrayscaleImage tempGrayscaleImg;
 	
-	void doMorphologicalCleanupOnThresholdedVideo();
-	Mat thresholdedCleaned;  // the thresholded input, after morphological filtering.
+
 	
 	
 	bool bDoAdaptiveThresholding;
-	bool bDoMorphologicalCleanup;
-	bool bDoMorphologicalOpening; 
+	bool bDoLaplacianEdgeDetect; 
 	bool bHandyBool; 
 
 	int imgW; // width of our images for computer vision
@@ -57,6 +61,7 @@ public:
 	
 	
 	ContourFinder contourFinder;
+	ContourFinder edgeContourFinder; 
 	float minAllowableContourAreaAsAPercentOfImageSize;
 	float maxAllowableContourAreaAsAPercentOfImageSize;
 	
