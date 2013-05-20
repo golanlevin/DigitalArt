@@ -8,8 +8,8 @@ void updatePuppet(Skeleton& skeleton, ofxPuppet& puppet) {
 }
 
 void ofApp::setup() {
-	sharedSetup();
 	setupGui();
+	sharedSetup();
 	
 	mouseControl = true;
 	showImage = true;
@@ -35,6 +35,7 @@ void ofApp::setupGui() {
 	sceneNames.push_back("Wobble");
 	
 	gui = new ofxUICanvas();
+	gui->setFont("GUI/NewMedia Fett.ttf");
 	gui->addLabel("Mesh Deformer");
 	gui->addSpacer();
 	gui->addFPS();
