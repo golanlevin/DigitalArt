@@ -114,6 +114,10 @@ public:
 	void setPositionAbsolute(Bone::Label label, ofVec2f position) {
 		bones[label].setGlobalPosition(position);
 	}
+	void setPositionAbsoluteIndependent(Bone::Label label, ofVec2f position) {
+		vector<ofVec2f> cachedChildren;
+		bones[label].setGlobalPosition(position);
+	}
 	void setPositionRelativeToSelf(Bone::Label label, ofVec2f position) {
 		setPositionAbsolute(label, position + getPositionAbsolute(label));
 	}

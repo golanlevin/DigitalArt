@@ -11,6 +11,7 @@ void ofApp::setup() {
 	sharedSetup();
 	setupGui();
 	
+	mouseControl = true;
 	showImage = true;
 	showWireframe = true;
 	showSkeleton = true;
@@ -31,6 +32,7 @@ void ofApp::setup() {
 void ofApp::setupGui() {
 	sceneNames.push_back("Wave");
 	sceneNames.push_back("Wiggle");
+	sceneNames.push_back("Wobble");
 	
 	gui = new ofxUICanvas();
 	gui->addLabel("Mesh Deformer");
@@ -39,6 +41,7 @@ void ofApp::setupGui() {
 	gui->addSpacer();
 	sceneRadio = gui->addRadio("Scene", sceneNames);
 	gui->addSpacer();
+	gui->addLabelToggle("Mouse Control", &mouseControl);
 	gui->addLabelToggle("Show Image", &showImage);
 	gui->addLabelToggle("Show Wireframe", &showWireframe);
 	gui->addLabelToggle("Show Skeleton", &showSkeleton);
@@ -61,6 +64,10 @@ void ofApp::update() {
 	// every frame we get a new mesh from the hand tracker
 	skeleton.setup(mesh);
 	
+	if(mouseControl) {
+		//skeleton.setPositionAbsolute(Bone::PALM, ofVec2f(mouseX, mouseY));
+	}
+	
 	// then we modify the skeleton with one of our scenes
 	int scene = getSelection(sceneRadio);
 	if(scene == 0) {
@@ -71,6 +78,7 @@ void ofApp::update() {
 			Bone::Label index = toWave[i];
 			ofVec2f original = puppet.getOriginalMesh().getVertex(index);
 			skeleton.setRotation(index, theta);
+			skeleton.setRotation((Bone::Label) ((int)index-1), -theta);
 		}
 	} else if(scene == 1) {
 		Bone::Label toWiggle[] = {Bone::PINKY_TIP, Bone::RING_TIP, Bone::MIDDLE_TIP, Bone::INDEX_TIP, Bone::THUMB_TIP};
@@ -82,6 +90,10 @@ void ofApp::update() {
 			ofVec2f original = puppet.getOriginalMesh().getVertex(index);
 			skeleton.setPositionRelativeToSelf(index, wiggleRange * ofVec2f(ofNoise(i, t, 0), ofNoise(i, t, 1)));
 		}
+	} else if(scene == 2) {
+		float wiggleRange = 50;
+		float t = ofGetElapsedTimef();
+		skeleton.setPositionAbsoluteIndependent(Bone::PALM, wiggleRange * ofVec2f(ofNoise(t, 0), ofNoise(t, 1)));
 	}
 	
 	// we update the puppet using that skeleton

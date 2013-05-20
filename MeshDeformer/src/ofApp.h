@@ -19,11 +19,11 @@ public:
 	
 	ofxUICanvas* gui;
 	ofxUIRadio* sceneRadio;
-	bool showImage, showWireframe, showSkeleton;
+	bool showImage, showWireframe, showSkeleton, mouseControl;
 	
 	ofMesh mesh;
 	ofImage hand;
-	ofxPuppetInteractive puppet;
+	ofxPuppet puppet;
 	Skeleton skeleton;
 	vector<string> sceneNames;
 };
