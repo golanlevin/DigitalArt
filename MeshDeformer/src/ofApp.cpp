@@ -3,7 +3,7 @@
 
 void updatePuppet(Skeleton& skeleton, ofxPuppet& puppet) {
 	for(int i = 0; i < skeleton.size(); i++) {
-		puppet.setControlPoint(i, skeleton.getPositionAbsolute((Bone::Label) i));
+		puppet.setControlPoint(i, skeleton.getPositionAbsolute(i));
 	}
 }
 
@@ -70,27 +70,27 @@ void ofApp::update() {
 	skeleton.setup(mesh);
 	
 	if(mouseControl) {
-		skeleton.setPosition(Bone::PALM, ofVec2f(mouseX, mouseY), true);
+		skeleton.setPosition(HandSkeleton::PALM, ofVec2f(mouseX, mouseY), true);
 	}
 	
 	// then we modify the skeleton with one of our scenes
 	int scene = getSelection(sceneRadio);
 	if(scene == 1) {
-		Bone::Label toWave[] = {Bone::PINKY_MID, Bone::RING_MID, Bone::MIDDLE_MID, Bone::INDEX_MID};
+		int toWave[] = {HandSkeleton::PINKY_MID, HandSkeleton::RING_MID, HandSkeleton::MIDDLE_MID, HandSkeleton::INDEX_MID};
 		int toWaveCount = 4;
 		float theta = ofMap(sin(2 * ofGetElapsedTimef()), -1, 1, -20, 20);
 		for(int i = 0; i < toWaveCount; i++) {
-			Bone::Label index = toWave[i];
+			int index = toWave[i];
 			skeleton.setRotation(index, 2 * theta);
-			skeleton.setRotation((Bone::Label) ((int)index-1), -theta);
+			skeleton.setRotation((int) ((int)index-1), -theta);
 		}
 	} else if(scene == 2) {
-		Bone::Label toWiggle[] = {Bone::PINKY_TIP, Bone::RING_TIP, Bone::MIDDLE_TIP, Bone::INDEX_TIP, Bone::THUMB_TIP};
+		int toWiggle[] = {HandSkeleton::PINKY_TIP, HandSkeleton::RING_TIP, HandSkeleton::MIDDLE_TIP, HandSkeleton::INDEX_TIP, HandSkeleton::THUMB_TIP};
 		int toWiggleCount = 5;
 		float wiggleRange = 10;
 		float t = ofGetElapsedTimef();
 		for(int i = 0; i < toWiggleCount; i++) {
-			Bone::Label index = toWiggle[i];
+			int index = toWiggle[i];
 			ofVec2f original = puppet.getOriginalMesh().getVertex(index);
 			ofVec2f position(wiggleRange * ofVec2f(ofNoise(i, t, 0), ofNoise(i, t, 1)));
 			skeleton.setPosition(index, position, false, false);
@@ -99,11 +99,11 @@ void ofApp::update() {
 		float wiggleRange = 50;
 		float t = ofGetElapsedTimef();
 		ofVec2f position(wiggleRange * ofVec2f(ofNoise(t, 0), ofNoise(t, 1)));
-		skeleton.setPosition(Bone::PALM, position, false, true);
+		skeleton.setPosition(HandSkeleton::PALM, position, false, true);
 	} else if(scene == 4) {
-		Bone::Label toEqualize[] = {
-			Bone::PINKY_TIP, Bone::RING_TIP, Bone::MIDDLE_TIP, Bone::INDEX_TIP,
-			Bone::PINKY_MID, Bone::RING_MID, Bone::MIDDLE_MID, Bone::INDEX_MID
+		int toEqualize[] = {
+			HandSkeleton::PINKY_TIP, HandSkeleton::RING_TIP, HandSkeleton::MIDDLE_TIP, HandSkeleton::INDEX_TIP,
+			HandSkeleton::PINKY_MID, HandSkeleton::RING_MID, HandSkeleton::MIDDLE_MID, HandSkeleton::INDEX_MID
 		};
 		float ratios[] = {
 			1, 1, 1, 1,
@@ -113,15 +113,15 @@ void ofApp::update() {
 		for(int i = 0; i < toEqualizeCount; i++) {
 			skeleton.setBoneLength(toEqualize[i], ratios[i] * equalizeLength);
 		}
-		ofVec2f pinkyBase = skeleton.getPositionAbsolute(Bone::PINKY_BASE);
-		ofVec2f indexBase = skeleton.getPositionAbsolute(Bone::INDEX_BASE);
-		skeleton.setPosition(Bone::RING_BASE, pinkyBase.getInterpolated(indexBase, 1/3.), true);
-		skeleton.setPosition(Bone::MIDDLE_BASE, pinkyBase.getInterpolated(indexBase, 2/3.), true);
+		ofVec2f pinkyBase = skeleton.getPositionAbsolute(HandSkeleton::PINKY_BASE);
+		ofVec2f indexBase = skeleton.getPositionAbsolute(HandSkeleton::INDEX_BASE);
+		skeleton.setPosition(HandSkeleton::RING_BASE, pinkyBase.getInterpolated(indexBase, 1/3.), true);
+		skeleton.setPosition(HandSkeleton::MIDDLE_BASE, pinkyBase.getInterpolated(indexBase, 2/3.), true);
 	} else if(scene == 5) {
-		Bone::Label toRotate[] = {Bone::PINKY_BASE, Bone::RING_BASE, Bone::MIDDLE_BASE, Bone::INDEX_BASE};
+		int toRotate[] = {HandSkeleton::PINKY_BASE, HandSkeleton::RING_BASE, HandSkeleton::MIDDLE_BASE, HandSkeleton::INDEX_BASE};
 		int toRotateCount = 4;
 		for(int i = 0; i < toRotateCount; i++) {
-			Bone::Label index = toRotate[i];
+			int index = toRotate[i];
 			skeleton.setRotation(index, -90, true);
 		}
 	}

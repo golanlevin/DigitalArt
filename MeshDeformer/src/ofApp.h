@@ -25,6 +25,6 @@ public:
 	ofMesh mesh;
 	ofImage hand;
 	ofxPuppet puppet;
-	Skeleton skeleton;
+	HandSkeleton skeleton;
 	vector<string> sceneNames;
 };
