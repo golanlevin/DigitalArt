@@ -218,7 +218,7 @@ void ofApp::draw() {
 		
 		if (bValidHandContourExists){
 			HCAAMB.drawAnalytics();
-			//if (bValidHandContourExists){ HCAAMB.drawMousePoint (mouseX); }
+			if (bValidHandContourExists){ HCAAMB.drawMousePoint (mouseX); }
 		}
 		ofPopStyle();
 		
