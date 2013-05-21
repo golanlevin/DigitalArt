@@ -11,9 +11,10 @@ void ofApp::setup() {
 	sharedSetup();
 	setupGui();
 	
-	mouseControl = true;
-	showImage = true;
-	showWireframe = true;
+	equalizeLength = 40;
+	mouseControl = false;
+	showImage = false;
+	showWireframe = false;
 	showSkeleton = true;
 	
 	hand.loadImage("hand/genericHandCentered.jpg");
@@ -30,9 +31,12 @@ void ofApp::setup() {
 }
 
 void ofApp::setupGui() {
+	sceneNames.push_back("None");
 	sceneNames.push_back("Wave");
 	sceneNames.push_back("Wiggle");
 	sceneNames.push_back("Wobble");
+	sceneNames.push_back("Equalize");
+	sceneNames.push_back("North");
 	
 	gui = new ofxUICanvas();
 	gui->addLabel("Mesh Deformer");
@@ -41,13 +45,14 @@ void ofApp::setupGui() {
 	gui->addSpacer();
 	sceneRadio = gui->addRadio("Scene", sceneNames);
 	gui->addSpacer();
+	gui->addSlider("Equalize Length", 0, 100, &equalizeLength);
 	gui->addLabelToggle("Mouse Control", &mouseControl);
 	gui->addLabelToggle("Show Image", &showImage);
 	gui->addLabelToggle("Show Wireframe", &showWireframe);
 	gui->addLabelToggle("Show Skeleton", &showSkeleton);
 	gui->autoSizeToFitWidgets();
 	
-	//sceneRadio->getToggles()[0]->setValue(true);
+	sceneRadio->getToggles()[0]->setValue(true);
 }
 
 int getSelection(ofxUIRadio* radio) {
@@ -70,17 +75,16 @@ void ofApp::update() {
 	
 	// then we modify the skeleton with one of our scenes
 	int scene = getSelection(sceneRadio);
-	if(scene == 0) {
+	if(scene == 1) {
 		Bone::Label toWave[] = {Bone::PINKY_MID, Bone::RING_MID, Bone::MIDDLE_MID, Bone::INDEX_MID};
 		int toWaveCount = 4;
-		float theta = ofMap(sin(ofGetElapsedTimef()), -1, 1, -30, 30);
+		float theta = ofMap(sin(2 * ofGetElapsedTimef()), -1, 1, -20, 20);
 		for(int i = 0; i < toWaveCount; i++) {
 			Bone::Label index = toWave[i];
-			ofVec2f original = puppet.getOriginalMesh().getVertex(index);
-			skeleton.setRotation(index, theta);
+			skeleton.setRotation(index, 2 * theta);
 			skeleton.setRotation((Bone::Label) ((int)index-1), -theta);
 		}
-	} else if(scene == 1) {
+	} else if(scene == 2) {
 		Bone::Label toWiggle[] = {Bone::PINKY_TIP, Bone::RING_TIP, Bone::MIDDLE_TIP, Bone::INDEX_TIP, Bone::THUMB_TIP};
 		int toWiggleCount = 5;
 		float wiggleRange = 10;
@@ -91,11 +95,35 @@ void ofApp::update() {
 			ofVec2f position(wiggleRange * ofVec2f(ofNoise(i, t, 0), ofNoise(i, t, 1)));
 			skeleton.setPosition(index, position, false, false);
 		}
-	} else if(scene == 2) {
+	} else if(scene == 3) {
 		float wiggleRange = 50;
 		float t = ofGetElapsedTimef();
 		ofVec2f position(wiggleRange * ofVec2f(ofNoise(t, 0), ofNoise(t, 1)));
 		skeleton.setPosition(Bone::PALM, position, false, true);
+	} else if(scene == 4) {
+		Bone::Label toEqualize[] = {
+			Bone::PINKY_TIP, Bone::RING_TIP, Bone::MIDDLE_TIP, Bone::INDEX_TIP,
+			Bone::PINKY_MID, Bone::RING_MID, Bone::MIDDLE_MID, Bone::INDEX_MID
+		};
+		float ratios[] = {
+			1, 1, 1, 1,
+			1.6, 1.6, 1.6, 1.6
+		};
+		int toEqualizeCount = 8;
+		for(int i = 0; i < toEqualizeCount; i++) {
+			skeleton.setBoneLength(toEqualize[i], ratios[i] * equalizeLength);
+		}
+		ofVec2f pinkyBase = skeleton.getPositionAbsolute(Bone::PINKY_BASE);
+		ofVec2f indexBase = skeleton.getPositionAbsolute(Bone::INDEX_BASE);
+		skeleton.setPosition(Bone::RING_BASE, pinkyBase.getInterpolated(indexBase, 1/3.), true);
+		skeleton.setPosition(Bone::MIDDLE_BASE, pinkyBase.getInterpolated(indexBase, 2/3.), true);
+	} else if(scene == 5) {
+		Bone::Label toRotate[] = {Bone::PINKY_BASE, Bone::RING_BASE, Bone::MIDDLE_BASE, Bone::INDEX_BASE};
+		int toRotateCount = 4;
+		for(int i = 0; i < toRotateCount; i++) {
+			Bone::Label index = toRotate[i];
+			skeleton.setRotation(index, -90, true);
+		}
 	}
 	
 	// we update the puppet using that skeleton

@@ -28,6 +28,14 @@ public:
 			case NONE: return "NONE";
 		}
 	}
+	void customDraw() {
+		ofPushStyle();
+		ofSetColor(ofColor::red);
+		ofLine(0, 0, 20, 0);
+		ofSetColor(ofColor::green);
+		ofLine(0, 0, 0, 20);
+		ofPopStyle();
+	}
 	string getLabelName() {
 		return getLabelName(label);
 	}
@@ -40,6 +48,9 @@ public:
 class Skeleton {
 protected:
 	vector<Bone> bones;
+	vector<Bone::Label> cachedChildren;
+	vector<ofVec2f> cachedPositions;
+	
 public:	
 	void setup(ofMesh& mesh) {
 		bones.clear();
@@ -104,42 +115,63 @@ public:
 				ofNode& parent = *(cur.getParent());
 				ofLine(cur.getGlobalPosition(), parent.getGlobalPosition());
 			}
-			bones[i].draw();
 		}
 		for(int i = 0; i < size(); i++) {
 			ofVec2f cur = bones[i].getGlobalPosition();
 			//ofDrawBitmapStringHighlight(Bone::getLabelName((Bone::Label) i), cur);
+			bones[i].draw();
 		}
 		ofPopStyle();
 	}
 	ofVec2f getPositionAbsolute(Bone::Label label) {
 		return bones[label].getGlobalPosition();
 	}
-	void setPosition(Bone::Label label, ofVec2f position, bool absolute = true, bool independent = false, bool localCoordinates = false) {
-		vector<Bone::Label> cachedChildren;
-		vector<ofVec2f> cachedPositions;
-		if(independent) {
-			Bone& bone = bones[label];
-			for(int i = 0; i < size(); i++) {
-				Bone* parent = (Bone*) bones[i].getParent();
-				if(parent == &bone) {
-					cachedChildren.push_back((Bone::Label) i);
-					cachedPositions.push_back(bones[i].getGlobalPosition());
-				}
-			}
-		}
-		if(absolute) {
-			bones[label].setGlobalPosition(position);
-		} else {
-			bones[label].setGlobalPosition(bones[label].getGlobalPosition() + position);
-		}
-		if(independent) {
-			for(int i = 0; i < cachedChildren.size(); i++) {
-				bones[cachedChildren[i]].setGlobalPosition(cachedPositions[i]);
-			}		
+	Bone& getBone(Bone::Label label) {
+		return bones[label];
+	}
+	void setBoneLength(Bone::Label label, float distance) {
+		Bone& bone = bones[label];
+		if(bone.getParent() != NULL) {
+			bone.setGlobalPosition(bone.getParent()->getGlobalPosition());
+			bone.move(distance, 0, 0);
 		}
 	}
-	void setRotation(Bone::Label label, float rotation) {
-		bones[label].setOrientation(ofVec3f(0, 0, rotation));
+	void stashChildren(Bone::Label label) {
+		Bone& bone = bones[label];
+		for(int i = 0; i < size(); i++) {
+			Bone* parent = (Bone*) bones[i].getParent();
+			if(parent == &bone) {
+				cachedChildren.push_back((Bone::Label) i);
+				cachedPositions.push_back(bones[i].getGlobalPosition());
+			}
+		}
+	}
+	void applyChildren() {
+		for(int i = 0; i < cachedChildren.size(); i++) {
+			bones[cachedChildren[i]].setGlobalPosition(cachedPositions[i]);
+		}		
+	}
+	void setPosition(Bone::Label label, ofVec2f position, bool absolute = true, bool independent = false) {
+		Bone& bone = bones[label];
+		if(independent) {
+			stashChildren(label);
+		}
+		if(absolute) {
+			bone.setGlobalPosition(position);
+		} else {
+			bone.setGlobalPosition(bone.getGlobalPosition() + position);
+		}
+		if(independent) {
+			applyChildren();
+		}
+	}
+	void setRotation(Bone::Label label, float rotation, bool absolute = false) {
+		if(absolute) {
+			ofQuaternion orientation;
+			orientation.makeRotate(rotation, 0, 0, 1);
+			bones[label].setGlobalOrientation(orientation);
+		} else {
+			bones[label].setOrientation(ofVec3f(0, 0, rotation));
+		}
 	}
 };

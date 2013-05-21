@@ -20,6 +20,7 @@ public:
 	ofxUICanvas* gui;
 	ofxUIRadio* sceneRadio;
 	bool showImage, showWireframe, showSkeleton, mouseControl;
+	float equalizeLength;
 	
 	ofMesh mesh;
 	ofImage hand;
