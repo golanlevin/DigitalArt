@@ -61,9 +61,12 @@ public:
 	
 	vector<float>	handContourFilteredCurvatures;
 	vector<int>		handContourFilteredTipIndices;
+	vector<int>		handContourFingerTipIndicesSorted;
 	
 	vector<ofVec2f> fingerTipPointsFiltered;
+	vector<ofVec2f> fingerTipPointsTmp; // on handContourNice
 	vector<ofVec2f> fingerTipPoints; // on handContourNice
+	
 	
 	vector<float>	handContourCurvatures;
 	vector<int>		handContourPossibleCrotchIndices;
@@ -75,6 +78,9 @@ public:
 	
 	float crotchLineSlope;
 	float crotchLineIntercept;
+	
+	ofVec2f sideLineP1;
+	ofVec2f sideLineP2;
 	
 	
 	void drawMousePoint (float mx);

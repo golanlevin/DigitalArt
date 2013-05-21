@@ -163,7 +163,6 @@ void HandContourAnalyzerAndMeshBuilder::process (ofPolyline inputContour, cv::Po
 		// find the parametrization u for each point on that line.
 		// http://paulbourke.net/geometry/pointlineplane/
 		// Then we will sort them by this parameter u.
-		
 		vector< pair<float, int> > crotchParametrizationIndexPairs;
 		for (int i=0; i<fingerCrotchPointsTmp.size(); i++){
 			float x3  = fingerCrotchPointsTmp[i].x;
@@ -213,24 +212,55 @@ void HandContourAnalyzerAndMeshBuilder::process (ofPolyline inputContour, cv::Po
 		
 		//--------------------------------------
 		// FIND THE SIDE CROTCHES -- BY FINDING THE ORIENTATION OF THE HAND
-		
-		float avgDistanceToNonThumbCrotches = 0;
-		int crotchCount = 0;
-		for (int i=0; i< maxNCrotchesToConsider; i++){
-			if (i != indexOfThumbCrotch){ // ignore the thumb crotch
-				ofVec2f pointi = fingerCrotchPoints[i];
-				float icDist = ofDist(pointi.x, pointi.y, handCentroid.x, handCentroid.y);
-				avgDistanceToNonThumbCrotches += icDist;
-				crotchCount++; 
-			}
-		}
-		avgDistanceToNonThumbCrotches /= (float) crotchCount;
-		
 		float handOrientation = getOrientation (handContourNice.getVertices(), handCentroid);
-		float qx = handCentroid.x + avgDistanceToNonThumbCrotches * sinf(handOrientation);
-		float qy = handCentroid.y + avgDistanceToNonThumbCrotches * cosf(handOrientation);
 		
-		// find least distance from all points in contour to line, to find intersections. 
+		float dq = handRadius * 0.10;
+		float qx = handCentroid.x + dq * sinf(handOrientation);
+		float qy = handCentroid.y + dq * cosf(handOrientation);
+		
+		float sp1x = qx - handRadius * cosf(handOrientation);
+		float sp1y = qy + handRadius * sinf(handOrientation);
+		float sp2x = qx + handRadius * cosf(handOrientation);
+		float sp2y = qy - handRadius * sinf(handOrientation);
+		sideLineP1.set(sp1x, sp1y);
+		sideLineP2.set(sp2x, sp2y);
+		
+		/*
+		// Interlude. Now that we have this side line:
+		// let's sort the finger tips according to their projections along it.
+		// Using the code to find the nearest point on a line,
+		// find the parametrization u for each point on that line.
+		// http://paulbourke.net/geometry/pointlineplane/
+		// Then we will sort them by this parameter u.
+		vector< pair<float, int> > fingerTipParametrizationIndexPairs;
+		for (int i=0; i<fingerCrotchPointsTmp.size(); i++){
+			float x3  = fingerCrotchPointsTmp[i].x;
+			float y3  = fingerCrotchPointsTmp[i].y;
+			float  u  = ((x3-x1)*(x2-x1) + (y3-y1)*(y2-y1)) / LineMag2;
+			// push pairs of (parametrizations, index):
+			int indexInHandContourNice = handContourCrotchIndicesTmp[i];
+			fingerTipParametrizationIndexPairs.push_back (pair<float, int> (u, indexInHandContourNice));
+		}
+		ofSort (fingerTipParametrizationIndexPairs);
+		
+		*/
+		
+		
+		
+		
+		
+		
+		//Search for the pinky side crotch.
+		if (indexOfThumbCrotch == 0){ // right hand
+			int indexOfPinkyCrotch = 3;
+			int indexOfPinkyCrotchContourPoint = handContourCrotchIndicesSorted [ indexOfPinkyCrotch ];
+			printf("indexOfPinkyCrotchContourPoint = %d\n", indexOfPinkyCrotchContourPoint);
+			//ofVec2f pinkyCrotch = handContourNice [ indexOfPinkyCrotchContourPoint ];
+		
+		} else {
+			// handle the left hand another day.
+		
+		}
 		
 		
 		//--------------------------------------
@@ -268,6 +298,7 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 		float ftx = fingerTipPoints[i].x;
 		float fty = fingerTipPoints[i].y;
 		ofEllipse(ftx, fty, 9,9);
+		ofDrawBitmapString( ofToString(i), ftx+8, fty+10); 
 	}
 	ofSetColor(0,150,255);
 	for (int i=0; i<fingerCrotchPoints.size(); i++){
@@ -288,8 +319,7 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 	float y0 = crotchLineSlope * minx + crotchLineIntercept;
 	float y1 = crotchLineSlope * maxx + crotchLineIntercept;
 	ofLine(minx,y0, maxx, y1); 
-	
-
+    ofLine(sideLineP1, sideLineP2);
 	
 	
 	
@@ -366,18 +396,6 @@ vector<int> HandContourAnalyzerAndMeshBuilder::findPeaks (vector<float>& values,
 	vector<int> indices;
 	for(int i = 0; i < peaks.size(); i++) {
 		int curIndex = peaks[i].second;
-		
-		/* 
-		// old, bad
-		bool hasNeighbor = false;
-		for(int j = 0; j < indices.size(); j++) {
-			if(abs(curIndex - indices[j]) < peakArea || abs((curIndex + n) - indices[j]) < peakArea) {
-				hasNeighbor = true;
-				break;
-			}
-		}
-		 */
-		
 		
 		bool bHasNeighbor = false;
 		for (int j = 0; j < indices.size(); j++) {
