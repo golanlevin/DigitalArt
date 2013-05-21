@@ -8,6 +8,7 @@
 #include "HandSkeleton.h"
 #include "ThreePointSkeleton.h"
 #include "HandWithFingertipsSkeleton.h"
+#include "PalmSkeleton.h"
 
 using namespace ofxCv;
 using namespace cv;
@@ -26,7 +27,8 @@ public:
 		NONE = 0,
 		WAVE, WIGGLE, WOBBLE, 
 		EQUALIZE, NORTH, LISSAJOUS,
-		MEANDER, PROP_WIGGLE, SIN_LENGTH
+		MEANDER, PROP_WIGGLE, SIN_LENGTH,
+		PULSE_PALM
 	};
 
 	ofxUICanvas* gui;
@@ -38,11 +40,13 @@ public:
 	float meanderAmount;
 	float propWiggleBaseAngleRange, propWiggleMidAngleRange, propWiggleTopAngleRange, propWiggleSpeedUp, propWigglePhaseOffset;
 	float sinLength, sinLengthPhaseOffset;
+	float pulseLength;
 
 	ofMesh mesh;
 	ofImage hand;
 	ofxPuppet puppet;
 	ThreePointSkeleton threePointSkeleton;
+	PalmSkeleton palmSkeleton;
 	HandSkeleton handSkeleton;
 	HandWithFingertipsSkeleton handWithFingertipsSkeleton;
 	Skeleton* previousSkeleton, *currentSkeleton;

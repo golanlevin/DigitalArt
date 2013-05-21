@@ -27,6 +27,8 @@ void ofApp::setup() {
 	sinLength = 15;
 	sinLengthPhaseOffset = 0.5;
 
+	pulseLength = 10;
+
 	mouseControl = false;
 	showImage = true;
 	showWireframe = false;
@@ -45,6 +47,7 @@ void ofApp::setup() {
 	handWithFingertipsSkeleton.setup(mesh);
 	handSkeleton.setup(mesh);
 	threePointSkeleton.setup(mesh);
+	palmSkeleton.setup(mesh);
 	setSkeleton(&handSkeleton);
 }
 
@@ -59,6 +62,7 @@ void ofApp::setupGui() {
 	sceneNames.push_back("Meander");
 	sceneNames.push_back("Propogating Wiggle");
 	sceneNames.push_back("Sinusoidal Length");
+	sceneNames.push_back("Pulsating Palm");
 
 	vector<string> lissajousStyle;
 	lissajousStyle.push_back("Circle");
@@ -91,7 +95,7 @@ void ofApp::setupGui() {
 	for (int i=0; i < sceneNames.size(); i++) {
 		guis[i] = new ofxUICanvas();
 		guis[i]->setFont("GUI/NewMedia Fett.ttf");
-		guis[i]->setPosition(0, 390);
+		guis[i]->setPosition(555, 0);
 		guis[i]->setVisible(false);
 	}
 	
@@ -111,6 +115,8 @@ void ofApp::setupGui() {
 
 	guis[SIN_LENGTH]->addSlider("Max Length", 10, 30, &sinLength);
 	guis[SIN_LENGTH]->addSlider("Phase Offset", 0, 1, &sinLengthPhaseOffset);
+
+	guis[PULSE_PALM]->addSlider("Pulse Length", 5, 20, &pulseLength);
 
 	for (int i=0; i < sceneNames.size(); i++) {
 		guis[i]->autoSizeToFitWidgets();
@@ -132,12 +138,14 @@ void ofApp::update() {
 	handWithFingertipsSkeleton.setup(mesh);
 	handSkeleton.setup(mesh);
 	threePointSkeleton.setup(mesh);
+	palmSkeleton.setup(mesh);
 
 	if(mouseControl) {
 		ofVec2f mouse(mouseX, mouseY);
 		handWithFingertipsSkeleton.setPosition(HandWithFingertipsSkeleton::PALM, mouse, true);
 		handSkeleton.setPosition(HandSkeleton::PALM, mouse, true);
-		threePointSkeleton.setPosition(HandSkeleton::PALM, mouse, true);
+		threePointSkeleton.setPosition(ThreePointSkeleton::PALM, mouse, true);
+		palmSkeleton.setPosition(PalmSkeleton::BASE, mouse, true);
 	}
 
 	// get the current scene
@@ -168,7 +176,6 @@ void ofApp::update() {
 		float t = ofGetElapsedTimef();
 		for(int i = 0; i < toWiggleCount; i++) {
 			int index = toWiggle[i];
-			ofVec2f original = puppet.getOriginalMesh().getVertex(index);
 			ofVec2f position(wiggleRange * ofVec2f(ofNoise(i, t, 0), ofNoise(i, t, 1)));
 			handSkeleton.setPosition(index, position, false, false);
 		}
@@ -277,24 +284,39 @@ void ofApp::update() {
 		ofVec2f position(0, 0);
 		for(int i = 0; i < fingerCount; i++) {
 			index = mid[i];
-			original = puppet.getOriginalMesh().getVertex(index);
-			parent = puppet.getOriginalMesh().getVertex((int) ((int)index-1));
+			original = puppet.getOriginalMesh().getVertex(handSkeleton.getControlIndex(index));
+			parent = puppet.getOriginalMesh().getVertex(handSkeleton.getControlIndex((int) ((int)index-1)));
 			position.set(original-parent);
 			position.normalize();
 			position = position * (sinLength*sin(t + i*sinLengthPhaseOffset));
 			handSkeleton.setPosition(index, position, false, false);
 
 			index = tip[i];
-			original = puppet.getOriginalMesh().getVertex(index);
-			parent = puppet.getOriginalMesh().getVertex((int) ((int)index-1));
+			original = puppet.getOriginalMesh().getVertex(handSkeleton.getControlIndex(index));
+			parent = puppet.getOriginalMesh().getVertex(handSkeleton.getControlIndex((int) ((int)index-1)));
 			position.set(original-parent);
 			position.normalize();
 			position = position * (sinLength*sin(t + i*sinLengthPhaseOffset));
 			handSkeleton.setPosition(index, position, false, false);
 		}
 		setSkeleton(&handSkeleton);
+	} else if(scene == PULSE_PALM) {
+		int toPulsate[] = {PalmSkeleton::TOP, PalmSkeleton::RIGHT_BASE, PalmSkeleton::RIGHT_MID, PalmSkeleton::RIGHT_TOP, PalmSkeleton::LEFT_BASE, PalmSkeleton::LEFT_MID, PalmSkeleton::LEFT_TOP};
+		int toPulsateCount = 7;
+		float t = ofGetElapsedTimef();
+		
+		for(int i = 0; i < toPulsateCount; i++) {
+			int index = toPulsate[i];
+			ofVec2f original = puppet.getOriginalMesh().getVertex(palmSkeleton.getControlIndex(index));
+			ofVec2f parent = puppet.getOriginalMesh().getVertex(palmSkeleton.getControlIndex(PalmSkeleton::CENTROID));
+			ofVec2f position(original-parent);
+			position.normalize();
+			position = position * (pulseLength*sin(t));
+			palmSkeleton.setPosition(index, position, false, false);
+		}
+		setSkeleton(&palmSkeleton);
 	}
-	
+
 	// we update the puppet using that skeleton
 	updatePuppet(currentSkeleton, puppet);
 	puppet.update();
