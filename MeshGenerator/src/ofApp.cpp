@@ -9,9 +9,11 @@ void ofApp::setup() {
 	thresholdValue			= 26;
 	prevThresholdValue		= 0;
 	blurKernelSize			= 4;
-	blurredStrengthWeight	= 0.09;
+	blurredStrengthWeight	= 0.07;
 	handyFloat01			= 0;
 	minLaplaceEdgeStrength  = 184;
+	
+
 	
 	bHandyBool = false;
 	bDoAdaptiveThresholding = true;
@@ -50,9 +52,11 @@ void ofApp::setupGui() {
 	gui->addSlider("ContourResampling", 1.0, 20.0, &(HCAAMB.contourResampleSpacing));
 	gui->addSpacer();
 	gui->addSlider("Sample offset", 1, 40, &(HCAAMB.sampleOffset));
-	gui->addSlider("Peak angle cutoff", 0, 60, &(HCAAMB.peakAngleCutoff));
-	gui->addSlider("Peak neighbor distance", 0, 100, &(HCAAMB.peakNeighborDistance));
+	gui->addSlider("Crotch angle cutoff", -150, 0, &(HCAAMB.crotchAngleCutoff));
+	gui->addSlider("Crotch neighbor distance", 0, 100, &(HCAAMB.crotchNeighborDistance));
 	gui->addSlider("MinLaplaceEdgeStrength", 1, 255, &minLaplaceEdgeStrength);
+	
+	
 	
 	gui->addSpacer();
 	
@@ -189,6 +193,10 @@ void ofApp::update() {
 			handContourPolyline = contourFinder.getPolyline(indexOfHandContour);
 			handContourCentroid = contourFinder.getCentroid(indexOfHandContour);
 			HCAAMB.process(handContourPolyline, handContourCentroid);
+			
+			
+
+			
 		}
 		
 		 
@@ -210,6 +218,7 @@ void ofApp::draw() {
 		
 		if (bValidHandContourExists){
 			HCAAMB.drawAnalytics();
+			//if (bValidHandContourExists){ HCAAMB.drawMousePoint (mouseX); }
 		}
 		ofPopStyle();
 		
