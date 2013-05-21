@@ -17,6 +17,34 @@ struct eigenMultiPartData {
 	float eigenValue;
 };
 
+#define N_HANDMARKS 14
+
+enum HandmarkType {
+	HANDMARK_INVALID			= -1,
+	HANDMARK_PINKY_TIP			= 0,
+	HANDMARK_PR_CROTCH			= 1,
+	HANDMARK_RING_TIP			= 2,
+	HANDMARK_RM_CROTCH			= 3,
+	HANDMARK_MIDDLE_TIP			= 4,
+	HANDMARK_MI_CROTCH			= 5,
+	HANDMARK_POINTER_TIP		= 6,
+	HANDMARK_POINTER_SIDE		= 7,
+	HANDMARK_IT_CROTCH			= 8,
+	HANDMARK_THUMB_TIP			= 9,
+	HANDMARK_THUMB_BASE			= 10,
+	HANDMARK_THUMBSIDE_WRIST	= 11,
+	HANDMARK_PINKYSIDE_WRIST	= 12,
+	HANDMARK_PINKY_SIDE			= 13
+};
+
+struct Handmark {
+	// analogous to landmark
+	ofVec2f	point;		// the actual location
+	int		index;		// the index in the handContourNice
+	HandmarkType type;  // for safety's sake, the name of the point
+};
+
+
 
 
 class HandContourAnalyzerAndMeshBuilder {
@@ -66,7 +94,8 @@ public:
 	vector<ofVec2f> fingerTipPointsFiltered;
 	vector<ofVec2f> fingerTipPointsTmp; // on handContourNice
 	vector<ofVec2f> fingerTipPoints; // on handContourNice
-	
+	vector<int>		fingerTipIndicesTmp;
+	vector<int>		fingerTipIndices; // on handContourNice
 	
 	vector<float>	handContourCurvatures;
 	vector<int>		handContourPossibleCrotchIndices;
@@ -85,7 +114,7 @@ public:
 	
 	void drawMousePoint (float mx);
 	
-	
+	Handmark		Handmarks[N_HANDMARKS];
 	
 	eigenMultiPartData	eigenData;
 	float getOrientation (vector<ofPoint> pts, ofVec2f COM);
