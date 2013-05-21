@@ -4,7 +4,7 @@
 #include "ofxCv.h"
 #include "ofxUI.h"
 #include "ofxPuppetInteractive.h"
-#include "Skeleton.h"
+#include "HandSkeleton.h"
 
 using namespace ofxCv;
 using namespace cv;
