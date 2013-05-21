@@ -4,7 +4,9 @@
 #include "ofxCv.h"
 #include "ofxUI.h"
 #include "ofxPuppetInteractive.h"
-#include "Skeleton.h"
+
+#include "HandSkeleton.h"
+#include "ThreePointSkeleton.h"
 
 using namespace ofxCv;
 using namespace cv;
@@ -17,13 +19,20 @@ public:
 	void draw();
 	void keyPressed(int key);
 	
+	void setSkeleton(Skeleton* skeleton);
+	
 	ofxUICanvas* gui;
-	ofxUIRadio* sceneRadio;
-	bool showImage, showWireframe, showSkeleton;
+	ofxUIRadio* sceneRadio, *lissajousRadio;
+	bool showImage, showWireframe, showSkeleton, mouseControl;
+	float equalizeLength;
+	float lissajousAmplitude, lissajousFrequency;
+	float meanderAmount;
 	
 	ofMesh mesh;
 	ofImage hand;
-	ofxPuppetInteractive puppet;
-	Skeleton skeleton;
+	ofxPuppet puppet;
+	ThreePointSkeleton threePointSkeleton;
+	HandSkeleton handSkeleton;
+	Skeleton* previousSkeleton, *currentSkeleton;
 	vector<string> sceneNames;
 };

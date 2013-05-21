@@ -1,72 +1,29 @@
 #pragma once
 
-class Bone : public ofNode {
-public:
-	enum Label {
-		WRIST = 0,
-		PALM,
-		PINKY_BASE, PINKY_MID, PINKY_TIP,
-		RING_BASE, RING_MID, RING_TIP,
-		MIDDLE_BASE, MIDDLE_MID, MIDDLE_TIP,
-		INDEX_BASE, INDEX_MID, INDEX_TIP,
-		THUMB_BASE, THUMB_MID, THUMB_TIP,
-		BONE_COUNT,
-		NONE
-	};
-	static string getLabelName(Label label) {
-		switch(label) {
-			case WRIST: return "WRIST";
-			case PALM: return "PALM";
-			case PINKY_BASE: return "PINKY_BASE"; case PINKY_MID: return "PINKY_MID"; case PINKY_TIP: return "PINKY_TIP";
-			case RING_BASE: return "RING_BASE"; case RING_MID: return "RING_MID"; case RING_TIP: return "RING_TIP";
-			case MIDDLE_BASE: return "MIDDLE_BASE"; case MIDDLE_MID: return "MIDDLE_MID"; case MIDDLE_TIP: return "MIDDLE_TIP";
-			case INDEX_BASE: return "INDEX_BASE"; case INDEX_MID: return "INDEX_MID"; case INDEX_TIP: return "INDEX_TIP";
-			case THUMB_BASE: return "THUMB_BASE"; case THUMB_MID: return "THUMB_MID"; case THUMB_TIP: return "THUMB_TIP";
-			case BONE_COUNT: return "BONE_COUNT";
-			case NONE: return "NONE";
-		}
-	}
-	string getLabelName() {
-		return getLabelName(label);
-	}
-	Label label;
-	bool forwardOriented;
-};
+#include "ofMain.h"
+#include "Bone.h"
 
 class Skeleton {
 protected:
 	vector<Bone> bones;
-public:
-	void setup(ofMesh& mesh) {
+	vector<int> cachedChildren;
+	vector<ofVec2f> cachedPositions;
+	vector<int> controlIndices;
+	
+public:	
+	void setup(ofMesh& mesh, vector<int>& controlIndices, vector<int>& parents, vector<bool>& forwardOriented) {
+		this->controlIndices = controlIndices;
 		bones.clear();
-		bones.resize(Bone::BONE_COUNT);
-		Bone::Label topology[] = {
-			Bone::NONE,
-			Bone::WRIST,
-			Bone::PALM, Bone::PINKY_BASE, Bone::PINKY_MID,
-			Bone::PALM, Bone::RING_BASE, Bone::RING_MID,
-			Bone::PALM, Bone::MIDDLE_BASE, Bone::MIDDLE_MID,
-			Bone::PALM, Bone::INDEX_BASE, Bone::INDEX_MID,
-			Bone::PALM, Bone::THUMB_BASE, Bone::THUMB_MID
-		};
-		bool forwardOriented[] = {
-			true,
-			false,
-			true, true, false,
-			true, true, false,
-			true, true, false,
-			true, true, false,
-			true, true, false
-		};
+		bones.resize(controlIndices.size());
 		for(int i = 0; i < size(); i++) {
-			bones[i].label = (Bone::Label) i;
 			bones[i].forwardOriented = forwardOriented[i];
-			if(topology[i] != Bone::NONE) {
-				bones[i].setParent(bones[topology[i]]);
+			if(parents[i] > -1) {
+				bones[i].setParent(bones[parents[i]]);
 			}
 		}
 		for(int i = 0; i < size(); i++) {
-			ofVec2f curPosition = mesh.getVertex(i);
+			int controlPoint = controlIndices[i];
+			ofVec2f curPosition = mesh.getVertex(controlPoint);
 			Bone& cur = bones[i];
 			if(cur.getParent() != NULL) {
 				Bone& parent = *((Bone*) cur.getParent());
@@ -81,8 +38,14 @@ public:
 					cur.setGlobalOrientation(orientation);
 				}
 			} 
-			setPositionAbsolute((Bone::Label) i, curPosition);
+			setPosition(i, curPosition, true);
 		}
+	}
+	int getControlIndex(int i) {
+		return controlIndices[i];
+	}
+	vector<int>& getControlIndices() {
+		return controlIndices;
 	}
 	int size() {
 		return bones.size();
@@ -100,27 +63,61 @@ public:
 				ofNode& parent = *(cur.getParent());
 				ofLine(cur.getGlobalPosition(), parent.getGlobalPosition());
 			}
-			bones[i].draw();
 		}
 		for(int i = 0; i < size(); i++) {
-			ofVec2f cur = bones[i].getGlobalPosition();
-			//ofDrawBitmapStringHighlight(Bone::getLabelName((Bone::Label) i), cur);
+			bones[i].draw();
 		}
 		ofPopStyle();
 	}
-	ofVec2f getPositionAbsolute(Bone::Label label) {
-		return bones[label].getGlobalPosition();
+	ofVec2f getPositionAbsolute(int i) {
+		return bones[i].getGlobalPosition();
 	}
-	void setPositionAbsolute(Bone::Label label, ofVec2f position) {
-		bones[label].setGlobalPosition(position);
+	Bone& getBone(int i) {
+		return bones[i];
 	}
-	void setPositionRelativeToSelf(Bone::Label label, ofVec2f position) {
-		setPositionAbsolute(label, position + getPositionAbsolute(label));
+	void setBoneLength(int i, float distance) {
+		Bone& bone = bones[i];
+		if(bone.getParent() != NULL) {
+			bone.setGlobalPosition(bone.getParent()->getGlobalPosition());
+			bone.move(distance, 0, 0);
+		}
 	}
-	void setPositionRelativeToParent(Bone::Label label, ofVec2f position) {
-		bones[label].setPosition(position);
+	void stashChildren(int i) {
+		Bone& bone = bones[i];
+		for(int j = 0; j < size(); j++) {
+			Bone* parent = (Bone*) bones[j].getParent();
+			if(parent == &bone) {
+				cachedChildren.push_back(j);
+				cachedPositions.push_back(bones[j].getGlobalPosition());
+			}
+		}
 	}
-	void setRotation(Bone::Label label, float rotation) {
-		bones[label].setOrientation(ofVec3f(0, 0, rotation));
+	void applyChildren() {
+		for(int i = 0; i < cachedChildren.size(); i++) {
+			bones[cachedChildren[i]].setGlobalPosition(cachedPositions[i]);
+		}		
+	}
+	void setPosition(int i, ofVec2f position, bool absolute = true, bool independent = false) {
+		Bone& bone = bones[i];
+		if(independent) {
+			stashChildren(i);
+		}
+		if(absolute) {
+			bone.setGlobalPosition(position);
+		} else {
+			bone.setGlobalPosition(bone.getGlobalPosition() + position);
+		}
+		if(independent) {
+			applyChildren();
+		}
+	}
+	void setRotation(int i, float rotation, bool absolute = false) {
+		if(absolute) {
+			ofQuaternion orientation;
+			orientation.makeRotate(rotation, 0, 0, 1);
+			bones[i].setGlobalOrientation(orientation);
+		} else {
+			bones[i].rotate(rotation, ofVec3f(0, 0, 1));
+		}
 	}
 };

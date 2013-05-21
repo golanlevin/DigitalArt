@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ofMain.h"
+
 void sharedSetup() {
 	ofSetVerticalSync(true);
 	ofSetFrameRate(120);
