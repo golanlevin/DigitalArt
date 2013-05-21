@@ -47,6 +47,62 @@
 
 
 
+/*
+ bool bComputeAngleAroundCentroid = false;
+ if (bComputeAngleAroundCentroid){
+ float angleAroundCentroid[maxNCrotchesToConsider];
+ for (int i=0; i<maxNCrotchesToConsider; i++){
+ ofVec2f a = fingerCrotchPointsTmp[i];
+ ofVec2f b = handCentroid;
+ ofVec2f c = ofVec2f(100, 0);
+ a -= b;
+ float angle = a.angle(c);
+ angleAroundCentroid[i] = (angle < 0)? angle + 360: angle;
+ }
+ }
+ */
+
+
+/*
+ float closestDistance2 = 99999;
+ float indexOnHandContourResampledOfClosest = 0;
+ 
+ for (int j=0; j<handContourResampled.size(); j++){
+ float jx = handContourResampled[j].x;
+ float jy = handContourResampled[j].y;
+ 
+ float dist2 = ofDistSquared(ix,iy, jx,jy);
+ if (dist2 < closestDistance2){
+ closestDistance2 = dist2;
+ indexOnHandContourResampledOfClosest = j;
+ }
+ }
+ */
+
+/*
+ int nNeighborSpanToSearch = 12;
+ int nRes = handContourResampled.size();
+ int mid   = indexOnHandContourResampledOfClosest;
+ float longestDistance2FromCentroid = 0;
+ int   indexOfNeighborMostDistalFromCentroid = 0;
+ for (int j=0; j<nNeighborSpanToSearch; j++){
+ int searchIndex = (mid + j - (nNeighborSpanToSearch/2) + nRes)%nRes;
+ float jx = handContourResampled[searchIndex].x;
+ float jy = handContourResampled[searchIndex].x;
+ float jh = ofDistSquared(jx,jy, handCentroid.x,handCentroid.y);
+ if (jh > longestDistance2FromCentroid){
+ longestDistance2FromCentroid = jh;
+ indexOfNeighborMostDistalFromCentroid = searchIndex;
+ }
+ }
+ */
+
+
+//ofVec2f aFingerTip = handContourResampled [ indexOfNeighborMostDistalFromCentroid ];
+//fingerTipPoints.push_back (aFingerTip);
+
+//ofVec2f aFingerTip = handContourResampled [ indexOnHandContourResampledOfClosest ];
+//fingerTipPoints.push_back (aFingerTip);
 
 
 #endif
