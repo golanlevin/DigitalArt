@@ -19,16 +19,20 @@ public:
 	void draw();
 	void keyPressed(int key);
 	
+	void setSkeleton(Skeleton* skeleton);
+	
 	ofxUICanvas* gui;
-	ofxUIRadio* sceneRadio;
+	ofxUIRadio* sceneRadio, *lissajousRadio;
 	bool showImage, showWireframe, showSkeleton, mouseControl;
 	float equalizeLength;
+	float lissajousAmplitude, lissajousFrequency;
+	float meanderAmount;
 	
 	ofMesh mesh;
 	ofImage hand;
 	ofxPuppet puppet;
 	ThreePointSkeleton threePointSkeleton;
 	HandSkeleton handSkeleton;
-	Skeleton* currentSkeleton;
+	Skeleton* previousSkeleton, *currentSkeleton;
 	vector<string> sceneNames;
 };

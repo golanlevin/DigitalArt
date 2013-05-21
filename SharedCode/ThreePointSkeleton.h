@@ -12,7 +12,7 @@ public:
 	
 	void setup(ofMesh& mesh) {
 		int boneCount = 3;
-		int controlPointsRaw[] = {
+		int controlIndicesRaw[] = {
 			1, 104, 8
 		};
 		int parentsRaw[] = {
@@ -21,13 +21,13 @@ public:
 		bool forwardOrientedRaw[] = {
 			true, false, false
 		};
-		vector<int> controlPoints, parents;
+		vector<int> controlIndices, parents;
 		vector<bool> forwardOriented;
 		for(int i = 0; i < boneCount; i++) {
-			controlPoints.push_back(controlPointsRaw[i]);
+			controlIndices.push_back(controlIndicesRaw[i]);
 			parents.push_back(parentsRaw[i]);
 			forwardOriented.push_back(forwardOrientedRaw[i]);
 		}
-		Skeleton::setup(mesh, controlPoints, parents, forwardOriented);
+		Skeleton::setup(mesh, controlIndices, parents, forwardOriented);
 	}
 };

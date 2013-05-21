@@ -8,11 +8,13 @@ protected:
 	vector<Bone> bones;
 	vector<int> cachedChildren;
 	vector<ofVec2f> cachedPositions;
+	vector<int> controlIndices;
 	
 public:	
-	void setup(ofMesh& mesh, vector<int>& controlPoints, vector<int>& parents, vector<bool>& forwardOriented) {
+	void setup(ofMesh& mesh, vector<int>& controlIndices, vector<int>& parents, vector<bool>& forwardOriented) {
+		this->controlIndices = controlIndices;
 		bones.clear();
-		bones.resize(controlPoints.size());
+		bones.resize(controlIndices.size());
 		for(int i = 0; i < size(); i++) {
 			bones[i].forwardOriented = forwardOriented[i];
 			if(parents[i] > -1) {
@@ -20,7 +22,7 @@ public:
 			}
 		}
 		for(int i = 0; i < size(); i++) {
-			int controlPoint = controlPoints[i];
+			int controlPoint = controlIndices[i];
 			ofVec2f curPosition = mesh.getVertex(controlPoint);
 			Bone& cur = bones[i];
 			if(cur.getParent() != NULL) {
@@ -38,6 +40,12 @@ public:
 			} 
 			setPosition(i, curPosition, true);
 		}
+	}
+	int getControlIndex(int i) {
+		return controlIndices[i];
+	}
+	vector<int>& getControlIndices() {
+		return controlIndices;
 	}
 	int size() {
 		return bones.size();
@@ -109,7 +117,7 @@ public:
 			orientation.makeRotate(rotation, 0, 0, 1);
 			bones[i].setGlobalOrientation(orientation);
 		} else {
-			bones[i].setOrientation(ofVec3f(0, 0, rotation));
+			bones[i].rotate(rotation, ofVec3f(0, 0, 1));
 		}
 	}
 };
