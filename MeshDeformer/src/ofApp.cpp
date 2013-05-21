@@ -1,9 +1,9 @@
 #include "ofApp.h"
 #include "SharedUtils.h"
 
-void updatePuppet(Skeleton& skeleton, ofxPuppet& puppet) {
-	for(int i = 0; i < skeleton.size(); i++) {
-		puppet.setControlPoint(i, skeleton.getPositionAbsolute(i));
+void updatePuppet(Skeleton* skeleton, ofxPuppet& puppet) {
+	for(int i = 0; i < skeleton->size(); i++) {
+		puppet.setControlPoint(i, skeleton->getPositionAbsolute(i));
 	}
 }
 
@@ -23,7 +23,9 @@ void ofApp::setup() {
 		mesh.addTexCoord(mesh.getVertex(i));
 	}
 	puppet.setup(mesh);
-	skeleton.setup(mesh);
+	handSkeleton.setup(mesh);
+	threePointSkeleton.setup(mesh);
+	currentSkeleton = &handSkeleton;
 	
 	for(int i = 0; i < 17; i++) {
 		puppet.setControlPoint(i);
@@ -37,6 +39,7 @@ void ofApp::setupGui() {
 	sceneNames.push_back("Wobble");
 	sceneNames.push_back("Equalize");
 	sceneNames.push_back("North");
+	sceneNames.push_back("Waggle");
 	
 	gui = new ofxUICanvas();
 	gui->addLabel("Mesh Deformer");
@@ -67,10 +70,13 @@ int getSelection(ofxUIRadio* radio) {
 
 void ofApp::update() {
 	// every frame we get a new mesh from the hand tracker
-	skeleton.setup(mesh);
+	handSkeleton.setup(mesh);
+	threePointSkeleton.setup(mesh);
 	
 	if(mouseControl) {
-		skeleton.setPosition(HandSkeleton::PALM, ofVec2f(mouseX, mouseY), true);
+		ofVec2f mouse(mouseX, mouseY);
+		handSkeleton.setPosition(HandSkeleton::PALM, mouse, true);
+		threePointSkeleton.setPosition(HandSkeleton::PALM, mouse, true);
 	}
 	
 	// then we modify the skeleton with one of our scenes
@@ -81,9 +87,10 @@ void ofApp::update() {
 		float theta = ofMap(sin(2 * ofGetElapsedTimef()), -1, 1, -20, 20);
 		for(int i = 0; i < toWaveCount; i++) {
 			int index = toWave[i];
-			skeleton.setRotation(index, 2 * theta);
-			skeleton.setRotation((int) ((int)index-1), -theta);
+			handSkeleton.setRotation(index, 2 * theta);
+			handSkeleton.setRotation((int) ((int)index-1), -theta);
 		}
+		currentSkeleton = &handSkeleton;
 	} else if(scene == 2) {
 		int toWiggle[] = {HandSkeleton::PINKY_TIP, HandSkeleton::RING_TIP, HandSkeleton::MIDDLE_TIP, HandSkeleton::INDEX_TIP, HandSkeleton::THUMB_TIP};
 		int toWiggleCount = 5;
@@ -93,13 +100,15 @@ void ofApp::update() {
 			int index = toWiggle[i];
 			ofVec2f original = puppet.getOriginalMesh().getVertex(index);
 			ofVec2f position(wiggleRange * ofVec2f(ofNoise(i, t, 0), ofNoise(i, t, 1)));
-			skeleton.setPosition(index, position, false, false);
+			handSkeleton.setPosition(index, position, false, false);
 		}
+		currentSkeleton = &handSkeleton;
 	} else if(scene == 3) {
 		float wiggleRange = 50;
 		float t = ofGetElapsedTimef();
 		ofVec2f position(wiggleRange * ofVec2f(ofNoise(t, 0), ofNoise(t, 1)));
-		skeleton.setPosition(HandSkeleton::PALM, position, false, true);
+		handSkeleton.setPosition(HandSkeleton::PALM, position, false, true);
+		currentSkeleton = &handSkeleton;
 	} else if(scene == 4) {
 		int toEqualize[] = {
 			HandSkeleton::PINKY_TIP, HandSkeleton::RING_TIP, HandSkeleton::MIDDLE_TIP, HandSkeleton::INDEX_TIP,
@@ -111,23 +120,30 @@ void ofApp::update() {
 		};
 		int toEqualizeCount = 8;
 		for(int i = 0; i < toEqualizeCount; i++) {
-			skeleton.setBoneLength(toEqualize[i], ratios[i] * equalizeLength);
+			handSkeleton.setBoneLength(toEqualize[i], ratios[i] * equalizeLength);
 		}
-		ofVec2f pinkyBase = skeleton.getPositionAbsolute(HandSkeleton::PINKY_BASE);
-		ofVec2f indexBase = skeleton.getPositionAbsolute(HandSkeleton::INDEX_BASE);
-		skeleton.setPosition(HandSkeleton::RING_BASE, pinkyBase.getInterpolated(indexBase, 1/3.), true);
-		skeleton.setPosition(HandSkeleton::MIDDLE_BASE, pinkyBase.getInterpolated(indexBase, 2/3.), true);
+		ofVec2f pinkyBase = handSkeleton.getPositionAbsolute(HandSkeleton::PINKY_BASE);
+		ofVec2f indexBase = handSkeleton.getPositionAbsolute(HandSkeleton::INDEX_BASE);
+		handSkeleton.setPosition(HandSkeleton::RING_BASE, pinkyBase.getInterpolated(indexBase, 1/3.), true);
+		handSkeleton.setPosition(HandSkeleton::MIDDLE_BASE, pinkyBase.getInterpolated(indexBase, 2/3.), true);
+		currentSkeleton = &handSkeleton;
 	} else if(scene == 5) {
 		int toRotate[] = {HandSkeleton::PINKY_BASE, HandSkeleton::RING_BASE, HandSkeleton::MIDDLE_BASE, HandSkeleton::INDEX_BASE};
 		int toRotateCount = 4;
 		for(int i = 0; i < toRotateCount; i++) {
 			int index = toRotate[i];
-			skeleton.setRotation(index, -90, true);
+			handSkeleton.setRotation(index, -90, true);
 		}
+		currentSkeleton = &handSkeleton;
+	} else if(scene == 6) {
+		ofVec2f position(10, 0);
+		position.rotate(ofGetElapsedTimef() * 100);
+		threePointSkeleton.setPosition(ThreePointSkeleton::MIDDLE_HAND, position, false, true);
+		currentSkeleton = &threePointSkeleton;
 	}
 	
 	// we update the puppet using that skeleton
-	updatePuppet(skeleton, puppet);
+	updatePuppet(currentSkeleton, puppet);
 	puppet.update();
 }
 
@@ -143,7 +159,7 @@ void ofApp::draw() {
 		puppet.drawControlPoints();
 	}
 	if(showSkeleton) {
-		skeleton.draw();
+		currentSkeleton->draw();
 	}
 }
 

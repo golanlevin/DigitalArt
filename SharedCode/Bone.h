@@ -12,6 +12,5 @@ public:
 		ofLine(0, 0, 0, 20);
 		ofPopStyle();
 	}
-	int label;
 	bool forwardOriented;
 };

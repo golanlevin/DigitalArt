@@ -10,18 +10,18 @@ protected:
 	vector<ofVec2f> cachedPositions;
 	
 public:	
-	void setup(ofMesh& mesh, vector<int>& indices, vector<int>& parents, vector<bool>& forwardOriented) {
+	void setup(ofMesh& mesh, vector<int>& controlPoints, vector<int>& parents, vector<bool>& forwardOriented) {
 		bones.clear();
-		bones.resize(indices.size());
+		bones.resize(controlPoints.size());
 		for(int i = 0; i < size(); i++) {
-			bones[i].label = i;
 			bones[i].forwardOriented = forwardOriented[i];
 			if(parents[i] > -1) {
 				bones[i].setParent(bones[parents[i]]);
 			}
 		}
 		for(int i = 0; i < size(); i++) {
-			ofVec2f curPosition = mesh.getVertex(i);
+			int controlPoint = controlPoints[i];
+			ofVec2f curPosition = mesh.getVertex(controlPoint);
 			Bone& cur = bones[i];
 			if(cur.getParent() != NULL) {
 				Bone& parent = *((Bone*) cur.getParent());

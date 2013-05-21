@@ -4,7 +4,9 @@
 #include "ofxCv.h"
 #include "ofxUI.h"
 #include "ofxPuppetInteractive.h"
+
 #include "HandSkeleton.h"
+#include "ThreePointSkeleton.h"
 
 using namespace ofxCv;
 using namespace cv;
@@ -25,6 +27,8 @@ public:
 	ofMesh mesh;
 	ofImage hand;
 	ofxPuppet puppet;
-	HandSkeleton skeleton;
+	ThreePointSkeleton threePointSkeleton;
+	HandSkeleton handSkeleton;
+	Skeleton* currentSkeleton;
 	vector<string> sceneNames;
 };
