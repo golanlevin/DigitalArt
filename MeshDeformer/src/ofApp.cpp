@@ -24,6 +24,9 @@ void ofApp::setup() {
 	propWiggleSpeedUp = 2;
 	propWigglePhaseOffset = 0.5;
 
+	sinLength = 15;
+	sinLengthPhaseOffset = 0.5;
+
 	mouseControl = false;
 	showImage = true;
 	showWireframe = false;
@@ -64,6 +67,7 @@ void ofApp::setupGui() {
 	lissajousStyle.push_back("Bow tie");
 	lissajousStyle.push_back("Vertical line");
 	
+	// create the main gui
 	gui = new ofxUICanvas();
 	gui->setFont("GUI/NewMedia Fett.ttf"); 
 	gui->addLabel("Mesh Deformer");
@@ -79,8 +83,10 @@ void ofApp::setupGui() {
 	gui->addSpacer();
 	gui->autoSizeToFitWidgets();
 	
-	sceneRadio->getToggles()[PROP_WIGGLE]->setValue(true);
+	// set the initial scene
+	sceneRadio->getToggles()[SIN_LENGTH]->setValue(true);
 
+	// create the scene specific guis
 	guis = new ofxUICanvas*[sceneNames.size()];
 	for (int i=0; i < sceneNames.size(); i++) {
 		guis[i] = new ofxUICanvas();
@@ -90,15 +96,21 @@ void ofApp::setupGui() {
 	}
 	
 	guis[EQUALIZE]->addSlider("Equalize Length", 0, 100, &equalizeLength);
+
 	guis[LISSAJOUS]->addSlider("Lissajous Amplitude", 0, 100, &lissajousAmplitude);
 	guis[LISSAJOUS]->addSlider("Lissajous Frequency", 0, 5, &lissajousFrequency);
 	lissajousRadio = guis[LISSAJOUS]->addRadio("Lissajous Style", lissajousStyle);
+
 	guis[MEANDER]->addSlider("Meander", 0, 60, &meanderAmount);
+
 	guis[PROP_WIGGLE]->addSlider("Base Angle Range", 10, 60, &propWiggleBaseAngleRange);
 	guis[PROP_WIGGLE]->addSlider("Mid Angle Range", 10, 60, &propWiggleMidAngleRange);
 	guis[PROP_WIGGLE]->addSlider("Top Angle Range", 10, 60, &propWiggleTopAngleRange);
 	guis[PROP_WIGGLE]->addSlider("Wiggle Speed", 1, 3, &propWiggleSpeedUp);
 	guis[PROP_WIGGLE]->addSlider("Phase Offset", 0, 1, &propWigglePhaseOffset);
+
+	guis[SIN_LENGTH]->addSlider("Max Length", 10, 30, &sinLength);
+	guis[SIN_LENGTH]->addSlider("Phase Offset", 0, 1, &sinLengthPhaseOffset);
 
 	for (int i=0; i < sceneNames.size(); i++) {
 		guis[i]->autoSizeToFitWidgets();
@@ -258,26 +270,27 @@ void ofApp::update() {
 		int tip[] = {HandSkeleton::PINKY_TIP, HandSkeleton::RING_TIP, HandSkeleton::MIDDLE_TIP, HandSkeleton::INDEX_TIP, HandSkeleton::THUMB_TIP};
 		int fingerCount = 5;
 		float t = ofGetElapsedTimef();
+		
 		int index;
 		ofVec2f original;
 		ofVec2f parent;
-		ofVec2f position;
+		ofVec2f position(0, 0);
 		for(int i = 0; i < fingerCount; i++) {
-			//index = mid[i];
-			//original = puppet.getOriginalMesh().getVertex(index);
-			//parent = puppet.getOriginalMesh().getVertex((int) ((int)index-1));
-			//position = new ofVec2f(original-parent);
-			//position.normalize();
-			//position = position * (10*sin(t));
-			//handSkeleton.setPosition(index, position, false, false);
+			index = mid[i];
+			original = puppet.getOriginalMesh().getVertex(index);
+			parent = puppet.getOriginalMesh().getVertex((int) ((int)index-1));
+			position.set(original-parent);
+			position.normalize();
+			position = position * (sinLength*sin(t + i*sinLengthPhaseOffset));
+			handSkeleton.setPosition(index, position, false, false);
 
-			//index = tip[i];
-			//original = puppet.getOriginalMesh().getVertex(index);
-			//parent = puppet.getOriginalMesh().getVertex((int) ((int)index-1));
-			//oposition(original-parent);
-			//position.normalize();
-			//position = position * (10*sin(t));
-			//handSkeleton.setPosition(index, position, false, false);
+			index = tip[i];
+			original = puppet.getOriginalMesh().getVertex(index);
+			parent = puppet.getOriginalMesh().getVertex((int) ((int)index-1));
+			position.set(original-parent);
+			position.normalize();
+			position = position * (sinLength*sin(t + i*sinLengthPhaseOffset));
+			handSkeleton.setPosition(index, position, false, false);
 		}
 		setSkeleton(&handSkeleton);
 	}

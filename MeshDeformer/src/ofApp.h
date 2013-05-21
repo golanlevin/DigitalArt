@@ -37,7 +37,8 @@ public:
 	float lissajousAmplitude, lissajousFrequency;
 	float meanderAmount;
 	float propWiggleBaseAngleRange, propWiggleMidAngleRange, propWiggleTopAngleRange, propWiggleSpeedUp, propWigglePhaseOffset;
-	
+	float sinLength, sinLengthPhaseOffset;
+
 	ofMesh mesh;
 	ofImage hand;
 	ofxPuppet puppet;
