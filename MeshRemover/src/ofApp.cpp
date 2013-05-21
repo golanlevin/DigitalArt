@@ -35,12 +35,56 @@ ofMesh dropUnusedVertices(ofMesh& mesh) {
 		if(used[i]) {
 			newIndex[i] = total++;
 			out.addVertex(mesh.getVertex(i));
+			if(mesh.hasTexCoords()) {
+				out.addTexCoord(mesh.getTexCoord(i));
+			}
 		}
 	}
 	for(int i = 0; i < n; i++) {
 		out.addIndex(newIndex[mesh.getIndex(i)]);
 	}
 	return out;
+}
+
+void mergeCoincidentVertices(ofMesh& mesh, float epsilon = 10e-5) {
+	int n = mesh.getNumVertices();
+	vector<ofIndexType> newIndex(n);
+	float epsilonSquared = epsilon * epsilon;
+	for(int i = 0; i < n; i++) {
+		ofVec2f cur = mesh.getVertex(i);
+		newIndex[i] = i;
+		for(int j = 0; j < i; j++) {
+			ofVec2f other = mesh.getVertex(j);
+			if(cur.squareDistance(other) < epsilonSquared) {
+				newIndex[i] = j;
+				break;
+			}
+		}
+	}
+	int m = mesh.getNumIndices();
+	for(int i = 0; i < m; i++) {
+		ofIndexType index = mesh.getIndex(i);
+		mesh.setIndex(i, newIndex[index]);
+	}
+}
+
+ofMesh removeAndStitch(ofMesh& mesh, ofPolyline& removalRegion, vector<pair<ofIndexType, ofIndexType> >& stitch) {
+	ofMesh out = mesh;
+	removeTriangles(out, removalRegion);
+	out = dropUnusedVertices(out);
+	ofxPuppet puppet;
+	puppet.setup(out);
+	puppet.update();
+	for(int i = 0; i < stitch.size(); i++) {
+		ofIndexType left = stitch[i].first, right = stitch[i].second;
+		ofVec2f avg = (out.getVertex(left) + out.getVertex(right)) / 2;
+		puppet.setControlPoint(left, avg);
+		puppet.setControlPoint(right, avg);
+	}
+	puppet.update();
+	out = puppet.getDeformedMesh();
+	mergeCoincidentVertices(out);
+	return dropUnusedVertices(out);
 }
 
 void ofApp::setup() {
@@ -53,6 +97,9 @@ void ofApp::setup() {
 	
 	hand.loadImage("hand/genericHandCentered.jpg");
 	mesh.load("hand/handmarks.ply");
+	for(int i = 0; i < mesh.getNumVertices(); i++) {
+		mesh.addTexCoord(mesh.getVertex(i));
+	}
 	
 	removalRegion.close();
 	int toRemove[] = {
@@ -71,25 +118,17 @@ void ofApp::setup() {
 		removalRegion.addVertex(mesh.getVertex(toRemove[i]));
 	}
 	
-	removeTriangles(mesh, removalRegion);
-	mesh = dropUnusedVertices(mesh);
-	
-	for(int i = 0; i < mesh.getNumVertices(); i++) {
-		mesh.addTexCoord(mesh.getVertex(i));
-	}
-	
-	puppet.setup(mesh);
-	puppet.update();
-	
 	int toStitchLeft[] = {69, 100, 68, 92, 67, 87, 8, 20};
 	int toStitchRight[] = {72, 99, 71, 93, 70, 88, 9, 21};
 	int toStichCount = 8;
+	vector<pair<ofIndexType, ofIndexType> > stitch;
 	for(int i = 0; i < toStichCount; i++) {
-		int left = toStitchLeft[i], right = toStitchRight[i];
-		ofVec2f avg = (mesh.getVertex(left) + mesh.getVertex(right)) / 2;
-		puppet.setControlPoint(left, avg);
-		puppet.setControlPoint(right, avg);
+		stitch.push_back(pair<ofIndexType, ofIndexType>(toStitchLeft[i], toStitchRight[i]));
 	}
+	
+	mesh = removeAndStitch(mesh, removalRegion, stitch);
+	
+	puppet.setup(mesh);
 }
 
 void ofApp::setupGui() {	
@@ -118,6 +157,7 @@ void ofApp::draw() {
 	if(showWireframe) {
 		puppet.drawWireframe();
 		puppet.drawControlPoints();
+		mesh.drawWireframe();
 	}
 	if(showRemoval) {
 		ofPushStyle();
