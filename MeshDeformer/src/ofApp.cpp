@@ -8,8 +8,8 @@ void updatePuppet(Skeleton* skeleton, ofxPuppet& puppet) {
 }
 
 void ofApp::setup() {
-	sharedSetup();
 	setupGui();
+	sharedSetup();
 	
 	equalizeLength = 40;
 	
@@ -32,6 +32,7 @@ void ofApp::setup() {
 	
 	previousSkeleton = NULL;
 	currentSkeleton = NULL;
+	handWithFingertipsSkeleton.setup(mesh);
 	handSkeleton.setup(mesh);
 	threePointSkeleton.setup(mesh);
 	setSkeleton(&handSkeleton);
@@ -46,7 +47,7 @@ void ofApp::setupGui() {
 	sceneNames.push_back("North");
 	sceneNames.push_back("Lissajous");
 	sceneNames.push_back("Meander");
-	
+
 	vector<string> lissajousStyle;
 	lissajousStyle.push_back("Circle");
 	lissajousStyle.push_back("Ellipse");
@@ -55,6 +56,7 @@ void ofApp::setupGui() {
 	lissajousStyle.push_back("Vertical line");
 	
 	gui = new ofxUICanvas();
+	gui->setFont("GUI/NewMedia Fett.ttf"); 
 	gui->addLabel("Mesh Deformer");
 	gui->addSpacer();
 	gui->addFPS();
@@ -87,11 +89,13 @@ int getSelection(ofxUIRadio* radio) {
 
 void ofApp::update() {
 	// every frame we get a new mesh from the hand tracker
+	handWithFingertipsSkeleton.setup(mesh);
 	handSkeleton.setup(mesh);
 	threePointSkeleton.setup(mesh);
-	
+
 	if(mouseControl) {
 		ofVec2f mouse(mouseX, mouseY);
+		handWithFingertipsSkeleton.setPosition(HandWithFingertipsSkeleton::PALM, mouse, true);
 		handSkeleton.setPosition(HandSkeleton::PALM, mouse, true);
 		threePointSkeleton.setPosition(HandSkeleton::PALM, mouse, true);
 	}

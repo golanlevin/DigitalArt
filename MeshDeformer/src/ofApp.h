@@ -7,6 +7,7 @@
 
 #include "HandSkeleton.h"
 #include "ThreePointSkeleton.h"
+#include "HandWithFingertipsSkeleton.h"
 
 using namespace ofxCv;
 using namespace cv;
@@ -33,6 +34,7 @@ public:
 	ofxPuppet puppet;
 	ThreePointSkeleton threePointSkeleton;
 	HandSkeleton handSkeleton;
+	HandWithFingertipsSkeleton handWithFingertipsSkeleton;
 	Skeleton* previousSkeleton, *currentSkeleton;
 	vector<string> sceneNames;
 };
