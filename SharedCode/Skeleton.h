@@ -111,13 +111,19 @@ public:
 			applyChildren();
 		}
 	}
-	void setRotation(int i, float rotation, bool absolute = false) {
+	void setRotation(int i, float rotation, bool absolute = false, bool independent = false) {
+		if(independent) {
+			stashChildren(i);
+		}
 		if(absolute) {
 			ofQuaternion orientation;
 			orientation.makeRotate(rotation, 0, 0, 1);
 			bones[i].setGlobalOrientation(orientation);
 		} else {
 			bones[i].rotate(rotation, ofVec3f(0, 0, 1));
+		}
+		if(independent) {
+			applyChildren();
 		}
 	}
 };

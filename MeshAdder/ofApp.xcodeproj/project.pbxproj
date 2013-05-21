@@ -135,6 +135,7 @@
 		27CBC34F174AFF7500EE526D /* Bone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bone.h; sourceTree = "<group>"; };
 		27CBC350174B008000EE526D /* HandSkeleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HandSkeleton.h; sourceTree = "<group>"; };
 		27CBC351174B020700EE526D /* ThreePointSkeleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThreePointSkeleton.h; sourceTree = "<group>"; };
+		27DDE2A4174BB33700C70537 /* MeshUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshUtils.h; sourceTree = "<group>"; };
 		27E3D5A11749E6B300535563 /* LinearAlgebra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LinearAlgebra.cpp; sourceTree = "<group>"; };
 		27E3D5A21749E6B300535563 /* LinearAlgebra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinearAlgebra.h; sourceTree = "<group>"; };
 		27E3D5A31749E6B300535563 /* RigidMeshDeformer2D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RigidMeshDeformer2D.cpp; sourceTree = "<group>"; };
@@ -520,6 +521,7 @@
 				27CBC34F174AFF7500EE526D /* Bone.h */,
 				27CBC350174B008000EE526D /* HandSkeleton.h */,
 				27CBC351174B020700EE526D /* ThreePointSkeleton.h */,
+				27DDE2A4174BB33700C70537 /* MeshUtils.h */,
 			);
 			name = SharedCode;
 			path = ../SharedCode;
