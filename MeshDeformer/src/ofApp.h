@@ -21,8 +21,16 @@ public:
 	void keyPressed(int key);
 	
 	void setSkeleton(Skeleton* skeleton);
-	
+
+	enum Scene {
+		NONE = 0,
+		WAVE, WIGGLE, WOBBLE, 
+		EQUALIZE, NORTH, LISSAJOUS,
+		MEANDER, PROP_WIGGLE, SIN_LENGTH
+	};
+
 	ofxUICanvas* gui;
+	ofxUICanvas** guis;
 	ofxUIRadio* sceneRadio, *lissajousRadio;
 	bool showImage, showWireframe, showSkeleton, mouseControl;
 	float equalizeLength;
