@@ -36,6 +36,7 @@ public:
 	float equalizeLength;
 	float lissajousAmplitude, lissajousFrequency;
 	float meanderAmount;
+	float propWiggleBaseAngleRange, propWiggleMidAngleRange, propWiggleTopAngleRange, propWiggleSpeedUp, propWigglePhaseOffset;
 	
 	ofMesh mesh;
 	ofImage hand;

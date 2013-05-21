@@ -15,8 +15,15 @@ void ofApp::setup() {
 	
 	lissajousAmplitude = 10;
 	lissajousFrequency = 1;
+	
 	meanderAmount = 20;
 	
+	propWiggleBaseAngleRange = 15;
+	propWiggleMidAngleRange = 30;
+	propWiggleTopAngleRange = 45;
+	propWiggleSpeedUp = 2;
+	propWigglePhaseOffset = 0.5;
+
 	mouseControl = false;
 	showImage = true;
 	showWireframe = false;
@@ -72,7 +79,7 @@ void ofApp::setupGui() {
 	gui->addSpacer();
 	gui->autoSizeToFitWidgets();
 	
-	sceneRadio->getToggles()[MEANDER]->setValue(true);
+	sceneRadio->getToggles()[PROP_WIGGLE]->setValue(true);
 
 	guis = new ofxUICanvas*[sceneNames.size()];
 	for (int i=0; i < sceneNames.size(); i++) {
@@ -87,6 +94,11 @@ void ofApp::setupGui() {
 	guis[LISSAJOUS]->addSlider("Lissajous Frequency", 0, 5, &lissajousFrequency);
 	lissajousRadio = guis[LISSAJOUS]->addRadio("Lissajous Style", lissajousStyle);
 	guis[MEANDER]->addSlider("Meander", 0, 60, &meanderAmount);
+	guis[PROP_WIGGLE]->addSlider("Base Angle Range", 10, 60, &propWiggleBaseAngleRange);
+	guis[PROP_WIGGLE]->addSlider("Mid Angle Range", 10, 60, &propWiggleMidAngleRange);
+	guis[PROP_WIGGLE]->addSlider("Top Angle Range", 10, 60, &propWiggleTopAngleRange);
+	guis[PROP_WIGGLE]->addSlider("Wiggle Speed", 1, 3, &propWiggleSpeedUp);
+	guis[PROP_WIGGLE]->addSlider("Phase Offset", 0, 1, &propWigglePhaseOffset);
 
 	for (int i=0; i < sceneNames.size(); i++) {
 		guis[i]->autoSizeToFitWidgets();
@@ -221,30 +233,23 @@ void ofApp::update() {
 		ofVec2f original;
 		float theta;
 		for (int i=0; i < fingerCount; i++) {
-			float speedUp = 2.0;
-
-			float baseCap = 10;
-			float midCap = 7.5;
-			float topCap = 5;
-
-			float phaseOffset = 0.5;
-			float baseOffset = 0*phaseOffset + i;
-			float midOffset = 1*phaseOffset + i;
-			float topOffset = 2*phaseOffset + i;
+			float baseOffset = 0*propWigglePhaseOffset + i;
+			float midOffset = 1*propWigglePhaseOffset + i;
+			float topOffset = 2*propWigglePhaseOffset + i;
 
 			index = base[i];
 			original = puppet.getOriginalMesh().getVertex(index);
-			theta = ofMap(sin(speedUp*ofGetElapsedTimef() + baseOffset), -1, 1, -baseCap, baseCap);
+			theta = ofMap(sin(propWiggleSpeedUp*ofGetElapsedTimef() + baseOffset), -1, 1, -(propWiggleBaseAngleRange/2.0), propWiggleBaseAngleRange/2.0);
 			handWithFingertipsSkeleton.setRotation(index, theta, false, false);
 			
 			index = mid[i];
 			original = puppet.getOriginalMesh().getVertex(index);
-			theta = -ofMap(sin(speedUp*ofGetElapsedTimef() + midOffset), -1, 1, -midCap, midCap);
+			theta = -ofMap(sin(propWiggleSpeedUp*ofGetElapsedTimef() + midOffset), -1, 1, -(propWiggleMidAngleRange/2.0), propWiggleMidAngleRange/2.0);
 			handWithFingertipsSkeleton.setRotation(index, theta, false, false);
 
 			index = top[i];
 			original = puppet.getOriginalMesh().getVertex(index);
-			theta = ofMap(sin(speedUp*ofGetElapsedTimef() + topOffset), -1, 1, -topCap, topCap);
+			theta = ofMap(sin(propWiggleSpeedUp*ofGetElapsedTimef() + topOffset), -1, 1, -(propWiggleTopAngleRange/2.0), propWiggleTopAngleRange/2.0);
 			handWithFingertipsSkeleton.setRotation(index, theta, false , false);
 		}
 		setSkeleton(&handWithFingertipsSkeleton);
