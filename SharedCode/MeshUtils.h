@@ -87,3 +87,59 @@ ofMesh removeAndStitch(ofMesh& mesh, ofPolyline& removalRegion, vector<pair<ofIn
 	mergeCoincidentVertices(out);
 	return dropUnusedVertices(out);
 }
+
+bool isLeft(ofVec2f a, ofVec2f b, ofVec2f c){
+	return ((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) > 0;
+}
+
+void split(ofMesh& mesh, vector<ofIndexType>& indices) {
+	int n = mesh.getNumIndices();
+	vector<ofIndexType> newIndices;
+	for(int i = 0; i < indices.size(); i++) {
+		newIndices.push_back(mesh.getNumVertices());
+		mesh.addVertex(mesh.getVertex(indices[i]));
+	}
+	cout << ofToString(newIndices) << endl;
+	for(int i = 0; i < n; i += 3) {
+		ofIndexType i0 = mesh.getIndex(i + 0);
+		ofIndexType i1 = mesh.getIndex(i + 1);
+		ofIndexType i2 = mesh.getIndex(i + 2);
+		
+		for(int j = 0; j < indices.size(); j++) {
+			ofVec2f first, second, adjacent;
+			
+			int si = indices[j];
+			if(si == i0 || si == i1 || si == i2) {
+				int diffIndex;
+				if(si != i0) {
+					diffIndex = i0;
+				} else if(si != i1) {
+					diffIndex = i1;
+				} else if(si != i2) {
+					diffIndex = i2;
+				}
+				adjacent = mesh.getVertex(diffIndex);
+				
+				if(j + 1 < indices.size()) {
+					first = mesh.getVertex(indices[j]);
+					second = mesh.getVertex(indices[j + 1]);
+				} else {
+					first = mesh.getVertex(indices[j - 1]);
+					second = mesh.getVertex(indices[j]);
+				}
+				
+				if(isLeft(first, second, adjacent)) {
+					int sameIndex;
+					if(si == i0) {
+						sameIndex = 0;
+					} else if(si == i1) {
+						sameIndex = 1;
+					} else if(si == i2) {
+						sameIndex = 2;
+					}
+					mesh.setIndex(i + sameIndex, newIndices[j]);
+				}
+			}
+		}
+	}
+}
