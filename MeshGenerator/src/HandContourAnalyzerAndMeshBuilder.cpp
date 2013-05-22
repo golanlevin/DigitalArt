@@ -292,17 +292,51 @@ void HandContourAnalyzerAndMeshBuilder::process (ofPolyline inputContour, cv::Po
 
 	
 		// Search for the pinky side.
+		int contourIndexOfPinkySide = fingerTipIndicesTmp[ 0 ]; 
 		if (indexOfThumbCrotch == 3){ // right hand
-			int contourIndexOfPinkyTip   = fingerTipIndicesTmp[0];
+			
+			int nPointsOnContour = handContourNice.size(); 
+			int contourIndexOfPinkyTip       = fingerTipIndicesTmp[ 0 ];
 			int contourIndexOfPinkysideWrist = fingerTipIndicesTmp[ fingerTipIndicesTmp.size() - 1];
 			
-			if (contourIndexOfPinkysideWrist < contourIndexOfPinkyTip){
-				
-			
+			int startIndex = contourIndexOfPinkysideWrist;
+			int endIndex   = contourIndexOfPinkyTip;
+			if (contourIndexOfPinkyTip < contourIndexOfPinkysideWrist) {    // which it will almost never be
+				endIndex = contourIndexOfPinkysideWrist + nPointsOnContour; // thus exceeding the bounds; mod it later!
 			}
-			// search for the point on the contour
+			
+			// http://paulbourke.net/geometry/pointlineplane/ 
+			// Now search for the point on the contour (handContourNice)
 			// between contourIndexOfPinkyTip and contourIndexOfPinkysideWrist
-			// which is closest to the sideLine. 
+			// which is closest to the sideLine.
+			float leastDistance = 99999;
+			int   contourIndexOfLeastDistantPoint = max(0, startIndex-1);
+			
+			float spdx = sp2x - sp1x;
+			float spdy = sp2y - sp1y;
+			float spLineMag2 = spdx*spdx + spdy*spdy;
+			
+			for (int i=startIndex; i<endIndex; i++){
+				int safeIndex = i%nPointsOnContour;
+				ofVec2f aPoint = handContourNice[safeIndex];
+				float sp3x  = aPoint.x;
+				float sp3y  = aPoint.y;
+				float spu   = ((sp3x-sp1x)*(sp2x-sp1x) + (sp3y-sp1y)*(sp2y-sp1y)) / spLineMag2;
+				
+				// intersection point
+				float inx = sp1x + spu * (sp2x - sp1x);
+				float iny = sp1y + spu * (sp2y - sp1y);
+				float dist = ofDist (sp3x,sp3y, inx,iny);
+				
+				if (dist < leastDistance){
+					leastDistance = dist;
+					contourIndexOfLeastDistantPoint = safeIndex;
+				}
+			}
+			
+			contourIndexOfPinkySide = contourIndexOfLeastDistantPoint;
+			
+			
 		
 		} else {
 			// handle the left hand another day.
@@ -384,7 +418,9 @@ void HandContourAnalyzerAndMeshBuilder::process (ofPolyline inputContour, cv::Po
 		Handmarks[HANDMARK_PINKYSIDE_WRIST].point	= handContourNice [contourIndexOfPinkysideWrist];
 		Handmarks[HANDMARK_PINKYSIDE_WRIST].type	= HANDMARK_PINKYSIDE_WRIST;
 		
-		Handmarks[HANDMARK_PINKY_SIDE].type			= HANDMARK_INVALID;
+		Handmarks[HANDMARK_PINKY_SIDE].index		= contourIndexOfPinkySide;
+		Handmarks[HANDMARK_PINKY_SIDE].point		= handContourNice [contourIndexOfPinkySide];
+		Handmarks[HANDMARK_PINKY_SIDE].type			= HANDMARK_PINKY_SIDE;
 		
 	
 		
