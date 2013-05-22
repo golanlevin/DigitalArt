@@ -28,7 +28,7 @@ public:
 		WAVE, WIGGLE, WOBBLE, 
 		EQUALIZE, NORTH, LISSAJOUS,
 		MEANDER, PROP_WIGGLE, SIN_LENGTH,
-		PULSE_PALM
+		PULSE_PALM, RETRACTION
 	};
 
 	ofxUICanvas* gui;
@@ -41,14 +41,15 @@ public:
 	float propWiggleBaseAngleRange, propWiggleMidAngleRange, propWiggleTopAngleRange, propWiggleSpeedUp, propWigglePhaseOffset;
 	float sinLength, sinLengthPhaseOffset;
 	float pulseLength;
+	float retractHeight;
 
 	ofMesh mesh;
 	ofImage hand;
 	ofxPuppet puppet;
-	ThreePointSkeleton threePointSkeleton;
-	PalmSkeleton palmSkeleton;
-	HandSkeleton handSkeleton;
-	HandWithFingertipsSkeleton handWithFingertipsSkeleton;
+	ThreePointSkeleton threePointSkeleton, immutableThreePointSkeleton;
+	PalmSkeleton palmSkeleton, immutablePalmSkeleton;
+	HandSkeleton handSkeleton, immutableHandSkeleton;
+	HandWithFingertipsSkeleton handWithFingertipsSkeleton, immutableHandWithFingertipsSkeleton;
 	Skeleton* previousSkeleton, *currentSkeleton;
 	vector<string> sceneNames;
 };

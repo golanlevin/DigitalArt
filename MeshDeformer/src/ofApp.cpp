@@ -29,6 +29,8 @@ void ofApp::setup() {
 
 	pulseLength = 10;
 
+	retractHeight = 150;
+
 	mouseControl = false;
 	showImage = true;
 	showWireframe = false;
@@ -45,9 +47,13 @@ void ofApp::setup() {
 	previousSkeleton = NULL;
 	currentSkeleton = NULL;
 	handWithFingertipsSkeleton.setup(mesh);
+	immutableHandWithFingertipsSkeleton.setup(mesh);
 	handSkeleton.setup(mesh);
+	immutableHandSkeleton.setup(mesh);
 	threePointSkeleton.setup(mesh);
+	immutableThreePointSkeleton.setup(mesh);
 	palmSkeleton.setup(mesh);
+	immutablePalmSkeleton.setup(mesh);
 	setSkeleton(&handSkeleton);
 }
 
@@ -60,9 +66,10 @@ void ofApp::setupGui() {
 	sceneNames.push_back("North");
 	sceneNames.push_back("Lissajous");
 	sceneNames.push_back("Meander");
-	sceneNames.push_back("Propogating Wiggle");
+	sceneNames.push_back("Propagating Wiggle");
 	sceneNames.push_back("Sinusoidal Length");
 	sceneNames.push_back("Pulsating Palm");
+	sceneNames.push_back("Retracting Fingers");
 
 	vector<string> lissajousStyle;
 	lissajousStyle.push_back("Circle");
@@ -88,7 +95,7 @@ void ofApp::setupGui() {
 	gui->autoSizeToFitWidgets();
 	
 	// set the initial scene
-	sceneRadio->getToggles()[SIN_LENGTH]->setValue(true);
+	sceneRadio->getToggles()[RETRACTION]->setValue(true);
 
 	// create the scene specific guis
 	guis = new ofxUICanvas*[sceneNames.size()];
@@ -118,6 +125,8 @@ void ofApp::setupGui() {
 
 	guis[PULSE_PALM]->addSlider("Pulse Length", 5, 20, &pulseLength);
 
+	guis[RETRACTION]->addSlider("Retract Height", 0, 500, &retractHeight);
+
 	for (int i=0; i < sceneNames.size(); i++) {
 		guis[i]->autoSizeToFitWidgets();
 	}
@@ -136,16 +145,24 @@ int getSelection(ofxUIRadio* radio) {
 void ofApp::update() {
 	// every frame we get a new mesh from the hand tracker
 	handWithFingertipsSkeleton.setup(mesh);
+	immutableHandWithFingertipsSkeleton.setup(mesh);
 	handSkeleton.setup(mesh);
+	immutableHandSkeleton.setup(mesh);
 	threePointSkeleton.setup(mesh);
+	immutableThreePointSkeleton.setup(mesh);
 	palmSkeleton.setup(mesh);
+	immutablePalmSkeleton.setup(mesh);
 
 	if(mouseControl) {
 		ofVec2f mouse(mouseX, mouseY);
 		handWithFingertipsSkeleton.setPosition(HandWithFingertipsSkeleton::PALM, mouse, true);
+		immutableHandWithFingertipsSkeleton.setPosition(HandWithFingertipsSkeleton::PALM, mouse, true);
 		handSkeleton.setPosition(HandSkeleton::PALM, mouse, true);
+		immutableHandSkeleton.setPosition(HandSkeleton::PALM, mouse, true);
 		threePointSkeleton.setPosition(ThreePointSkeleton::PALM, mouse, true);
+		immutableThreePointSkeleton.setPosition(ThreePointSkeleton::PALM, mouse, true);
 		palmSkeleton.setPosition(PalmSkeleton::BASE, mouse, true);
+		immutablePalmSkeleton.setPosition(PalmSkeleton::BASE, mouse, true);
 	}
 
 	// get the current scene
@@ -315,6 +332,73 @@ void ofApp::update() {
 			palmSkeleton.setPosition(index, position, false, false);
 		}
 		setSkeleton(&palmSkeleton);
+	} else if(scene == RETRACTION) {
+		int palm = HandWithFingertipsSkeleton::PALM;
+		int tip[] = {HandWithFingertipsSkeleton::PINKY_TIP, HandWithFingertipsSkeleton::RING_TIP, HandWithFingertipsSkeleton::MIDDLE_TIP, HandWithFingertipsSkeleton::INDEX_TIP};
+		int top[] = {HandWithFingertipsSkeleton::PINKY_TOP, HandWithFingertipsSkeleton::RING_TOP, HandWithFingertipsSkeleton::MIDDLE_TOP, HandWithFingertipsSkeleton::INDEX_TOP};
+		int mid[] = {HandWithFingertipsSkeleton::PINKY_MID, HandWithFingertipsSkeleton::RING_MID, HandWithFingertipsSkeleton::MIDDLE_MID, HandWithFingertipsSkeleton::INDEX_MID};
+		int base[] = {HandWithFingertipsSkeleton::PINKY_BASE, HandWithFingertipsSkeleton::RING_BASE, HandWithFingertipsSkeleton::MIDDLE_BASE, HandWithFingertipsSkeleton::INDEX_BASE};
+
+		float tipRatio = 0.2;
+		float topRatio = 0.3;
+		float middleRatio = 0.5;
+		float bottomRatio = 1;
+		float fingerTot = tipRatio + topRatio + middleRatio + bottomRatio;
+
+		int fingerCount = 4;
+		for(int i = 0; i < fingerCount; i++) {
+			ofVec2f fingerTip = immutableHandWithFingertipsSkeleton.getPositionAbsolute(tip[i]);
+			if (fingerTip.y < retractHeight) {
+				ofVec2f fingerBase = immutableHandWithFingertipsSkeleton.getPositionAbsolute(palm);
+
+				float bigDx = fingerTip.x - fingerBase.x;
+				float bigDy = fingerTip.y - fingerBase.y;
+
+				float dy = retractHeight - fingerBase.y;
+				float dx = (dy * bigDx) / bigDy;
+
+				float maxLen = sqrt(dx*dx + dy*dy);
+
+				if (dy > 0) {
+					dy = 0; 
+					dx = 0;
+					maxLen = 0;
+				}
+
+				ofVec2f original;
+				ofVec2f parent;
+				ofVec2f position;
+		
+				original = immutableHandWithFingertipsSkeleton.getPositionAbsolute(tip[i]);
+				parent = immutableHandWithFingertipsSkeleton.getPositionAbsolute(top[i]);
+				position = original - parent;
+				position.normalize();
+				position *= (tipRatio/fingerTot) * maxLen;
+				handWithFingertipsSkeleton.setBoneLength(tip[i], position);
+
+				original = immutableHandWithFingertipsSkeleton.getPositionAbsolute(top[i]);
+				parent = immutableHandWithFingertipsSkeleton.getPositionAbsolute(mid[i]);
+				position = original - parent;
+				position.normalize();
+				position *= (topRatio/fingerTot) * maxLen;
+				handWithFingertipsSkeleton.setBoneLength(top[i], position);
+
+				original = immutableHandWithFingertipsSkeleton.getPositionAbsolute(mid[i]);
+				parent = immutableHandWithFingertipsSkeleton.getPositionAbsolute(base[i]);
+				position = original - parent;
+				position.normalize();
+				position *= (middleRatio/fingerTot) * maxLen;
+				handWithFingertipsSkeleton.setBoneLength(mid[i], position);
+
+				original = immutableHandWithFingertipsSkeleton.getPositionAbsolute(base[i]);
+				parent = immutableHandWithFingertipsSkeleton.getPositionAbsolute(palm);
+				position = original - parent;
+				position.normalize();
+				position *= (bottomRatio/fingerTot) * maxLen;
+				handWithFingertipsSkeleton.setBoneLength(base[i], position);
+			}	
+		}
+		setSkeleton(&handWithFingertipsSkeleton);
 	}
 
 	// we update the puppet using that skeleton
@@ -335,6 +419,12 @@ void ofApp::draw() {
 	}
 	if(showSkeleton) {
 		currentSkeleton->draw();
+	}
+
+	int scene = getSelection(sceneRadio);
+	if (scene == RETRACTION) {
+		ofSetColor(255);
+		ofLine(0, retractHeight, 768, retractHeight);
 	}
 }
 
