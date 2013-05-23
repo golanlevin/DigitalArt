@@ -28,12 +28,12 @@ public:
 		WAVE, WIGGLE, WOBBLE, 
 		EQUALIZE, NORTH, LISSAJOUS,
 		MEANDER, PROP_WIGGLE, SIN_LENGTH,
-		PULSE_PALM, RETRACTION
+		PULSE_PALM, RETRACTION, SIN_WIGGLE
 	};
 
 	ofxUICanvas* gui;
 	ofxUICanvas** guis;
-	ofxUIRadio* sceneRadio, *lissajousRadio;
+	ofxUIRadio* sceneRadio, *lissajousRadio, *sinusoidalWiggleRadio;
 	bool showImage, showWireframe, showSkeleton, mouseControl;
 	float equalizeLength;
 	float lissajousAmplitude, lissajousFrequency;
@@ -42,7 +42,7 @@ public:
 	float sinLength, sinLengthPhaseOffset;
 	float pulseLength;
 	float retractHeight, tipRatio, topRatio, middleRatio, bottomRatio;
-
+	float sinWiggleAngleRange, sinWiggleSpeedUp, sinWigglePhaseOffset;
 	ofMesh mesh;
 	ofImage hand;
 	ofxPuppet puppet;

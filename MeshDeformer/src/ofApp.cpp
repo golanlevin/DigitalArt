@@ -35,6 +35,10 @@ void ofApp::setup() {
 	middleRatio = 0.5;
 	bottomRatio = 1;
 
+	sinWiggleAngleRange = 45;
+	sinWiggleSpeedUp = 2;
+	sinWigglePhaseOffset = 0.5;
+
 	mouseControl = false;
 	showImage = true;
 	showWireframe = false;
@@ -74,6 +78,7 @@ void ofApp::setupGui() {
 	sceneNames.push_back("Sinusoidal Length");
 	sceneNames.push_back("Pulsating Palm");
 	sceneNames.push_back("Retracting Fingers");
+	sceneNames.push_back("Sinusoidal Wiggle");
 
 	vector<string> lissajousStyle;
 	lissajousStyle.push_back("Circle");
@@ -82,6 +87,11 @@ void ofApp::setupGui() {
 	lissajousStyle.push_back("Bow tie");
 	lissajousStyle.push_back("Vertical line");
 	
+	vector<string> sinusoidalWiggleJoint;
+	sinusoidalWiggleJoint.push_back("Base");
+	sinusoidalWiggleJoint.push_back("Mid");
+	sinusoidalWiggleJoint.push_back("Top");
+
 	// create the main gui
 	gui = new ofxUICanvas();
 	gui->setFont("GUI/NewMedia Fett.ttf"); 
@@ -99,7 +109,7 @@ void ofApp::setupGui() {
 	gui->autoSizeToFitWidgets();
 	
 	// set the initial scene
-	sceneRadio->getToggles()[PULSE_PALM]->setValue(true);
+	sceneRadio->getToggles()[SIN_WIGGLE]->setValue(true);
 
 	// create the scene specific guis
 	guis = new ofxUICanvas*[sceneNames.size()];
@@ -115,6 +125,7 @@ void ofApp::setupGui() {
 	guis[LISSAJOUS]->addSlider("Lissajous Amplitude", 0, 100, &lissajousAmplitude);
 	guis[LISSAJOUS]->addSlider("Lissajous Frequency", 0, 5, &lissajousFrequency);
 	lissajousRadio = guis[LISSAJOUS]->addRadio("Lissajous Style", lissajousStyle);
+	lissajousRadio->getToggles()[0]->setValue(true);
 
 	guis[MEANDER]->addSlider("Meander", 0, 60, &meanderAmount);
 
@@ -134,6 +145,12 @@ void ofApp::setupGui() {
 	guis[RETRACTION]->addSlider("Top Ratio", 0, 1, &topRatio);
 	guis[RETRACTION]->addSlider("Middle Ratio", 0, 1, &middleRatio);
 	guis[RETRACTION]->addSlider("Bottom Ratio", 0, 1, &bottomRatio);
+
+	guis[SIN_WIGGLE]->addSlider("Angle Range", 5, 85, &sinWiggleAngleRange);
+	guis[SIN_WIGGLE]->addSlider("Speed Up", 1, 5, &sinWiggleSpeedUp);
+	guis[SIN_WIGGLE]->addSlider("Phase Offset", 0, 1, &sinWigglePhaseOffset);
+	sinusoidalWiggleRadio = guis[SIN_WIGGLE]->addRadio("Wiggle Joint", sinusoidalWiggleJoint);
+	sinusoidalWiggleRadio->getToggles()[0]->setValue(true);
 
 	for (int i=0; i < sceneNames.size(); i++) {
 		guis[i]->autoSizeToFitWidgets();
@@ -401,6 +418,34 @@ void ofApp::update() {
 				position *= (bottomRatio/fingerTot) * maxLen;
 				handWithFingertipsSkeleton.setBoneLength(base[i], position);
 			}	
+		}
+		setSkeleton(&handWithFingertipsSkeleton);
+	} else if(scene == SIN_WIGGLE) {
+		int base[] = {HandWithFingertipsSkeleton::PINKY_BASE, HandWithFingertipsSkeleton::RING_BASE, HandWithFingertipsSkeleton::MIDDLE_BASE, HandWithFingertipsSkeleton::INDEX_BASE, HandWithFingertipsSkeleton::THUMB_BASE};
+		int mid[] = {HandWithFingertipsSkeleton::PINKY_MID, HandWithFingertipsSkeleton::RING_MID, HandWithFingertipsSkeleton::MIDDLE_MID, HandWithFingertipsSkeleton::INDEX_MID, HandWithFingertipsSkeleton::THUMB_MID};
+		int top[] = {HandWithFingertipsSkeleton::PINKY_TOP, HandWithFingertipsSkeleton::RING_TOP, HandWithFingertipsSkeleton::MIDDLE_TOP, HandWithFingertipsSkeleton::INDEX_TOP, HandWithFingertipsSkeleton::THUMB_TOP};
+			
+		int* toWiggle;
+		int toWiggleCount = 5;
+		switch(getSelection(sinusoidalWiggleRadio)) {
+			case 0: // base
+				toWiggle = base;
+				break;
+			case 1: // mid
+				toWiggle = mid;
+				break;
+			case 2: // top
+				toWiggle = top;
+				break;
+		}
+		
+		for (int i=0; i < toWiggleCount; i++) {
+			float phaseOffset = i*sinWigglePhaseOffset + i;
+
+			int index = toWiggle[i];
+			ofVec2f original = puppet.getOriginalMesh().getVertex(index);
+			float theta = ofMap(sin(sinWiggleSpeedUp*ofGetElapsedTimef() + phaseOffset), -1, 1, -(sinWiggleAngleRange/2.0), sinWiggleAngleRange/2.0);
+			handWithFingertipsSkeleton.setRotation(index, theta, false, false);
 		}
 		setSkeleton(&handWithFingertipsSkeleton);
 	}
