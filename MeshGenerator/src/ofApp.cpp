@@ -51,9 +51,9 @@ void ofApp::setupGui() {
 	gui->addSlider("ContourSmoothing", 0.0, 50.0,&(HCAAMB.contourSmoothingSize));
 	gui->addSlider("ContourResampling", 1.0, 20.0, &(HCAAMB.contourResampleSpacing));
 	gui->addSpacer();
-	gui->addSlider("Sample offset", 1, 40, &(HCAAMB.sampleOffset));
-	gui->addSlider("Crotch angle cutoff", -150, 0, &(HCAAMB.crotchAngleCutoff));
-	gui->addSlider("Crotch neighbor distance", 0, 100, &(HCAAMB.crotchNeighborDistance));
+	//gui->addSlider("Sample offset", 1, 40, &(HCAAMB.sampleOffset));
+	//gui->addSlider("Peak angle cutoff", -150, 0, &(HCAAMB.peakAngleCutoff));
+	//gui->addSlider("Peak neighbor distance", 0, 100, &(HCAAMB.peakNeighborDistance));
 	gui->addSlider("MinLaplaceEdgeStrength", 1, 255, &minLaplaceEdgeStrength);
 	
 	
