@@ -41,7 +41,7 @@ public:
 	float propWiggleBaseAngleRange, propWiggleMidAngleRange, propWiggleTopAngleRange, propWiggleSpeedUp, propWigglePhaseOffset;
 	float sinLength, sinLengthPhaseOffset;
 	float pulseLength;
-	float retractHeight;
+	float retractHeight, tipRatio, topRatio, middleRatio, bottomRatio;
 
 	ofMesh mesh;
 	ofImage hand;

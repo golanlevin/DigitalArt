@@ -30,6 +30,10 @@ void ofApp::setup() {
 	pulseLength = 10;
 
 	retractHeight = 150;
+	tipRatio = 0.2;
+	topRatio = 0.3;
+	middleRatio = 0.5;
+	bottomRatio = 1;
 
 	mouseControl = false;
 	showImage = true;
@@ -95,7 +99,7 @@ void ofApp::setupGui() {
 	gui->autoSizeToFitWidgets();
 	
 	// set the initial scene
-	sceneRadio->getToggles()[RETRACTION]->setValue(true);
+	sceneRadio->getToggles()[PULSE_PALM]->setValue(true);
 
 	// create the scene specific guis
 	guis = new ofxUICanvas*[sceneNames.size()];
@@ -126,6 +130,10 @@ void ofApp::setupGui() {
 	guis[PULSE_PALM]->addSlider("Pulse Length", 5, 20, &pulseLength);
 
 	guis[RETRACTION]->addSlider("Retract Height", 0, 500, &retractHeight);
+	guis[RETRACTION]->addSlider("Tip Ratio", 0, 1, &tipRatio);
+	guis[RETRACTION]->addSlider("Top Ratio", 0, 1, &topRatio);
+	guis[RETRACTION]->addSlider("Middle Ratio", 0, 1, &middleRatio);
+	guis[RETRACTION]->addSlider("Bottom Ratio", 0, 1, &bottomRatio);
 
 	for (int i=0; i < sceneNames.size(); i++) {
 		guis[i]->autoSizeToFitWidgets();
@@ -339,10 +347,6 @@ void ofApp::update() {
 		int mid[] = {HandWithFingertipsSkeleton::PINKY_MID, HandWithFingertipsSkeleton::RING_MID, HandWithFingertipsSkeleton::MIDDLE_MID, HandWithFingertipsSkeleton::INDEX_MID};
 		int base[] = {HandWithFingertipsSkeleton::PINKY_BASE, HandWithFingertipsSkeleton::RING_BASE, HandWithFingertipsSkeleton::MIDDLE_BASE, HandWithFingertipsSkeleton::INDEX_BASE};
 
-		float tipRatio = 0.2;
-		float topRatio = 0.3;
-		float middleRatio = 0.5;
-		float bottomRatio = 1;
 		float fingerTot = tipRatio + topRatio + middleRatio + bottomRatio;
 
 		int fingerCount = 4;
