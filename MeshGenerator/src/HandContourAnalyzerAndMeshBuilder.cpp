@@ -7,388 +7,67 @@
 HandContourAnalyzerAndMeshBuilder::HandContourAnalyzerAndMeshBuilder (){
 	
 	/*
-	ofPolyline	handContourRaw;
-	ofPolyline	handContour1;
-	ofPolyline	handContour2;
-	
-	
 	vector <int>	joints;
 	ofMesh			handMesh;
 	 */
 	
-	bCalculatedMesh = false;
-	contourResampleSpacing = 2.0;
-	contourSmoothingSize   = 20.0;
+	currentHandType			= HAND_NONE;
+	bCalculatedMesh			= false;
+	contourResampleSpacing	= 2.0;
+	contourSmoothingSize	= 20.0;
 	
-	sampleOffset = 8;
-	peakAngleCutoff = 14;
-	peakNeighborDistance = 32;
+	sampleOffset			= 8;
+	peakAngleCutoff			= 14;
+	peakNeighborDistance	= 32;
 	
-	crotchAngleCutoff = -40;
-	crotchNeighborDistance = 40;
+	crotchAngleCutoff		= -40;
+	crotchNeighborDistance	= 40;
+	maxNCrotchesToConsider	= 4;
 	
-	eigenData.orientation = 0;
-	eigenData.eigenValue = 0;
+	eigenData.orientation	= 0;
+	eigenData.eigenValue	= 0;
 	
+	contourIndexOfPalmBase  = 0;
+	contourIndexOfThumbKnuckle = 0;
 	
 }
 
-//============================================================
-void HandContourAnalyzerAndMeshBuilder::setContourFilterValues(float r, float s){
-	contourResampleSpacing = r;
-	contourSmoothingSize   = s;
-}
+
 
 
 //============================================================
 void HandContourAnalyzerAndMeshBuilder::process (ofPolyline inputContour, cv::Point2f inputCentroid){
+	
+	currentHandType	= HAND_NONE;
 	if (inputContour.size() > 0){
 		
-		// Clear the main output Mesh, and copy in the new information (contour and centroid). 
-		handMesh.clear();
-		handContourRaw = inputContour;
-		handCentroid.set(inputCentroid.x, inputCentroid.y);
+		// Compute smoothed and resampled contours, the globals:
+		// handContourResampled, handContourNice, handContourFiltered
+		prepareContours (inputContour, inputCentroid);
+		
+		// Compute (sorted) fingertips into fingerTipPoints and fingerTipContourIndices.
+		// Also computes handContourFilteredCurvatures.
+		locateFingerTips();
+		
+		// Locate (unsorted) finger valleys, into fingerCrotchPointsTmp & handContourCrotchIndicesTmp
+		locateFingerCrotches();
 	
-		// handContourFiltered is handContourRaw resampled, then smoothed, then resampled.
-		handContourResampled= handContourRaw.getResampledBySpacing(2.0);
-		handContourNice		= handContourResampled.getSmoothed(5.0);
-		handContour1        = handContourResampled.getSmoothed(contourSmoothingSize);
-		handContourFiltered = handContour1.getResampledBySpacing(contourResampleSpacing);
-		
-		// compute handRadius;
-		handRadius = computeHandRadius (handContourFiltered);
-		
-		
-		
-		//--------------------------------------
-		// FIND FINGER TIPS
-		// Cache the local curvatures; find peaks. 
-		handContourFilteredCurvatures = buildCurvatureAnalysis (handContourFiltered, sampleOffset);
-		handContourFilteredTipIndices = findPeaks (handContourFilteredCurvatures, peakAngleCutoff, peakNeighborDistance);
-		
-		// Store the indices of fingertips on the filtered contour.
-		// Only select those > some min distance from centroid.
-		// Note that peaks are already sorted in descending order of quality. 
-		fingerTipPointsFiltered.clear();
-		int maxNPeaksToConsider = 10;
-		float minFingerTipDistanceFromCentroid = handRadius * 0.5;
-		
-		for (int i = 0; i < handContourFilteredTipIndices.size(); i++) {
-			int indexOfPossibleFingerTip = handContourFilteredTipIndices[i];
-			ofVec2f aPossibleFingerTip = handContourFiltered [ indexOfPossibleFingerTip ];
-			float distanceFromCentroid = aPossibleFingerTip.distance(handCentroid);
-			if ((distanceFromCentroid > minFingerTipDistanceFromCentroid) &&
-				(fingerTipPointsFiltered.size() < maxNPeaksToConsider)){
-				fingerTipPointsFiltered.push_back (aPossibleFingerTip);
-			}
-		}
-
-		
-		// Find the points on handContourNice which are closest
-		// to the likely fingerTips in handContourFiltered.
-		fingerTipPointsTmp.clear();
-		fingerTipIndicesTmp.clear();
-		for (int i=0; i<fingerTipPointsFiltered.size(); i++){
+		// Reckon which crotch is the thumb's, and thus assign currentHandType
+		identifyThumbCrotchAndHandType(); 
+		if (currentHandType > HAND_NONE){
 			
-			bool bStashInterpolatedPoints = false;
-			if (bStashInterpolatedPoints){
-				// was nice, but is no longer used. 
-				ofPoint closestOriginal = handContourNice.getClosestPoint( fingerTipPointsFiltered[i] );
-				fingerTipPointsTmp.push_back (closestOriginal);
-				
-			} else {
-				// we store original, not interpolated points, because we need the indices.
-				int indexOfClosest = 0;
-				float minDistance = 99999;
-				ofVec2f winningFilteredPoint = fingerTipPointsFiltered[i];
-				
-				for (int j=0; j<handContourNice.size(); j++){
-					ofVec2f pointOnNiceContour = handContourNice[j];
-					float ijDist = ofDist(winningFilteredPoint.x, winningFilteredPoint.y,
-										  pointOnNiceContour.x, pointOnNiceContour.y);
-					if (ijDist < minDistance){
-						minDistance = ijDist;
-						indexOfClosest = j;
-					}
-				}
-				fingerTipPointsTmp.push_back ( handContourNice[indexOfClosest] );
-				fingerTipIndicesTmp.push_back( indexOfClosest);
-			}
-		}
-		
-		
-		// Sort the fingerTipIndicesTmp by the angle around the centroid.
-		vector< pair<float, int> > fingertipAngleIndexPairs;
-		for (int i=0; i<fingerTipIndicesTmp.size(); i++){
-			int indexInHandContourNice = fingerTipIndicesTmp[i];
+			// Obtain the "side line" which transects the hand, to find pointer & pinky side corners. 
+			computeHandOrientationAndSideLine();
 			
-			ofVec2f a = handContourNice [indexInHandContourNice];
-			ofVec2f b = handCentroid;
-			ofVec2f c = ofVec2f(100, 0);
-			a -= b;
-			float angle = a.angle(c);
-			angle = (angle < 0)? angle + 360: angle;
-			// push pairs of (angle, index):
-			fingertipAngleIndexPairs.push_back (pair<float, int> (angle, indexInHandContourNice));
-		}
-		ofSort (fingertipAngleIndexPairs);
-		 
-		// reshuffle the fingerTipIndicesTmp based on that sorting. 
-		fingerTipIndicesTmp.clear();
-		for (int i=0; i<fingertipAngleIndexPairs.size(); i++){
-			int indexOfSortedFingertip = fingertipAngleIndexPairs[i].second;
-			fingerTipIndicesTmp.push_back (indexOfSortedFingertip);
-		}
-		
-				
-		
-		//--------------------------------------
-		// FIND FINGER CROTCHES
-		handContourCurvatures = buildCurvatureAnalysis (handContourNice, sampleOffset);
-		handContourPossibleCrotchIndices = findCrotches (handContourCurvatures, crotchAngleCutoff, crotchNeighborDistance);
-		
-		fingerCrotchPointsTmp.clear();
-		handContourCrotchIndicesTmp.clear();
-		int maxNCrotchesToConsider = 4;
-		float maxCrotchDistanceFromCentroid = handRadius * 0.666;
-		
-		// Filter the possible crotches by quantity, distance from the centroid
-		for (int i = 0; i < handContourPossibleCrotchIndices.size(); i++) {
-			int indexOfPossibleCrotch = handContourPossibleCrotchIndices[i];
-			ofVec2f aPossibleCrotch = handContourNice [ indexOfPossibleCrotch ];
-			float distanceFromCentroid = aPossibleCrotch.distance(handCentroid);
-			if ((distanceFromCentroid < maxCrotchDistanceFromCentroid) &&
-				(fingerCrotchPointsTmp.size() < maxNCrotchesToConsider)){
-				 fingerCrotchPointsTmp.push_back       (aPossibleCrotch);
-				 handContourCrotchIndicesTmp.push_back (indexOfPossibleCrotch);
-			}
-		}
-		
-		
-		//--------------------------------------
-		// IDENTIFY WHICH IS THE THUMB CROTCH.
-		// SORT THE CROTCHES BY THEIR POSITION ALONG A LINE
-	
-		
-		// http://faculty.cs.niu.edu/~hutchins/csci230/best-fit.htm
-		// find the line that approximates the crotches.
-		// Formula Y = Slope * X + YInt
-		float SumX = 0;  // sum of all the X values
-		float SumY = 0;  //sum of all the Y values
-		float SumX2 = 0; //sum of the squares of the X values
-		float SumXY = 0; //sum of the products X*Y for all the points
-		int Count = maxNCrotchesToConsider;
-		for (int i=0; i<Count; i++){
-			ofVec2f pointi = fingerCrotchPointsTmp[i];
-			SumX  += pointi.x;
-			SumY  += pointi.y;
-			SumX2 += (pointi.x * pointi.x);
-			SumXY += (pointi.x * pointi.y);
-		}
-		float XMean = SumX / (float) Count;
-		float YMean = SumY / (float) Count;
-		float Slope = (SumXY - SumX * YMean) / (SumX2 - SumX * XMean);
-		float YInt  = YMean - Slope * XMean;
-		crotchLineSlope     = Slope;
-		crotchLineIntercept = YInt;
-		
-		//--------
-		// Compute the coordinates of the line which fits the four crotches
-		float x1 = -99999;
-		float x2 =  99999;
-		for (int i=0; i<fingerCrotchPointsTmp.size(); i++){
-			float ftx = fingerCrotchPointsTmp[i].x;
-			if (ftx > x1){ x1 = ftx; }
-			if (ftx < x2){ x2 = ftx; }
-		}
-		float y1 = crotchLineSlope * x1 + crotchLineIntercept;
-		float y2 = crotchLineSlope * x2 + crotchLineIntercept;
-		float dx = x2 - x1;
-		float dy = y2 - y1;
-		float LineMag2 = dx*dx + dy*dy;
-		
-		//--------
-		// Using the code to find the nearest point on a line,
-		// find the parametrization u for each point on that line.
-		// http://paulbourke.net/geometry/pointlineplane/
-		// Then we will sort them by this parameter u.
-		vector< pair<float, int> > crotchParametrizationIndexPairs;
-		for (int i=0; i<fingerCrotchPointsTmp.size(); i++){
-			float x3  = fingerCrotchPointsTmp[i].x;
-			float y3  = fingerCrotchPointsTmp[i].y;
-			float  u  = ((x3-x1)*(x2-x1) + (y3-y1)*(y2-y1)) / LineMag2;
-			// push pairs of (parametrizations, index): 
-			int indexInHandContourNice = handContourCrotchIndicesTmp[i];
-			crotchParametrizationIndexPairs.push_back (pair<float, int> (u, indexInHandContourNice));
-		}
-		ofSort (crotchParametrizationIndexPairs);
-		
-		
-		fingerCrotchPoints.clear();
-		handContourCrotchIndicesSorted.clear();
-		for (int i=0; i<crotchParametrizationIndexPairs.size(); i++){
-			int indexOfSortedCrotch = crotchParametrizationIndexPairs[i].second;
-			ofVec2f aSortedCrotch = handContourNice [ indexOfSortedCrotch ];
-			handContourCrotchIndicesSorted.push_back (indexOfSortedCrotch);
-			fingerCrotchPoints.push_back (aSortedCrotch);
-		}
-		
-		// score the crotches by their distance to the centroid, and to each other.
-		// The highest score is most likely the thumb.
-		float scores[maxNCrotchesToConsider];
-		for (int i=0; i<maxNCrotchesToConsider; i++){ scores[i] = 1.0; }
-		for (int i=0; i<maxNCrotchesToConsider; i++){
-			ofVec2f pointi = fingerCrotchPoints[i];
-			float icDist = ofDist(pointi.x, pointi.y, handCentroid.x, handCentroid.y);
-			scores[i] *= icDist / handRadius;
-			for (int j=0; j<maxNCrotchesToConsider; j++){
-				if (j != i){
-					ofVec2f pointj = fingerCrotchPoints[j];
-					float ijDist = ofDist(pointi.x, pointi.y,  pointj.x, pointj.y);
-					scores[i] *= ijDist / handRadius;
-				}
-			}
-		}
-		// in fingerCrotchPoints, which one (of the four, 0,1,2,3, is the thumb?
-		int indexOfThumbCrotch = 0;
-		float maxScore = 0;
-		for (int i=0; i< maxNCrotchesToConsider; i++){
-			if (scores[i] > maxScore){
-				maxScore = scores[i];
-				indexOfThumbCrotch = i;
-			}
-		}
-		
-		
-		
-		// totally temp!!:
-		fingerTipPoints.clear();
-		for (int i=0; i<fingerTipIndicesTmp.size(); i++){
-			int indexOfSortedFingertip = fingerTipIndicesTmp[i]; //fingertipAngleIndexPairs[i].second;
-			ofVec2f aSortedFingertip = handContourNice [ indexOfSortedFingertip ];
-			fingerTipPoints.push_back (aSortedFingertip);
-		}
-		
-		
-
-		
-		
-		
-		//--------------------------------------
-		// FIND THE POINTER & PINKY SIDES -- BY FINDING THE ORIENTATION OF THE HAND
-		float handOrientation = getOrientation (handContourNice.getVertices(), handCentroid);
-		
-		float dq = handRadius * 0.10;
-		float qx = handCentroid.x + dq * sinf(handOrientation);
-		float qy = handCentroid.y + dq * cosf(handOrientation);
-		
-		float sp1x = qx - handRadius * cosf(handOrientation);
-		float sp1y = qy + handRadius * sinf(handOrientation);
-		float sp2x = qx + handRadius * cosf(handOrientation);
-		float sp2y = qy - handRadius * sinf(handOrientation);
-		sideLineP1.set(sp1x, sp1y);
-		sideLineP2.set(sp2x, sp2y);
-		
-
-	
-		// Search for the pinky side.
-		if (indexOfThumbCrotch == 3){ // right hand
-			int contourIndexOfPinkyTip   = fingerTipIndicesTmp[0];
-			int contourIndexOfPinkysideWrist = fingerTipIndicesTmp[ fingerTipIndicesTmp.size() - 1];
+			// Locate the pinky & pointer sides, store in contourIndexOfPinkySide & contourIndexOfPointerSide
+			locatePinkySide();
+			locatePointerSide();
+			locateThumbBase();
+			locatePalmBase();
+			locateThumbKnuckle();
 			
-			if (contourIndexOfPinkysideWrist < contourIndexOfPinkyTip){
-				
-			
-			}
-			// search for the point on the contour
-			// between contourIndexOfPinkyTip and contourIndexOfPinkysideWrist
-			// which is closest to the sideLine. 
-		
-		} else {
-			// handle the left hand another day.
-		
+			assembleHandmarks();
 		}
-		
-		
-		
-		
-		//--------------------------------------
-		// ASSEMBLE HANDMARKS
-		// Assumes indexOfThumbCrotch == 3 ! >> RIGHT HANDS ONLY FOR NOW
-		// Assume nFingerTipIndices >= 7!
-		
-		int nFingerTipIndices = fingerTipIndicesTmp.size();
-		int contourIndexOfPinkyTip   = fingerTipIndicesTmp[0];
-		int contourIndexOfRingTip    = fingerTipIndicesTmp[1];
-		int contourIndexOfMiddleTip  = fingerTipIndicesTmp[2];
-		int contourIndexOfPointerTip = fingerTipIndicesTmp[3];
-		int contourIndexOfThumbTip   = fingerTipIndicesTmp[4];
-		
-		int contourIndexOfPRCrotch	 = handContourCrotchIndicesSorted[0];
-		int contourIndexOfRMCrotch	 = handContourCrotchIndicesSorted[1];
-		int contourIndexOfMICrotch	 = handContourCrotchIndicesSorted[2];
-		int contourIndexOfITCrotch	 = handContourCrotchIndicesSorted[3];
-		
-		int contourIndexOfPinkysideWrist = fingerTipIndicesTmp[nFingerTipIndices - 1];
-		int contourIndexOfThumbsideWrist = fingerTipIndicesTmp[nFingerTipIndices - 2];
-		
-		if (indexOfThumbCrotch != 3){
-			; // then we have a left hand; deal with it later. // reverse everything
-		} 
-	
-		Handmarks[HANDMARK_PINKY_TIP].index			= contourIndexOfPinkyTip;
-		Handmarks[HANDMARK_PINKY_TIP].point			= handContourNice [contourIndexOfPinkyTip];
-		Handmarks[HANDMARK_PINKY_TIP].type			= HANDMARK_PINKY_TIP;
-		
-		Handmarks[HANDMARK_PR_CROTCH].index			= contourIndexOfPRCrotch;
-		Handmarks[HANDMARK_PR_CROTCH].point			= handContourNice [contourIndexOfPRCrotch];
-		Handmarks[HANDMARK_PR_CROTCH].type			= HANDMARK_PR_CROTCH;
-		
-		Handmarks[HANDMARK_RING_TIP].index			= contourIndexOfRingTip;
-		Handmarks[HANDMARK_RING_TIP].point			= handContourNice [contourIndexOfRingTip];
-		Handmarks[HANDMARK_RING_TIP].type			= HANDMARK_RING_TIP;
-		
-		Handmarks[HANDMARK_RM_CROTCH].index			= contourIndexOfRMCrotch;
-		Handmarks[HANDMARK_RM_CROTCH].point			= handContourNice [contourIndexOfRMCrotch];
-		Handmarks[HANDMARK_RM_CROTCH].type			= HANDMARK_RM_CROTCH;
-		
-		Handmarks[HANDMARK_MIDDLE_TIP].index		= contourIndexOfMiddleTip;
-		Handmarks[HANDMARK_MIDDLE_TIP].point		= handContourNice [contourIndexOfMiddleTip];
-		Handmarks[HANDMARK_MIDDLE_TIP].type			= HANDMARK_MIDDLE_TIP;
-		
-		Handmarks[HANDMARK_MI_CROTCH].index			= contourIndexOfMICrotch;
-		Handmarks[HANDMARK_MI_CROTCH].point			= handContourNice [contourIndexOfMICrotch];
-		Handmarks[HANDMARK_MI_CROTCH].type			= HANDMARK_MI_CROTCH;
-		
-		Handmarks[HANDMARK_POINTER_TIP].index		= contourIndexOfPointerTip;
-		Handmarks[HANDMARK_POINTER_TIP].point		= handContourNice [contourIndexOfPointerTip];
-		Handmarks[HANDMARK_POINTER_TIP].type		= HANDMARK_POINTER_TIP;
-		
-		Handmarks[HANDMARK_POINTER_SIDE].type		= HANDMARK_INVALID;
-		
-		Handmarks[HANDMARK_IT_CROTCH].index			= contourIndexOfITCrotch;
-		Handmarks[HANDMARK_IT_CROTCH].point			= handContourNice [contourIndexOfITCrotch];
-		Handmarks[HANDMARK_IT_CROTCH].type			= HANDMARK_IT_CROTCH;
-		
-		Handmarks[HANDMARK_THUMB_TIP].index			= contourIndexOfThumbTip;
-		Handmarks[HANDMARK_THUMB_TIP].point			= handContourNice [contourIndexOfThumbTip];
-		Handmarks[HANDMARK_THUMB_TIP].type			= HANDMARK_THUMB_TIP;
-		
-		Handmarks[HANDMARK_THUMB_BASE].type			= HANDMARK_INVALID;
-		
-		Handmarks[HANDMARK_THUMBSIDE_WRIST].index	= contourIndexOfThumbsideWrist;
-		Handmarks[HANDMARK_THUMBSIDE_WRIST].point	= handContourNice [contourIndexOfThumbsideWrist];
-		Handmarks[HANDMARK_THUMBSIDE_WRIST].type	= HANDMARK_THUMBSIDE_WRIST;
-		
-		Handmarks[HANDMARK_PINKYSIDE_WRIST].index	= contourIndexOfPinkysideWrist;
-		Handmarks[HANDMARK_PINKYSIDE_WRIST].point	= handContourNice [contourIndexOfPinkysideWrist];
-		Handmarks[HANDMARK_PINKYSIDE_WRIST].type	= HANDMARK_PINKYSIDE_WRIST;
-		
-		Handmarks[HANDMARK_PINKY_SIDE].type			= HANDMARK_INVALID;
-		
-	
-		
-		
 		
 		
 		//--------------------------------------
@@ -414,10 +93,15 @@ float HandContourAnalyzerAndMeshBuilder::computeHandRadius (ofPolyline aPolyline
 
 //============================================================
 void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
-	ofPushStyle();
-	ofSetLineWidth(1.0);
 	
-	ofSetColor(0,150,0);
+	ofPushStyle();
+	bool bDrawFilteredContour = false;
+	bool bDrawHandmarksOutline = true;
+	bool bDrawHandmarks = true;
+	
+
+	ofSetLineWidth(1.0);
+	ofSetColor(0,255,0);
 	handContourNice.draw();
 	
 	ofFill();
@@ -438,18 +122,29 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 	
 	// ----------------
 	// DRAW HANDMARKS!
-	ofNoFill();
-	ofSetColor(255,0,255);
-	ofBeginShape();
-	for (int i=0; i<N_HANDMARKS; i++){
-		if (Handmarks[i].type != HANDMARK_INVALID){
-			float hx = Handmarks[i].point.x;
-			float hy = Handmarks[i].point.y;
-			// ofEllipse(hx, hy, 30,30);
-			ofVertex(hx,hy); 
+	if (bDrawHandmarksOutline){
+		ofNoFill();
+		ofSetColor(255,0,255);
+		ofBeginShape();
+		for (int i=0; i<N_HANDMARKS; i++){
+			if (Handmarks[i].type != HANDMARK_INVALID){
+				float hx = Handmarks[i].point.x;
+				float hy = Handmarks[i].point.y;
+				// ofEllipse(hx, hy, 30,30);
+				ofVertex(hx,hy); 
+			}
+		}
+		ofEndShape(OF_CLOSE);
+	}
+	if (bDrawHandmarks){
+		for (int i=0; i<N_HANDMARKS; i++){
+			if (Handmarks[i].type != HANDMARK_INVALID){
+				float hx = Handmarks[i].point.x;
+				float hy = Handmarks[i].point.y;
+				ofEllipse(hx, hy, 20,20);
+			}
 		}
 	}
-	ofEndShape(OF_CLOSE);
 	
 	
 	
@@ -468,11 +163,12 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 	
 	
 	
-	
-	
-	ofNoFill();
-	ofSetColor(255,100,0);
-	handContourFiltered.draw();
+
+	if (bDrawFilteredContour){
+		ofNoFill();
+		ofSetColor(255,100,0);
+		handContourFiltered.draw();
+	}
 
 	
 	float cx = handCentroid.x;
@@ -638,7 +334,7 @@ void HandContourAnalyzerAndMeshBuilder::drawJoints(){
 
 //============================================================
 void HandContourAnalyzerAndMeshBuilder::drawMousePoint (float mx){
-	int nCurvatures = handContourCurvatures.size();
+	int nCurvatures = handContourNiceCurvatures.size();
 	if (nCurvatures > 0){
 		int whichCurvatureIndex = ((int)(mx))%nCurvatures;
 		ofVec2f aPoint = handContourResampled [ whichCurvatureIndex ];
@@ -757,6 +453,681 @@ void HandContourAnalyzerAndMeshBuilder::calcEigenvector (float matrix_00, float 
 }
 
 
+//============================================================
+void HandContourAnalyzerAndMeshBuilder::prepareContours (ofPolyline inputContour, cv::Point2f inputCentroid){
+	
+	// Clear the main output Mesh, and copy in the new information (contour and centroid).
+	handMesh.clear();
+	handContourRaw = inputContour;
+	handCentroid.set(inputCentroid.x, inputCentroid.y);
+	
+	// handContourFiltered is handContourRaw resampled, then smoothed, then resampled.
+	handContourResampled	= handContourRaw.getResampledByCount(DESIRED_N_CONTOUR_POINTS);//Spacing(2.0); //
+	handContourNice			= handContourResampled.getSmoothed(5.0);
+	handContour1			= handContourResampled.getSmoothed(contourSmoothingSize);
+	handContourFiltered		= handContour1.getResampledByCount(DESIRED_N_CONTOUR_POINTS);
+	
+	// compute handRadius;
+	handRadius = computeHandRadius (handContourFiltered);	
+}
+
+
+//============================================================
+void HandContourAnalyzerAndMeshBuilder::locateFingerTips(){
+	
+	
+	// FIND FINGER TIPS
+	// Cache the local curvatures; find peaks.
+	handContourFilteredCurvatures = buildCurvatureAnalysis (handContourFiltered, sampleOffset);
+	handContourFilteredTipIndices = findPeaks (handContourFilteredCurvatures, peakAngleCutoff, peakNeighborDistance);
+	
+	// Store the indices of fingertips on the filtered contour.
+	// Only select those > some min distance from centroid.
+	// Note that peaks are already sorted in descending order of quality.
+	fingerTipPointsFiltered.clear();
+	int maxNPeaksToConsider = 10;
+	float minFingerTipDistanceFromCentroid = handRadius * 0.5;
+	
+	for (int i = 0; i < handContourFilteredTipIndices.size(); i++) {
+		int indexOfPossibleFingerTip = handContourFilteredTipIndices[i];
+		ofVec2f aPossibleFingerTip = handContourFiltered [ indexOfPossibleFingerTip ];
+		float distanceFromCentroid = aPossibleFingerTip.distance(handCentroid);
+		if ((distanceFromCentroid > minFingerTipDistanceFromCentroid) &&
+			(fingerTipPointsFiltered.size() < maxNPeaksToConsider)){
+			fingerTipPointsFiltered.push_back (aPossibleFingerTip);
+		}
+	}
+	
+	// Find the points on handContourNice which are closest
+	// to the likely fingerTips in handContourFiltered.
+	fingerTipPointsTmp.clear();
+	fingerTipContourIndices.clear();
+	for (int i=0; i<fingerTipPointsFiltered.size(); i++){
+		
+		bool bStashInterpolatedPoints = false;
+		if (bStashInterpolatedPoints){
+			// was nice, but is no longer used.
+			ofPoint closestOriginal = handContourNice.getClosestPoint( fingerTipPointsFiltered[i] );
+			fingerTipPointsTmp.push_back (closestOriginal);
+			
+		} else {
+			// we store original, not interpolated points, because we need the indices.
+			int indexOfClosest = 0;
+			float minDistance = 99999;
+			ofVec2f winningFilteredPoint = fingerTipPointsFiltered[i];
+			
+			for (int j=0; j<handContourNice.size(); j++){
+				ofVec2f pointOnNiceContour = handContourNice[j];
+				float ijDist = ofDist(winningFilteredPoint.x, winningFilteredPoint.y,
+									  pointOnNiceContour.x, pointOnNiceContour.y);
+				if (ijDist < minDistance){
+					minDistance = ijDist;
+					indexOfClosest = j;
+				}
+			}
+			fingerTipPointsTmp.push_back ( handContourNice[indexOfClosest] );
+			fingerTipContourIndices.push_back( indexOfClosest);
+		}
+	}
+	
+	
+	// Sort the fingerTipContourIndices by their angles around the centroid.
+	vector< pair<float, int> > fingertipAngleIndexPairs;
+	for (int i=0; i<fingerTipContourIndices.size(); i++){
+		int indexInHandContourNice = fingerTipContourIndices[i];
+		
+		ofVec2f a = handContourNice [indexInHandContourNice];
+		ofVec2f b = handCentroid;
+		ofVec2f c = ofVec2f(100, 0);
+		a -= b;
+		float angle = a.angle(c);
+		angle = (angle < 0)? angle + 360: angle;
+		// push pairs of (angle, index):
+		fingertipAngleIndexPairs.push_back (pair<float, int> (angle, indexInHandContourNice));
+	}
+	ofSort (fingertipAngleIndexPairs);
+	
+	// reshuffle the fingerTipContourIndices based on that sorting.
+	fingerTipContourIndices.clear();
+	for (int i=0; i<fingertipAngleIndexPairs.size(); i++){
+		int indexOfSortedFingertip = fingertipAngleIndexPairs[i].second;
+		fingerTipContourIndices.push_back (indexOfSortedFingertip);
+	}
+	
+	// This is temporary, and will be clobbered later during our refinement stage.
+	fingerTipPoints.clear();
+	for (int i=0; i<fingerTipContourIndices.size(); i++){
+		int indexOfSortedFingertip = fingerTipContourIndices[i];
+		ofVec2f aSortedFingertip = handContourNice [ indexOfSortedFingertip ];
+		fingerTipPoints.push_back (aSortedFingertip);
+	}
+	 
+}
+
+
+//============================================================
+void HandContourAnalyzerAndMeshBuilder::locateFingerCrotches(){
+
+	//--------------------------------------
+	// FIND FINGER CROTCHES
+	handContourNiceCurvatures = buildCurvatureAnalysis (handContourNice, sampleOffset);
+	handContourPossibleCrotchIndices = findCrotches (handContourNiceCurvatures, crotchAngleCutoff, crotchNeighborDistance);
+
+	fingerCrotchPointsTmp.clear();
+	handContourCrotchIndicesTmp.clear();
+	float maxCrotchDistanceFromCentroid = handRadius * 0.666;
+
+	// Filter the possible crotches by quantity, distance from the centroid
+	for (int i = 0; i < handContourPossibleCrotchIndices.size(); i++) {
+		int indexOfPossibleCrotch = handContourPossibleCrotchIndices[i];
+		ofVec2f aPossibleCrotch = handContourNice [ indexOfPossibleCrotch ];
+		float distanceFromCentroid = aPossibleCrotch.distance(handCentroid);
+		if ((distanceFromCentroid < maxCrotchDistanceFromCentroid) &&
+			(fingerCrotchPointsTmp.size() < maxNCrotchesToConsider)){
+			fingerCrotchPointsTmp.push_back       (aPossibleCrotch);
+			handContourCrotchIndicesTmp.push_back (indexOfPossibleCrotch);
+		}
+	}
+}
+
+
+//============================================================
+void HandContourAnalyzerAndMeshBuilder::identifyThumbCrotchAndHandType (){
+	
+	//--------------------------------------
+	// IDENTIFY WHICH IS THE THUMB CROTCH.
+	// SORT THE CROTCHES BY THEIR POSITION ALONG A LINE
+	
+	// http://faculty.cs.niu.edu/~hutchins/csci230/best-fit.htm
+	// find the line that approximates the crotches.
+	// Formula Y = Slope * X + YInt
+	float SumX = 0;  // sum of all the X values
+	float SumY = 0;  //sum of all the Y values
+	float SumX2 = 0; //sum of the squares of the X values
+	float SumXY = 0; //sum of the products X*Y for all the points
+	int Count = maxNCrotchesToConsider;
+	for (int i=0; i<Count; i++){
+		ofVec2f pointi = fingerCrotchPointsTmp[i];
+		SumX  += pointi.x;
+		SumY  += pointi.y;
+		SumX2 += (pointi.x * pointi.x);
+		SumXY += (pointi.x * pointi.y);
+	}
+	float XMean = SumX / (float) Count;
+	float YMean = SumY / (float) Count;
+	float Slope = (SumXY - SumX * YMean) / (SumX2 - SumX * XMean);
+	float YInt  = YMean - Slope * XMean;
+	crotchLineSlope     = Slope;
+	crotchLineIntercept = YInt;
+	
+	//--------
+	// Compute the coordinates of the line which fits the four crotches
+	float x1 = -99999;
+	float x2 =  99999;
+	for (int i=0; i<fingerCrotchPointsTmp.size(); i++){
+		float ftx = fingerCrotchPointsTmp[i].x;
+		if (ftx > x1){ x1 = ftx; }
+		if (ftx < x2){ x2 = ftx; }
+	}
+	float y1 = crotchLineSlope * x1 + crotchLineIntercept;
+	float y2 = crotchLineSlope * x2 + crotchLineIntercept;
+	float dx = x2 - x1;
+	float dy = y2 - y1;
+	float LineMag2 = dx*dx + dy*dy;
+	
+	//--------
+	// Using the code to find the nearest point on a line,
+	// find the parametrization u for each point on that line.
+	// http://paulbourke.net/geometry/pointlineplane/
+	// Then we will sort them by this parameter u.
+	vector< pair<float, int> > crotchParametrizationIndexPairs;
+	for (int i=0; i<fingerCrotchPointsTmp.size(); i++){
+		float x3  = fingerCrotchPointsTmp[i].x;
+		float y3  = fingerCrotchPointsTmp[i].y;
+		float  u  = ((x3-x1)*(x2-x1) + (y3-y1)*(y2-y1)) / LineMag2;
+		// push pairs of (parametrizations, index):
+		int indexInHandContourNice = handContourCrotchIndicesTmp[i];
+		crotchParametrizationIndexPairs.push_back (pair<float, int> (u, indexInHandContourNice));
+	}
+	ofSort (crotchParametrizationIndexPairs);
+	
+	// Store the (sorted) crotch points
+	fingerCrotchPoints.clear();
+	handContourCrotchIndicesSorted.clear();
+	for (int i=0; i<crotchParametrizationIndexPairs.size(); i++){
+		int indexOfSortedCrotch = crotchParametrizationIndexPairs[i].second;
+		ofVec2f aSortedCrotch = handContourNice [ indexOfSortedCrotch ];
+		handContourCrotchIndicesSorted.push_back (indexOfSortedCrotch);
+		fingerCrotchPoints.push_back (aSortedCrotch);
+	}
+	
+	// Score the crotches by their distance to the centroid, and to each other.
+	// The highest score is most likely the thumb, which is the furthest from all the others.
+	float scores[maxNCrotchesToConsider];
+	for (int i=0; i<maxNCrotchesToConsider; i++){ scores[i] = 1.0; }
+	for (int i=0; i<maxNCrotchesToConsider; i++){
+		ofVec2f pointi = fingerCrotchPoints[i];
+		float icDist = ofDist(pointi.x, pointi.y, handCentroid.x, handCentroid.y);
+		scores[i] *= icDist / handRadius;
+		for (int j=0; j<maxNCrotchesToConsider; j++){
+			if (j != i){
+				ofVec2f pointj = fingerCrotchPoints[j];
+				float ijDist = ofDist(pointi.x, pointi.y,  pointj.x, pointj.y);
+				scores[i] *= ijDist / handRadius;
+			}
+		}
+	}
+	// in fingerCrotchPoints, which one (of the four, 0,1,2,3, is the thumb?
+	int indexOfThumbCrotch = 0;
+	float maxScore = 0;
+	for (int i=0; i< maxNCrotchesToConsider; i++){
+		if (scores[i] > maxScore){
+			maxScore = scores[i];
+			indexOfThumbCrotch = i;
+		}
+	}
+	
+	if (indexOfThumbCrotch == 3){
+		currentHandType	= HAND_RIGHT;
+	} else if (indexOfThumbCrotch == 0){
+		currentHandType	= HAND_LEFT;
+	} else {
+		currentHandType	= HAND_ERROR;
+	}
+}
+
+//============================================================
+void HandContourAnalyzerAndMeshBuilder::computeHandOrientationAndSideLine(){
+	
+	float handOrientation = getOrientation (handContourNice.getVertices(), handCentroid);
+	
+	float dq = handRadius * 0.10;
+	float qx = handCentroid.x + dq * sinf(handOrientation);
+	float qy = handCentroid.y + dq * cosf(handOrientation);
+	
+	float sp1x = qx - handRadius * cosf(handOrientation);
+	float sp1y = qy + handRadius * sinf(handOrientation);
+	float sp2x = qx + handRadius * cosf(handOrientation);
+	float sp2y = qy - handRadius * sinf(handOrientation);
+	sideLineP1.set(sp1x, sp1y);
+	sideLineP2.set(sp2x, sp2y);
+}
+
+//============================================================
+void HandContourAnalyzerAndMeshBuilder::locatePinkySide(){
+	
+	if (fingerTipContourIndices.size() >= 2){ // should be >=7, really
+	
+		// Search for the pinky side.
+		contourIndexOfPinkySide = fingerTipContourIndices[ 0 ]; // initial (very) bad guess
+		if (currentHandType == HAND_RIGHT){
+			
+			int nPointsOnContour			 = handContourNice.size();
+			int contourIndexOfPinkyTip       = fingerTipContourIndices[ 0 ];
+			int contourIndexOfPinkysideWrist = fingerTipContourIndices[ fingerTipContourIndices.size() - 1];
+			
+			int startIndex = contourIndexOfPinkysideWrist;
+			int endIndex   = contourIndexOfPinkyTip;
+			if (contourIndexOfPinkyTip < contourIndexOfPinkysideWrist) {    // which it will almost never be
+				endIndex = contourIndexOfPinkysideWrist + nPointsOnContour; // thus exceeding the bounds; mod it later!
+			}
+			
+			// Search for the point on contour handContourNice,
+			// between contourIndexOfPinkyTip and contourIndexOfPinkysideWrist,
+			// which is closest to the sideLine.
+			float leastDistance = 99999;
+			int   contourIndexOfLeastDistantPoint = max(0, startIndex-1);
+			
+			for (int i=startIndex; i<endIndex; i++){
+				int safeIndex = i%nPointsOnContour; // bounds-safe index modding happens here
+				ofVec2f ithPoint = handContourNice[safeIndex];
+				float dist = distanceFromPointToLine (sideLineP1, sideLineP2, ithPoint);
+				if (dist < leastDistance){
+					leastDistance = dist;
+					contourIndexOfLeastDistantPoint = safeIndex;
+				}
+			}
+			contourIndexOfPinkySide = contourIndexOfLeastDistantPoint;
+			
+		} else if (currentHandType == HAND_LEFT){
+			// handle the left hand another day.
+		}
+		
+	} else {
+		// we seem to lack for fingertips.
+		ofLog(OF_LOG_NOTICE, "Hand lacks sufficient fingers to detect pinky side vertex.");
+		currentHandType == HAND_ERROR;
+	}
+}
+
+
+//============================================================
+void HandContourAnalyzerAndMeshBuilder::locatePointerSide(){
+	
+	if ((fingerTipContourIndices.size() >= 4) &&
+		(handContourCrotchIndicesSorted.size() >= 4)){
+	
+		// Search for the POINTER side.
+		if (currentHandType == HAND_RIGHT){
+			
+			contourIndexOfPointerSide = fingerTipContourIndices[3]; // initial (very) bad guess
+			
+			int nPointsOnContour				= handContourNice.size();
+			int contourIndexOfPointerTip		= fingerTipContourIndices[3];
+			int contourIndexOfITCrotch			= handContourCrotchIndicesSorted[3];
+			
+			int startIndex = contourIndexOfPointerTip;
+			int endIndex   = contourIndexOfITCrotch;
+			
+			if (startIndex > endIndex) {      // which it will almost never be
+				endIndex += nPointsOnContour; // thus exceeding the bounds; mod it later!
+			}
+			
+			// Search for the point on contour handContourNice,
+			// between contourIndexOfPointerTip and contourIndexOfITCrotch (index-thumb crotch)
+			// which is closest to the sideLine.
+			float leastDistance = 99999;
+			int   contourIndexOfLeastDistantPoint = max(0, startIndex-1);
+			
+			for (int i=startIndex; i<endIndex; i++){
+				int safeIndex = i%nPointsOnContour; // bounds-safe index modding happens here
+				ofVec2f ithPoint = handContourNice[safeIndex];
+				float dist = distanceFromPointToLine (sideLineP1, sideLineP2, ithPoint);
+				if (dist < leastDistance){
+					leastDistance = dist;
+					contourIndexOfLeastDistantPoint = safeIndex;
+				}
+			}
+			contourIndexOfPointerSide = contourIndexOfLeastDistantPoint;
+			
+		} else if (currentHandType == HAND_LEFT){
+			// handle the left hand another day.
+		}
+	
+	} else {
+		// we seem to lack for fingertips.
+		ofLog(OF_LOG_NOTICE, "Hand lacks sufficient fingers to detect pointer side vertex."); 
+		currentHandType == HAND_ERROR;
+	}
+}
+
+
+//============================================================
+void HandContourAnalyzerAndMeshBuilder::locateThumbBase(){
+	
+	// search for the point with the highest negative curvature
+	// located between contourIndexOfThumbTip and contourIndexOfThumbsideWrist
+	
+	int nFingerTipIndices = fingerTipContourIndices.size();
+	int nPointsOnContour  = handContourNice.size();
+	
+	if (nFingerTipIndices >= 7) {
+		
+		// Search for the POINTER side.
+		if (currentHandType == HAND_RIGHT){
+	
+			int contourIndexOfThumbTip			= fingerTipContourIndices[4];
+			int contourIndexOfThumbsideWrist	= fingerTipContourIndices[nFingerTipIndices - 2];
+			
+			int startIndex = contourIndexOfThumbTip;
+			int endIndex   = contourIndexOfThumbsideWrist;
+			
+			if (startIndex > endIndex) {      // which it will almost never be; not sure how this would happen, but...
+				endIndex += nPointsOnContour; // thus exceeding the bounds; mod it later!
+			}
+
+			float mostNegativeCurvature = 0;
+			int indexOfIndent = ((startIndex + endIndex)/2)%nPointsOnContour; // a bad guess
+			
+			for (int i=startIndex; i<endIndex; i++){
+				int safeIndex = i%nPointsOnContour; // bounds-safe index modding
+				float aCurvature = handContourNiceCurvatures[safeIndex];
+				if (aCurvature < mostNegativeCurvature){
+					mostNegativeCurvature = aCurvature;
+					indexOfIndent = safeIndex; 
+				}
+			}
+			
+			contourIndexOfThumbBase = indexOfIndent;
+			
+		} else {
+			// handle the left hand another day.
+			
+		}
+		
+	} else {
+		
+		// we seem to lack for fingertips.
+		ofLog(OF_LOG_NOTICE, "Hand lacks sufficient fingers to detect thumb base vertex.");
+		currentHandType == HAND_ERROR;
+	}
+}
+
+
+//============================================================
+void HandContourAnalyzerAndMeshBuilder::locatePalmBase(){
+	
+	// search for the point with the highest negative curvature
+	// located between contourIndexOfPinkySide and contourIndexOfPinkysideWrist
+	
+	int nFingerTipIndices = fingerTipContourIndices.size();
+	int nPointsOnContour  = handContourNice.size();
+	
+	if (nFingerTipIndices >= 7) {
+		
+		// Search for the POINTER side.
+		if (currentHandType == HAND_RIGHT){
+			
+			int contourIndexOfPinkysideWrist	= fingerTipContourIndices[nFingerTipIndices - 1];
+			
+			int startIndex = contourIndexOfPinkysideWrist;
+			int endIndex   = contourIndexOfPinkySide;
+			if (startIndex > endIndex) {      // which it will almost never be
+				endIndex += nPointsOnContour; // thus exceeding the bounds; mod it later!
+			}
+			// limit the search to the first 70% of the range.
+			endIndex = endIndex - (int)(0.30 * (endIndex-startIndex));
+			
+			
+			float mostNegativeCurvature = 0;
+			int indexOfIndent = ((startIndex + endIndex)/2)%nPointsOnContour; // a bad guess
+			
+			for (int i=startIndex; i<endIndex; i++){
+				int safeIndex = i%nPointsOnContour; // bounds-safe index modding
+				float aCurvature = handContourNiceCurvatures[safeIndex];
+				if (aCurvature < mostNegativeCurvature){
+					mostNegativeCurvature = aCurvature;
+					indexOfIndent = safeIndex;
+				}
+			}
+			
+			
+			contourIndexOfPalmBase = indexOfIndent;
+			
+		} else {
+			// handle the left hand another day.
+			
+		}
+		
+	} else {
+		
+		// we seem to lack for fingertips.
+		ofLog(OF_LOG_NOTICE, "Hand lacks sufficient fingers to detect palm base vertex.");
+		currentHandType == HAND_ERROR;
+	}
+}
+
+
+//============================================================
+int HandContourAnalyzerAndMeshBuilder::locateContourFeature(int startFeatureIndex,
+															int endFeatureIndex,
+															float startFeatureIndexOffsetPercent,
+															float endFeatureIndexInsetPercent,
+															bool bConcave){
+		
+	// search for the point with the highest or lowest curvature
+	// located between startFeatureIndex and endFeatureIndex
+	
+	int nPointsOnContour  = handContourNice.size();
+	int indexOfFeature = 0;
+	
+	if (currentHandType == HAND_RIGHT){
+		
+		// Clean up the range limits
+		int startIndex = startFeatureIndex;
+		int endIndex   = endFeatureIndex;
+		if (startIndex > endIndex) {     
+			endIndex += nPointsOnContour; // thus exceeding the bounds; mod it later.
+		}
+		// and limit the search to a certain percentage of the range.
+		int startIndexOffset = (int)(startFeatureIndexOffsetPercent * (endIndex-startIndex));
+		int endIndexOffset   = (int)(endFeatureIndexInsetPercent    * (endIndex-startIndex));
+		startIndex = startIndex + startIndexOffset;
+		endIndex   = endIndex   - endIndexOffset;
+		indexOfFeature = ((startIndex + endIndex)/2)%nPointsOnContour; // a bad initial guess
+		
+		if (bConcave){
+			float greatestNegativeCurvature = 0;
+			for (int i=startIndex; i<endIndex; i++){
+				int safeIndex = i%nPointsOnContour; // bounds-safe index modding
+				float aCurvature = handContourNiceCurvatures[safeIndex];
+				if (aCurvature < greatestNegativeCurvature){
+					greatestNegativeCurvature = aCurvature;
+					indexOfFeature = safeIndex;
+				}
+			}
+			
+		} else {
+			float greatestPositiveCurvature = 0;
+			for (int i=startIndex; i<endIndex; i++){
+				int safeIndex = i%nPointsOnContour; // bounds-safe index modding
+				float aCurvature = handContourNiceCurvatures[safeIndex];
+				if (aCurvature > greatestPositiveCurvature){
+					greatestPositiveCurvature = aCurvature;
+					indexOfFeature = safeIndex;
+				}
+			}
+		}
+		
+	} else {
+		// handle the left hand another day.
+		indexOfFeature = 0; 
+		
+	}
+	
+	return indexOfFeature;
+}
+
+
+//============================================================
+void HandContourAnalyzerAndMeshBuilder::locateThumbKnuckle(){
+	
+	// search for the point with the highest curvature
+	// located between contourIndexOfThumbTip and contourIndexOfThumbBase
+	
+	int nFingerTipIndices = fingerTipContourIndices.size();
+	int nPointsOnContour  = handContourNice.size();
+	
+	if (nFingerTipIndices >= 7) {
+		
+		// Search for the POINTER side.
+		if (currentHandType == HAND_RIGHT){
+			
+			int contourIndexOfThumbTip = fingerTipContourIndices[4];
+			
+			
+			int startIndex = contourIndexOfThumbTip; 
+			int endIndex   = contourIndexOfThumbBase;
+			if (startIndex > endIndex) {      // which it will almost never be
+				endIndex += nPointsOnContour; // thus exceeding the bounds; mod it later!
+			}
+			// limit the search to the middle 30% of the range.
+			int startIndexOffset = (int)(0.35 * (endIndex-startIndex));
+			int endIndexOffset   = (int)(0.30 * (endIndex-startIndex));
+			startIndex = startIndex + startIndexOffset;
+			endIndex   = endIndex   - endIndexOffset;
+			
+			float greatestCurvature = 0;
+			int indexOfFeature = ((startIndex + endIndex)/2)%nPointsOnContour; // a bad guess
+			
+			for (int i=startIndex; i<endIndex; i++){
+				int safeIndex = i%nPointsOnContour; // bounds-safe index modding
+				float aCurvature = handContourNiceCurvatures[safeIndex];
+				if (aCurvature > greatestCurvature){
+					greatestCurvature = aCurvature;
+					indexOfFeature = safeIndex;
+				}
+			}
+			contourIndexOfThumbKnuckle = indexOfFeature;
+			
+		} else {
+			// handle the left hand another day.
+			
+		}
+		
+	} else {
+		
+		// we seem to lack for fingertips.
+		ofLog(OF_LOG_NOTICE, "Hand lacks sufficient fingers to detect palm base vertex.");
+		currentHandType == HAND_ERROR;
+	}
+}
+
+
+
+
+//============================================================
+void HandContourAnalyzerAndMeshBuilder::assembleHandmarks(){
+	
+	//--------------------------------------
+	// ASSEMBLE HANDMARKS
+	// Assumes indexOfThumbCrotch == 3 ! >> RIGHT HANDS ONLY FOR NOW
+	// Assume nFingerTipIndices >= 7!
+	
+	int nFingerTipIndices			= fingerTipContourIndices.size();
+	int contourIndexOfPinkyTip		= fingerTipContourIndices[0];
+	int contourIndexOfRingTip		= fingerTipContourIndices[1];
+	int contourIndexOfMiddleTip		= fingerTipContourIndices[2];
+	int contourIndexOfPointerTip	= fingerTipContourIndices[3];
+	int contourIndexOfThumbTip		= fingerTipContourIndices[4];
+	
+	int contourIndexOfPRCrotch		= handContourCrotchIndicesSorted[0];
+	int contourIndexOfRMCrotch		= handContourCrotchIndicesSorted[1];
+	int contourIndexOfMICrotch		= handContourCrotchIndicesSorted[2];
+	int contourIndexOfITCrotch		= handContourCrotchIndicesSorted[3];
+	
+	int contourIndexOfPinkysideWrist = fingerTipContourIndices[nFingerTipIndices - 1];
+	int contourIndexOfThumbsideWrist = fingerTipContourIndices[nFingerTipIndices - 2];
+	
+	if (currentHandType == HAND_LEFT){
+		; // then we have a left hand; deal with it later. // reverse everything
+	}
+	
+	Handmarks[HANDMARK_PINKY_TIP].index			= contourIndexOfPinkyTip;
+	Handmarks[HANDMARK_PINKY_TIP].point			= handContourNice [contourIndexOfPinkyTip];
+	Handmarks[HANDMARK_PINKY_TIP].type			= HANDMARK_PINKY_TIP;
+	
+	Handmarks[HANDMARK_PR_CROTCH].index			= contourIndexOfPRCrotch;
+	Handmarks[HANDMARK_PR_CROTCH].point			= handContourNice [contourIndexOfPRCrotch];
+	Handmarks[HANDMARK_PR_CROTCH].type			= HANDMARK_PR_CROTCH;
+	
+	Handmarks[HANDMARK_RING_TIP].index			= contourIndexOfRingTip;
+	Handmarks[HANDMARK_RING_TIP].point			= handContourNice [contourIndexOfRingTip];
+	Handmarks[HANDMARK_RING_TIP].type			= HANDMARK_RING_TIP;
+	
+	Handmarks[HANDMARK_RM_CROTCH].index			= contourIndexOfRMCrotch;
+	Handmarks[HANDMARK_RM_CROTCH].point			= handContourNice [contourIndexOfRMCrotch];
+	Handmarks[HANDMARK_RM_CROTCH].type			= HANDMARK_RM_CROTCH;
+	
+	Handmarks[HANDMARK_MIDDLE_TIP].index		= contourIndexOfMiddleTip;
+	Handmarks[HANDMARK_MIDDLE_TIP].point		= handContourNice [contourIndexOfMiddleTip];
+	Handmarks[HANDMARK_MIDDLE_TIP].type			= HANDMARK_MIDDLE_TIP;
+	
+	Handmarks[HANDMARK_MI_CROTCH].index			= contourIndexOfMICrotch;
+	Handmarks[HANDMARK_MI_CROTCH].point			= handContourNice [contourIndexOfMICrotch];
+	Handmarks[HANDMARK_MI_CROTCH].type			= HANDMARK_MI_CROTCH;
+	
+	Handmarks[HANDMARK_POINTER_TIP].index		= contourIndexOfPointerTip;
+	Handmarks[HANDMARK_POINTER_TIP].point		= handContourNice [contourIndexOfPointerTip];
+	Handmarks[HANDMARK_POINTER_TIP].type		= HANDMARK_POINTER_TIP;
+	
+	Handmarks[HANDMARK_POINTER_SIDE].index		= contourIndexOfPointerSide;
+	Handmarks[HANDMARK_POINTER_SIDE].point		= handContourNice [contourIndexOfPointerSide];
+	Handmarks[HANDMARK_POINTER_SIDE].type		= HANDMARK_POINTER_SIDE;
+	
+	Handmarks[HANDMARK_IT_CROTCH].index			= contourIndexOfITCrotch;
+	Handmarks[HANDMARK_IT_CROTCH].point			= handContourNice [contourIndexOfITCrotch];
+	Handmarks[HANDMARK_IT_CROTCH].type			= HANDMARK_IT_CROTCH;
+	
+	Handmarks[HANDMARK_THUMB_TIP].index			= contourIndexOfThumbTip;
+	Handmarks[HANDMARK_THUMB_TIP].point			= handContourNice [contourIndexOfThumbTip];
+	Handmarks[HANDMARK_THUMB_TIP].type			= HANDMARK_THUMB_TIP;
+	
+	Handmarks[HANDMARK_THUMB_KNUCKLE].index		= contourIndexOfThumbKnuckle;
+	Handmarks[HANDMARK_THUMB_KNUCKLE].point		= handContourNice [contourIndexOfThumbKnuckle];
+	Handmarks[HANDMARK_THUMB_KNUCKLE].type		= HANDMARK_THUMB_KNUCKLE;
+	
+	Handmarks[HANDMARK_THUMB_BASE].index		= contourIndexOfThumbBase;
+	Handmarks[HANDMARK_THUMB_BASE].point		= handContourNice [contourIndexOfThumbBase];
+	Handmarks[HANDMARK_THUMB_BASE].type			= HANDMARK_THUMB_BASE;
+	
+	Handmarks[HANDMARK_THUMBSIDE_WRIST].index	= contourIndexOfThumbsideWrist;
+	Handmarks[HANDMARK_THUMBSIDE_WRIST].point	= handContourNice [contourIndexOfThumbsideWrist];
+	Handmarks[HANDMARK_THUMBSIDE_WRIST].type	= HANDMARK_THUMBSIDE_WRIST;
+	
+	Handmarks[HANDMARK_PINKYSIDE_WRIST].index	= contourIndexOfPinkysideWrist;
+	Handmarks[HANDMARK_PINKYSIDE_WRIST].point	= handContourNice [contourIndexOfPinkysideWrist];
+	Handmarks[HANDMARK_PINKYSIDE_WRIST].type	= HANDMARK_PINKYSIDE_WRIST;
+	
+	Handmarks[HANDMARK_PALM_BASE].index			= contourIndexOfPalmBase;
+	Handmarks[HANDMARK_PALM_BASE].point			= handContourNice [contourIndexOfPalmBase];
+	Handmarks[HANDMARK_PALM_BASE].type			= HANDMARK_PALM_BASE;
+	
+	Handmarks[HANDMARK_PINKY_SIDE].index		= contourIndexOfPinkySide;
+	Handmarks[HANDMARK_PINKY_SIDE].point		= handContourNice [contourIndexOfPinkySide];
+	Handmarks[HANDMARK_PINKY_SIDE].type			= HANDMARK_PINKY_SIDE;
+	
+}
 
 
 
@@ -769,4 +1140,31 @@ ofMesh& HandContourAnalyzerAndMeshBuilder::getMesh(){
 vector<int>& HandContourAnalyzerAndMeshBuilder::getJoints(){
 	return joints;
 }
+
+//============================================================
+float HandContourAnalyzerAndMeshBuilder::distanceFromPointToLine (ofVec2f linePt1, ofVec2f linePt2,  ofVec2f aPoint){
+	// http://paulbourke.net/geometry/pointlineplane/
+	
+	float p1x = linePt1.x;
+	float p1y = linePt1.y;
+	float p2x = linePt2.x;
+	float p2y = linePt2.y;
+	
+	float dx = p2x - p1x;
+	float dy = p2y - p1y;
+	float lineMag2 = dx*dx + dy*dy;
+	
+	float p3x  = aPoint.x;
+	float p3y  = aPoint.y;
+	float u   = ((p3x-p1x)*(p2x-p1x) + (p3y-p1y)*(p2y-p1y)) / lineMag2;
+	
+	// intersection point
+	float inx = p1x + u * (p2x - p1x);
+	float iny = p1y + u * (p2y - p1y);
+	
+	float dist = ofDist (p3x,p3y, inx,iny);
+	return dist;
+}
+
+
 	

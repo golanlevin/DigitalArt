@@ -17,7 +17,15 @@ struct eigenMultiPartData {
 	float eigenValue;
 };
 
-#define N_HANDMARKS 14
+enum HandType {
+	HAND_ERROR = -1,
+	HAND_NONE  =  0,
+	HAND_RIGHT =  1,
+	HAND_LEFT  =  2
+};
+
+#define N_HANDMARKS 16
+#define DESIRED_N_CONTOUR_POINTS 1250
 
 enum HandmarkType {
 	HANDMARK_INVALID			= -1,
@@ -31,17 +39,20 @@ enum HandmarkType {
 	HANDMARK_POINTER_SIDE		= 7,
 	HANDMARK_IT_CROTCH			= 8,
 	HANDMARK_THUMB_TIP			= 9,
-	HANDMARK_THUMB_BASE			= 10,
-	HANDMARK_THUMBSIDE_WRIST	= 11,
-	HANDMARK_PINKYSIDE_WRIST	= 12,
-	HANDMARK_PINKY_SIDE			= 13
+	HANDMARK_THUMB_KNUCKLE		= 10,
+	HANDMARK_THUMB_BASE			= 11,
+	HANDMARK_THUMBSIDE_WRIST	= 12,
+	HANDMARK_PINKYSIDE_WRIST	= 13,
+	HANDMARK_PALM_BASE			= 14,
+	HANDMARK_PINKY_SIDE			= 15
 };
 
-struct Handmark {
-	// analogous to landmark
-	ofVec2f	point;		// the actual location
-	int		index;		// the index in the handContourNice
-	HandmarkType type;  // for safety's sake, the name of the point
+struct Handmark { // analogous to landmark
+	ofVec2f			point;			// the actual location
+	ofVec2f			pointPrev;		// its previous location
+	int				index;			// the index in the handContourNice
+	HandmarkType	type;			// the name (or type) of the point
+	float			confidence;		// a score for the Handmark's stability, 0...1
 };
 
 
@@ -60,7 +71,7 @@ public:
 	ofMesh		&getMesh();
 	vector<int> &getJoints();
 	bool		isCalculated();
-	void		setContourFilterValues(float r, float s);
+	HandType	getHandType(); 
 	
 	vector<float> buildCurvatureAnalysis (ofPolyline& polyline, int offset);
 	vector<int>   findPeaks (vector<float>& values, float cutoff, int peakArea);
@@ -94,10 +105,9 @@ public:
 	vector<ofVec2f> fingerTipPointsFiltered;
 	vector<ofVec2f> fingerTipPointsTmp; // on handContourNice
 	vector<ofVec2f> fingerTipPoints; // on handContourNice
-	vector<int>		fingerTipIndicesTmp;
-	vector<int>		fingerTipIndices; // on handContourNice
+	vector<int>		fingerTipContourIndices; // on handContourNice
 	
-	vector<float>	handContourCurvatures;
+	vector<float>	handContourNiceCurvatures; // from "nice" (accurate) contour
 	vector<int>		handContourPossibleCrotchIndices;
 	vector<int>		handContourCrotchIndicesTmp;
 	vector<int>		handContourCrotchIndicesSorted;
@@ -127,8 +137,35 @@ private:
 	bool			bCalculatedMesh;
 	
 	
+	void		prepareContours (ofPolyline inputContour, cv::Point2f inputCentroid);
+	void		locateFingerTips();
+	void		locateFingerCrotches();
+	void		identifyThumbCrotchAndHandType();
+	void		computeHandOrientationAndSideLine();
+	void		locatePinkySide();
+	void		locatePointerSide();
 	
+	int			locateContourFeature(int startFeatureIndex,
+									 int endFeatureIndex,
+									 float startFeatureIndexOffsetPercent,
+									 float endFeatureIndexInsetPercent,
+									 bool bConcave);
+	void		locateThumbBase();
+	void		locatePalmBase();
+	void		locateThumbKnuckle();
+	void		assembleHandmarks();
 	
+	float		distanceFromPointToLine (ofVec2f linePt1, ofVec2f linePt2,  ofVec2f aPoint);
+	
+	int			maxNCrotchesToConsider;
+	int			contourIndexOfPinkySide;
+	int			contourIndexOfPointerSide;
+	int			contourIndexOfThumbBase;
+	int			contourIndexOfPalmBase;
+	int			contourIndexOfThumbKnuckle; 
+	
+	HandType	currentHandType;
+
 	
 	void drawMeshWireframe();
 	void drawJoints();
