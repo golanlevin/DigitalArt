@@ -144,6 +144,12 @@ private:
 	void		computeHandOrientationAndSideLine();
 	void		locatePinkySide();
 	void		locatePointerSide();
+	
+	int			locateContourFeature(int startFeatureIndex,
+									 int endFeatureIndex,
+									 float startFeatureIndexOffsetPercent,
+									 float endFeatureIndexInsetPercent,
+									 bool bConcave);
 	void		locateThumbBase();
 	void		locatePalmBase();
 	void		locateThumbKnuckle();

@@ -93,10 +93,15 @@ float HandContourAnalyzerAndMeshBuilder::computeHandRadius (ofPolyline aPolyline
 
 //============================================================
 void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
-	ofPushStyle();
-	ofSetLineWidth(1.0);
 	
-	ofSetColor(0,150,0);
+	ofPushStyle();
+	bool bDrawFilteredContour = false;
+	bool bDrawHandmarksOutline = true;
+	bool bDrawHandmarks = true;
+	
+
+	ofSetLineWidth(1.0);
+	ofSetColor(0,255,0);
 	handContourNice.draw();
 	
 	ofFill();
@@ -117,18 +122,29 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 	
 	// ----------------
 	// DRAW HANDMARKS!
-	ofNoFill();
-	ofSetColor(255,0,255);
-	ofBeginShape();
-	for (int i=0; i<N_HANDMARKS; i++){
-		if (Handmarks[i].type != HANDMARK_INVALID){
-			float hx = Handmarks[i].point.x;
-			float hy = Handmarks[i].point.y;
-			// ofEllipse(hx, hy, 30,30);
-			ofVertex(hx,hy); 
+	if (bDrawHandmarksOutline){
+		ofNoFill();
+		ofSetColor(255,0,255);
+		ofBeginShape();
+		for (int i=0; i<N_HANDMARKS; i++){
+			if (Handmarks[i].type != HANDMARK_INVALID){
+				float hx = Handmarks[i].point.x;
+				float hy = Handmarks[i].point.y;
+				// ofEllipse(hx, hy, 30,30);
+				ofVertex(hx,hy); 
+			}
+		}
+		ofEndShape(OF_CLOSE);
+	}
+	if (bDrawHandmarks){
+		for (int i=0; i<N_HANDMARKS; i++){
+			if (Handmarks[i].type != HANDMARK_INVALID){
+				float hx = Handmarks[i].point.x;
+				float hy = Handmarks[i].point.y;
+				ofEllipse(hx, hy, 20,20);
+			}
 		}
 	}
-	ofEndShape(OF_CLOSE);
 	
 	
 	
@@ -147,11 +163,12 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 	
 	
 	
-	
-	
-	ofNoFill();
-	ofSetColor(255,100,0);
-	handContourFiltered.draw();
+
+	if (bDrawFilteredContour){
+		ofNoFill();
+		ofSetColor(255,100,0);
+		handContourFiltered.draw();
+	}
 
 	
 	float cx = handCentroid.x;
@@ -900,14 +917,67 @@ void HandContourAnalyzerAndMeshBuilder::locatePalmBase(){
 	}
 }
 
-/*
+
 //============================================================
-void HandContourAnalyzerAndMeshBuilder::locateContourFeature(int startIndex,
-															 int endIndex,
-															 bool bConcave,
-															 int &namedContourIndex){
+int HandContourAnalyzerAndMeshBuilder::locateContourFeature(int startFeatureIndex,
+															int endFeatureIndex,
+															float startFeatureIndexOffsetPercent,
+															float endFeatureIndexInsetPercent,
+															bool bConcave){
+		
+	// search for the point with the highest or lowest curvature
+	// located between startFeatureIndex and endFeatureIndex
+	
+	int nPointsOnContour  = handContourNice.size();
+	int indexOfFeature = 0;
+	
+	if (currentHandType == HAND_RIGHT){
+		
+		// Clean up the range limits
+		int startIndex = startFeatureIndex;
+		int endIndex   = endFeatureIndex;
+		if (startIndex > endIndex) {     
+			endIndex += nPointsOnContour; // thus exceeding the bounds; mod it later.
+		}
+		// and limit the search to a certain percentage of the range.
+		int startIndexOffset = (int)(startFeatureIndexOffsetPercent * (endIndex-startIndex));
+		int endIndexOffset   = (int)(endFeatureIndexInsetPercent    * (endIndex-startIndex));
+		startIndex = startIndex + startIndexOffset;
+		endIndex   = endIndex   - endIndexOffset;
+		indexOfFeature = ((startIndex + endIndex)/2)%nPointsOnContour; // a bad initial guess
+		
+		if (bConcave){
+			float greatestNegativeCurvature = 0;
+			for (int i=startIndex; i<endIndex; i++){
+				int safeIndex = i%nPointsOnContour; // bounds-safe index modding
+				float aCurvature = handContourNiceCurvatures[safeIndex];
+				if (aCurvature < greatestNegativeCurvature){
+					greatestNegativeCurvature = aCurvature;
+					indexOfFeature = safeIndex;
+				}
+			}
+			
+		} else {
+			float greatestPositiveCurvature = 0;
+			for (int i=startIndex; i<endIndex; i++){
+				int safeIndex = i%nPointsOnContour; // bounds-safe index modding
+				float aCurvature = handContourNiceCurvatures[safeIndex];
+				if (aCurvature > greatestPositiveCurvature){
+					greatestPositiveCurvature = aCurvature;
+					indexOfFeature = safeIndex;
+				}
+			}
+		}
+		
+	} else {
+		// handle the left hand another day.
+		indexOfFeature = 0; 
+		
+	}
+	
+	return indexOfFeature;
 }
- */
+
 
 //============================================================
 void HandContourAnalyzerAndMeshBuilder::locateThumbKnuckle(){

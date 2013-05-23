@@ -218,7 +218,7 @@ void ofApp::draw() {
 		
 		if (bValidHandContourExists){
 			HCAAMB.drawAnalytics();
-			if (bValidHandContourExists){ HCAAMB.drawMousePoint (mouseX); }
+			//if (bValidHandContourExists){ HCAAMB.drawMousePoint (mouseX); }
 		}
 		ofPopStyle();
 		
@@ -231,6 +231,10 @@ void ofApp::draw() {
 		
 		ofSetColor(255);
 		video.draw(0, 0);
+		
+		if (bValidHandContourExists){
+			HCAAMB.drawAnalytics();
+		}
 		
 		ofPopStyle();
 	}
