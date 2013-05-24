@@ -39,6 +39,23 @@ void ofApp::setup() {
 	sinWiggleSpeedUp = 2;
 	sinWigglePhaseOffset = 0.5;
 
+	wristWigglePalmAngleRange = 45;
+	wristWiggleTopAngleRange = 30;
+	wristWiggleMidAngleRange = 15;
+	wristWiggleSpeedUp = 2;
+	wristWigglePhaseOffset = 0.5;
+
+	middleLength = 80;
+	otherLength = 40;
+
+	growingMiddleBaseAngleRange = 60;
+	growingMiddleMidAngleRange = 30;
+	growingMiddleTopAngleRange = 15;
+	growingMiddleLength = 225;
+	growingMiddleGrowthAmount = 1.2;
+	growingMiddleSpeedUp = 5;
+	growingMiddlePhaseOffset = 0.5;
+
 	mouseControl = false;
 	showImage = true;
 	showWireframe = false;
@@ -62,6 +79,9 @@ void ofApp::setup() {
 	immutableThreePointSkeleton.setup(mesh);
 	palmSkeleton.setup(mesh);
 	immutablePalmSkeleton.setup(mesh);
+	wristSpineSkeleton.setup(mesh);
+	immutableWristSpineSkeleton.setup(mesh);
+
 	setSkeleton(&handSkeleton);
 }
 
@@ -79,6 +99,10 @@ void ofApp::setupGui() {
 	sceneNames.push_back("Pulsating Palm");
 	sceneNames.push_back("Retracting Fingers");
 	sceneNames.push_back("Sinusoidal Wiggle");
+	sceneNames.push_back("Wiggling Wrist");
+	sceneNames.push_back("Middle Different Length");
+	sceneNames.push_back("Growing Middle Finger");
+	sceneNames.push_back("StarTrek");
 
 	vector<string> lissajousStyle;
 	lissajousStyle.push_back("Circle");
@@ -109,7 +133,7 @@ void ofApp::setupGui() {
 	gui->autoSizeToFitWidgets();
 	
 	// set the initial scene
-	sceneRadio->getToggles()[SIN_WIGGLE]->setValue(true);
+	sceneRadio->getToggles()[STARTREK]->setValue(true);
 
 	// create the scene specific guis
 	guis = new ofxUICanvas*[sceneNames.size()];
@@ -152,6 +176,23 @@ void ofApp::setupGui() {
 	sinusoidalWiggleRadio = guis[SIN_WIGGLE]->addRadio("Wiggle Joint", sinusoidalWiggleJoint);
 	sinusoidalWiggleRadio->getToggles()[0]->setValue(true);
 
+	guis[WRIST_WIGGLE]->addSlider("Palm Angle Range", 10, 60, &wristWigglePalmAngleRange);
+	guis[WRIST_WIGGLE]->addSlider("Top Angle Range", 10, 60, &wristWiggleTopAngleRange);
+	guis[WRIST_WIGGLE]->addSlider("Mid Angle Range", 10, 60, &wristWiggleMidAngleRange);
+	guis[WRIST_WIGGLE]->addSlider("Wiggle Speed Up", 1, 3, &wristWiggleSpeedUp);
+	guis[WRIST_WIGGLE]->addSlider("Phase Offset", 0, 1, &wristWigglePhaseOffset);
+
+	guis[MIDDLE_LEN]->addSlider("Middle Length", 0, 100, &middleLength);
+	guis[MIDDLE_LEN]->addSlider("Other Fingers Length", 0, 100, &otherLength);
+
+	guis[GROWING_MIDDLE]->addSlider("Base Angle Range", 10, 90, &growingMiddleBaseAngleRange);
+	guis[GROWING_MIDDLE]->addSlider("Mid Angle Range", 10, 90, &growingMiddleMidAngleRange);
+	guis[GROWING_MIDDLE]->addSlider("Top Angle Range", 10, 90, &growingMiddleTopAngleRange);
+	guis[GROWING_MIDDLE]->addSlider("Middle Length", 200, 300, &growingMiddleLength);
+	guis[GROWING_MIDDLE]->addSlider("Growth Amount", 1, 2, &growingMiddleGrowthAmount);
+	guis[GROWING_MIDDLE]->addSlider("Speed Up", 1, 10, &growingMiddleSpeedUp);
+	guis[GROWING_MIDDLE]->addSlider("Phase Offset", 0, 1, &growingMiddlePhaseOffset);
+
 	for (int i=0; i < sceneNames.size(); i++) {
 		guis[i]->autoSizeToFitWidgets();
 	}
@@ -177,6 +218,8 @@ void ofApp::update() {
 	immutableThreePointSkeleton.setup(mesh);
 	palmSkeleton.setup(mesh);
 	immutablePalmSkeleton.setup(mesh);
+	wristSpineSkeleton.setup(mesh);
+	immutableWristSpineSkeleton.setup(mesh);
 
 	if(mouseControl) {
 		ofVec2f mouse(mouseX, mouseY);
@@ -188,6 +231,8 @@ void ofApp::update() {
 		immutableThreePointSkeleton.setPosition(ThreePointSkeleton::PALM, mouse, true);
 		palmSkeleton.setPosition(PalmSkeleton::BASE, mouse, true);
 		immutablePalmSkeleton.setPosition(PalmSkeleton::BASE, mouse, true);
+		wristSpineSkeleton.setPosition(WristSpineSkeleton::HAND_TOP, mouse, true);
+		immutableWristSpineSkeleton.setPosition(WristSpineSkeleton::HAND_TOP, mouse, true);
 	}
 
 	// get the current scene
@@ -291,7 +336,6 @@ void ofApp::update() {
 		int fingerCount = 4;
 
 		int index;
-		ofVec2f original;
 		float theta;
 		for (int i=0; i < fingerCount; i++) {
 			float baseOffset = 0*propWigglePhaseOffset + i;
@@ -299,17 +343,14 @@ void ofApp::update() {
 			float topOffset = 2*propWigglePhaseOffset + i;
 
 			index = base[i];
-			original = puppet.getOriginalMesh().getVertex(index);
 			theta = ofMap(sin(propWiggleSpeedUp*ofGetElapsedTimef() + baseOffset), -1, 1, -(propWiggleBaseAngleRange/2.0), propWiggleBaseAngleRange/2.0);
 			handWithFingertipsSkeleton.setRotation(index, theta, false, false);
 			
 			index = mid[i];
-			original = puppet.getOriginalMesh().getVertex(index);
 			theta = -ofMap(sin(propWiggleSpeedUp*ofGetElapsedTimef() + midOffset), -1, 1, -(propWiggleMidAngleRange/2.0), propWiggleMidAngleRange/2.0);
 			handWithFingertipsSkeleton.setRotation(index, theta, false, false);
 
 			index = top[i];
-			original = puppet.getOriginalMesh().getVertex(index);
 			theta = ofMap(sin(propWiggleSpeedUp*ofGetElapsedTimef() + topOffset), -1, 1, -(propWiggleTopAngleRange/2.0), propWiggleTopAngleRange/2.0);
 			handWithFingertipsSkeleton.setRotation(index, theta, false , false);
 		}
@@ -443,11 +484,146 @@ void ofApp::update() {
 			float phaseOffset = i*sinWigglePhaseOffset + i;
 
 			int index = toWiggle[i];
-			ofVec2f original = puppet.getOriginalMesh().getVertex(index);
 			float theta = ofMap(sin(sinWiggleSpeedUp*ofGetElapsedTimef() + phaseOffset), -1, 1, -(sinWiggleAngleRange/2.0), sinWiggleAngleRange/2.0);
 			handWithFingertipsSkeleton.setRotation(index, theta, false, false);
 		}
 		setSkeleton(&handWithFingertipsSkeleton);
+	} else if (scene == WRIST_WIGGLE) {
+		int index;
+		ofVec2f original;
+		float theta;
+
+		float palmOffset = 0*wristWigglePhaseOffset;
+		float topOffset = 1*wristWigglePhaseOffset;
+		float midOffset = 2*wristWigglePhaseOffset;
+
+		index = WristSpineSkeleton::PALM;
+		theta = ofMap(sin(wristWiggleSpeedUp*ofGetElapsedTimef() + palmOffset), -1, 1, -(wristWigglePalmAngleRange/2.0), wristWigglePalmAngleRange/2.0);
+		wristSpineSkeleton.setRotation(index, theta, false, false);
+			
+		index = WristSpineSkeleton::WRIST_TOP;
+		theta = -ofMap(sin(wristWiggleSpeedUp*ofGetElapsedTimef() + topOffset), -1, 1, -(wristWiggleTopAngleRange/2.0), wristWiggleTopAngleRange/2.0);
+		wristSpineSkeleton.setRotation(index, theta, false, false);
+
+		index = WristSpineSkeleton::WRIST_MID;
+		theta = ofMap(sin(wristWiggleSpeedUp*ofGetElapsedTimef() + midOffset), -1, 1, -(wristWiggleMidAngleRange/2.0), wristWiggleMidAngleRange/2.0);
+		handWithFingertipsSkeleton.setRotation(index, theta, false , false);
+
+		setSkeleton(&wristSpineSkeleton);
+	} else if(scene == MIDDLE_LEN) {
+		int middle[] = {HandSkeleton::MIDDLE_TIP, HandSkeleton::MIDDLE_MID};
+		int middleRatios[] = {1, 1.6};
+		int middleCount = 2;
+		for(int i = 0; i < middleCount; i++) {
+			handSkeleton.setBoneLength(middle[i], middleRatios[i] * middleLength);
+		}
+
+		int others[] = {
+			HandSkeleton::PINKY_TIP, HandSkeleton::RING_TIP, HandSkeleton::INDEX_TIP,
+			HandSkeleton::PINKY_MID, HandSkeleton::RING_MID, HandSkeleton::INDEX_MID
+		};
+		float otherRatios[] = {
+			1, 1, 1,
+			1.6, 1.6, 1.6
+		};
+		int otherCount = 6;
+		for(int i = 0; i < otherCount; i++) {
+			handSkeleton.setBoneLength(others[i], otherRatios[i] * otherLength);
+		}
+
+		setSkeleton(&handSkeleton);
+	} else if(scene == GROWING_MIDDLE) {
+		int fingerParts[] = {HandWithFingertipsSkeleton::MIDDLE_TIP, HandWithFingertipsSkeleton::MIDDLE_TOP, HandWithFingertipsSkeleton::MIDDLE_MID, HandWithFingertipsSkeleton::MIDDLE_BASE};
+		float ratios[] = {0.2, 0.3, 0.5};
+		float fingerPartCount = 3;
+
+		float t = ofGetElapsedTimef();
+
+		ofVec2f fingerBase = immutableHandWithFingertipsSkeleton.getPositionAbsolute(HandWithFingertipsSkeleton::MIDDLE_BASE);
+		ofVec2f fingerTip = immutableHandWithFingertipsSkeleton.getPositionAbsolute(HandWithFingertipsSkeleton::MIDDLE_TIP);
+		float len = fingerBase.distance(fingerTip);
+		float newLen = len + t*growingMiddleGrowthAmount;
+		
+		if (newLen > growingMiddleLength) newLen = growingMiddleLength;
+		//else {
+			float angleRanges[] = {growingMiddleTopAngleRange, growingMiddleMidAngleRange, growingMiddleTopAngleRange};
+
+			for (int i=1; i < fingerPartCount+1; i++) {
+				float phaseOffset = i*growingMiddlePhaseOffset;
+				float angleRange = angleRanges[i-1];
+
+				int index = fingerParts[i];
+				float theta = ofMap(sin(growingMiddleSpeedUp*t + phaseOffset), -1, 1, -(angleRange/2.0), angleRange/2.0);
+				if (i % 2 == 1) theta = -theta;
+				handWithFingertipsSkeleton.setRotation(index, theta, false, false);
+			
+			}
+		//}
+
+		for (int i=0; i < fingerPartCount; i++) {
+			int index = fingerParts[i];
+			ofVec2f original = immutableHandWithFingertipsSkeleton.getPositionAbsolute(index);
+			ofVec2f parent = immutableHandWithFingertipsSkeleton.getPositionAbsolute(index-1);
+			ofVec2f position = original - parent;
+			position.normalize();
+			position *= newLen*ratios[i];
+			handWithFingertipsSkeleton.setPosition(index, parent, true, false);
+			handWithFingertipsSkeleton.setPosition(index, position, false, false);
+		}
+
+		setSkeleton(&handWithFingertipsSkeleton);
+	} else if (scene == STARTREK) {
+		int toImitateTop[] = {HandSkeleton::PINKY_TIP, HandSkeleton::INDEX_TIP};
+		int toImitateMid[] = {HandSkeleton::PINKY_MID, HandSkeleton::INDEX_MID};
+		int toImitateBase[] = {HandSkeleton::PINKY_BASE, HandSkeleton::INDEX_BASE};
+		
+		int toSetMid[] = {HandSkeleton::RING_MID, HandSkeleton::MIDDLE_MID};
+		int toSetBase[] = {HandSkeleton::RING_BASE, HandSkeleton::MIDDLE_BASE};
+		int toSetCount = 2;
+		
+		ofVec2f imitateTop;
+		ofVec2f imitateMid;
+		ofVec2f imitateBase;
+		for(int i = 0; i < toSetCount; i++) {
+			ofVec2f xAxis(1, 0);
+			ofVec2f yAxis(0, -1);
+
+			imitateTop = handSkeleton.getPositionAbsolute(toImitateTop[i]);
+			imitateBase = handSkeleton.getPositionAbsolute(toImitateBase[i]);
+			ofVec2f dir = imitateTop - imitateBase;
+
+			float fromY = dir.angle(yAxis);
+
+			float angleOffset = ofMap(abs(fromY), 0, 60, 0, 25);
+			if (i % 2 == 1) angleOffset = -angleOffset;
+			handSkeleton.setRotation(toImitateBase[i], angleOffset, false, false);
+
+			imitateMid = handSkeleton.getPositionAbsolute(toImitateMid[i]);
+			imitateBase = handSkeleton.getPositionAbsolute(toImitateBase[i]);
+			
+			ofVec2f dirBase = imitateMid - imitateBase;
+			float baseAngle = dirBase.angle(xAxis);
+
+			int setBase = toSetBase[i];
+			handSkeleton.setRotation(setBase, -baseAngle, true, false);
+
+			imitateTop = handSkeleton.getPositionAbsolute(toImitateTop[i]);
+			imitateMid = handSkeleton.getPositionAbsolute(toImitateMid[i]);
+			
+			ofVec2f dirMid = imitateTop - imitateMid;
+			float midAngle = dirMid.angle(xAxis);
+
+			int setMid = toSetMid[i];
+			handSkeleton.setRotation(setMid, -midAngle, true, false);
+
+			ofVec2f original = handSkeleton.getPositionAbsolute(setBase);
+			ofVec2f position = imitateBase - original;
+			position.normalize();
+			position *= 35;
+			handSkeleton.setPosition(toImitateBase[i], original, true, false);
+			handSkeleton.setPosition(toImitateBase[i], position, false, false);
+		}
+		setSkeleton(&handSkeleton);
 	}
 
 	// we update the puppet using that skeleton

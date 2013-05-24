@@ -78,8 +78,23 @@ public:
 	void setBoneLength(int i, float distance) {
 		Bone& bone = bones[i];
 		if(bone.getParent() != NULL) {
+			//ofVec2f dir = bone.getGlobalPosition() - bone.getParent()->getGlobalPosition();
+			//dir.normalize();
+			//dir *= distance;
+			
 			bone.setGlobalPosition(bone.getParent()->getGlobalPosition());
+			
+			//bone.move(dir);
+			
 			bone.move(distance, 0, 0);
+		}
+	}
+	void setBoneLength(int i, ofVec2f distance) {
+		Bone& bone = bones[i];
+		if (bone.getParent() != NULL) {
+			bone.setGlobalPosition(bone.getParent()->getGlobalPosition());
+			//bone.move(distance);
+			setPosition(i, distance, false, false);
 		}
 	}
 	void stashChildren(int i) {

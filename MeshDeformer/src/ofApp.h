@@ -9,6 +9,7 @@
 #include "ThreePointSkeleton.h"
 #include "HandWithFingertipsSkeleton.h"
 #include "PalmSkeleton.h"
+#include "WristSpineSkeleton.h"
 
 using namespace ofxCv;
 using namespace cv;
@@ -28,7 +29,9 @@ public:
 		WAVE, WIGGLE, WOBBLE, 
 		EQUALIZE, NORTH, LISSAJOUS,
 		MEANDER, PROP_WIGGLE, SIN_LENGTH,
-		PULSE_PALM, RETRACTION, SIN_WIGGLE
+		PULSE_PALM, RETRACTION, SIN_WIGGLE,
+		WRIST_WIGGLE, MIDDLE_LEN, GROWING_MIDDLE,
+		STARTREK
 	};
 
 	ofxUICanvas* gui;
@@ -43,11 +46,15 @@ public:
 	float pulseLength;
 	float retractHeight, tipRatio, topRatio, middleRatio, bottomRatio;
 	float sinWiggleAngleRange, sinWiggleSpeedUp, sinWigglePhaseOffset;
+	float wristWigglePalmAngleRange, wristWiggleTopAngleRange, wristWiggleMidAngleRange, wristWiggleSpeedUp, wristWigglePhaseOffset;
+	float middleLength, otherLength;
+	float growingMiddleBaseAngleRange, growingMiddleMidAngleRange, growingMiddleTopAngleRange, growingMiddleLength, growingMiddleGrowthAmount, growingMiddleSpeedUp, growingMiddlePhaseOffset;
 	ofMesh mesh;
 	ofImage hand;
 	ofxPuppet puppet;
 	ThreePointSkeleton threePointSkeleton, immutableThreePointSkeleton;
 	PalmSkeleton palmSkeleton, immutablePalmSkeleton;
+	WristSpineSkeleton wristSpineSkeleton, immutableWristSpineSkeleton;
 	HandSkeleton handSkeleton, immutableHandSkeleton;
 	HandWithFingertipsSkeleton handWithFingertipsSkeleton, immutableHandWithFingertipsSkeleton;
 	Skeleton* previousSkeleton, *currentSkeleton;

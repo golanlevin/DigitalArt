@@ -2,32 +2,29 @@
 
 #include "Skeleton.h"
 
-class PalmSkeleton : public Skeleton {
+class WristSpineSkeleton : public Skeleton {
 public:
 	enum Label {
-		BASE = 0,
-		CENTROID,
-		TOP,
-		RIGHT_BASE, RIGHT_MID, RIGHT_TOP,
-		LEFT_BASE, LEFT_MID, LEFT_TOP
+		HAND_TOP,
+		HAND_MID,
+		HAND_BASE,
+		PALM,
+		WRIST_TOP,
+		WRIST_MID,
+		WRIST_BASE
 	};
 	
 	void setup(ofMesh& mesh) {
-		int boneCount = 9;
+		int boneCount = 7;
 		int controlIndicesRaw[] = {
-			1, 79, 8,
-			118, 184, 85,
-			122, 125, 97
+			8, 104, 81, 1, 143, 144, 145
 		};
 		int parentsRaw[] = {
-			-1, BASE, CENTROID,
-			CENTROID, CENTROID, CENTROID,
-			CENTROID, CENTROID, CENTROID
+			-1, HAND_TOP, HAND_MID,
+			HAND_BASE, PALM, WRIST_TOP, HAND_TOP,
 		};
 		bool forwardOrientedRaw[] = {
-			true, false, false,
-			false, false, false,
-			false, false, false
+			true, false, false, false, false, false, false
 		};
 		vector<int> controlIndices, parents;
 		vector<bool> forwardOriented;
