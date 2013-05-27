@@ -31,12 +31,13 @@ public:
 		MEANDER, PROP_WIGGLE, SIN_LENGTH,
 		PULSE_PALM, RETRACTION, SIN_WIGGLE,
 		WRIST_WIGGLE, MIDDLE_LEN, GROWING_MIDDLE,
-		STARTREK
+		STARTREK, STRAIGHTEN, SPLAY
 	};
 
 	ofxUICanvas* gui;
-	ofxUICanvas** guis;
-	ofxUIRadio* sceneRadio, *lissajousRadio, *sinusoidalWiggleRadio;
+	ofxUICanvas** guis, mouseGuis;
+	ofxUIRadio *sceneRadio, *lissajousRadio, *sinusoidalWiggleRadio;
+	ofxUIRadio** mouseRadios;
 	bool showImage, showWireframe, showSkeleton, mouseControl;
 	float equalizeLength;
 	float lissajousAmplitude, lissajousFrequency;
@@ -49,6 +50,7 @@ public:
 	float wristWigglePalmAngleRange, wristWiggleTopAngleRange, wristWiggleMidAngleRange, wristWiggleSpeedUp, wristWigglePhaseOffset;
 	float middleLength, otherLength;
 	float growingMiddleBaseAngleRange, growingMiddleMidAngleRange, growingMiddleTopAngleRange, growingMiddleLength, growingMiddleGrowthAmount, growingMiddleSpeedUp, growingMiddlePhaseOffset;
+	float splayHeight, splayAxis, splayMaxAngle;
 	ofMesh mesh;
 	ofImage hand;
 	ofxPuppet puppet;

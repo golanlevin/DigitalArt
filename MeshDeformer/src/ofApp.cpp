@@ -56,6 +56,10 @@ void ofApp::setup() {
 	growingMiddleSpeedUp = 5;
 	growingMiddlePhaseOffset = 0.5;
 
+	splayHeight = 530;
+	splayAxis = 291;
+	splayMaxAngle = 45;
+
 	mouseControl = false;
 	showImage = true;
 	showWireframe = false;
@@ -103,6 +107,8 @@ void ofApp::setupGui() {
 	sceneNames.push_back("Middle Different Length");
 	sceneNames.push_back("Growing Middle Finger");
 	sceneNames.push_back("StarTrek");
+	sceneNames.push_back("Straighten");
+	sceneNames.push_back("Splay");
 
 	vector<string> lissajousStyle;
 	lissajousStyle.push_back("Circle");
@@ -125,15 +131,15 @@ void ofApp::setupGui() {
 	gui->addSpacer();
 	sceneRadio = gui->addRadio("Scene", sceneNames);
 	gui->addSpacer();
-	gui->addLabelToggle("Mouse Control", &mouseControl);
 	gui->addLabelToggle("Show Image", &showImage);
 	gui->addLabelToggle("Show Wireframe", &showWireframe);
 	gui->addLabelToggle("Show Skeleton", &showSkeleton);
+	gui->addLabelToggle("Mouse Control", &mouseControl);
 	gui->addSpacer();
 	gui->autoSizeToFitWidgets();
 	
 	// set the initial scene
-	sceneRadio->getToggles()[STARTREK]->setValue(true);
+	sceneRadio->getToggles()[SPLAY]->setValue(true);
 
 	// create the scene specific guis
 	guis = new ofxUICanvas*[sceneNames.size()];
@@ -192,6 +198,10 @@ void ofApp::setupGui() {
 	guis[GROWING_MIDDLE]->addSlider("Growth Amount", 1, 2, &growingMiddleGrowthAmount);
 	guis[GROWING_MIDDLE]->addSlider("Speed Up", 1, 10, &growingMiddleSpeedUp);
 	guis[GROWING_MIDDLE]->addSlider("Phase Offset", 0, 1, &growingMiddlePhaseOffset);
+
+	guis[SPLAY]->addSlider("Splay Height", 0, 1024, &splayHeight);
+	guis[SPLAY]->addSlider("Splay Axis", 0, 768, &splayAxis);
+	guis[SPLAY]->addSlider("Splay Angle Increment", 0, 90, &splayMaxAngle);
 
 	for (int i=0; i < sceneNames.size(); i++) {
 		guis[i]->autoSizeToFitWidgets();
@@ -624,6 +634,88 @@ void ofApp::update() {
 			handSkeleton.setPosition(toImitateBase[i], position, false, false);
 		}
 		setSkeleton(&handSkeleton);
+	} else if (scene == STRAIGHTEN) {
+		int tip[] = {HandWithFingertipsSkeleton::PINKY_TIP, HandWithFingertipsSkeleton::RING_TIP, HandWithFingertipsSkeleton::MIDDLE_TIP, HandWithFingertipsSkeleton::INDEX_TIP, HandWithFingertipsSkeleton::THUMB_TIP};
+		int top[] = {HandWithFingertipsSkeleton::PINKY_TOP, HandWithFingertipsSkeleton::RING_TOP, HandWithFingertipsSkeleton::MIDDLE_TOP, HandWithFingertipsSkeleton::INDEX_TOP, HandWithFingertipsSkeleton::THUMB_TOP};
+		int mid[] = {HandWithFingertipsSkeleton::PINKY_MID,	HandWithFingertipsSkeleton::RING_MID, HandWithFingertipsSkeleton::MIDDLE_MID, HandWithFingertipsSkeleton::INDEX_MID, HandWithFingertipsSkeleton::THUMB_MID};
+		int base[] = {HandWithFingertipsSkeleton::PINKY_BASE, HandWithFingertipsSkeleton::RING_BASE, HandWithFingertipsSkeleton::MIDDLE_BASE, HandWithFingertipsSkeleton::INDEX_BASE, HandWithFingertipsSkeleton::THUMB_BASE};
+
+		int fingerCount = 5;
+
+		for(int i = 0; i < fingerCount; i++) {
+			int fingerTip = tip[i];
+			int fingerTop = top[i];
+			int fingerMid = mid[i];
+			int fingerBase = base[i];
+
+			ofVec2f tipPos = handWithFingertipsSkeleton.getPositionAbsolute(fingerTip);
+			ofVec2f topPos = handWithFingertipsSkeleton.getPositionAbsolute(fingerTop);
+			ofVec2f midPos = handWithFingertipsSkeleton.getPositionAbsolute(fingerMid);
+			ofVec2f basePos = handWithFingertipsSkeleton.getPositionAbsolute(fingerBase);
+
+			//float bottomLen = basePos.distance(midPos);
+			float middleLen = midPos.distance(topPos);
+			float topLen = topPos.distance(tipPos);
+			ofVec2f dir = midPos - basePos;
+
+			//basePos = handWithFingertipsSkeleton.getPositionAbsolute(fingerBase);
+			//dir.normalize();
+			//dir *= bottomLen;
+			//handWithFingertipsSkeleton.setPosition(fingerMid, basePos, true, false);
+			//handWithFingertipsSkeleton.setPosition(fingerMid, dir, false, false);
+
+			midPos = handWithFingertipsSkeleton.getPositionAbsolute(fingerMid);
+			dir.normalize();
+			dir *= middleLen;
+			handWithFingertipsSkeleton.setPosition(fingerTop, midPos, true, false);
+			handWithFingertipsSkeleton.setPosition(fingerTop, dir, false, false);
+
+			topPos = handWithFingertipsSkeleton.getPositionAbsolute(fingerTop);
+			dir.normalize();
+			dir *= topLen;
+			handWithFingertipsSkeleton.setPosition(fingerTip, topPos, true, false);
+			handWithFingertipsSkeleton.setPosition(fingerTip, dir, false, false);
+		}
+		setSkeleton(&handWithFingertipsSkeleton);
+	} else if (scene == SPLAY) {
+		int palm = HandWithFingertipsSkeleton::PALM;
+		ofVec2f palmPos = handWithFingertipsSkeleton.getPositionAbsolute(palm);
+
+		if (palmPos.y < splayHeight) {
+			int tip[] = {HandWithFingertipsSkeleton::PINKY_TIP, HandWithFingertipsSkeleton::RING_TIP, HandWithFingertipsSkeleton::MIDDLE_TIP, HandWithFingertipsSkeleton::INDEX_TIP, HandWithFingertipsSkeleton::THUMB_TIP};
+			int top[] = {HandWithFingertipsSkeleton::PINKY_TOP, HandWithFingertipsSkeleton::RING_TOP, HandWithFingertipsSkeleton::MIDDLE_TOP, HandWithFingertipsSkeleton::INDEX_TOP, HandWithFingertipsSkeleton::THUMB_TOP};
+			int mid[] = {HandWithFingertipsSkeleton::PINKY_MID,	HandWithFingertipsSkeleton::RING_MID, HandWithFingertipsSkeleton::MIDDLE_MID, HandWithFingertipsSkeleton::INDEX_MID, HandWithFingertipsSkeleton::THUMB_MID};
+			int base[] = {HandWithFingertipsSkeleton::PINKY_BASE, HandWithFingertipsSkeleton::RING_BASE, HandWithFingertipsSkeleton::MIDDLE_BASE, HandWithFingertipsSkeleton::INDEX_BASE, HandWithFingertipsSkeleton::THUMB_BASE};
+
+			float angleOffset = ofMap(palmPos.y, splayHeight, 0, 0, splayMaxAngle);
+			int fingerCount = 5;
+			for (int i=0; i < fingerCount; i++) {
+				int joints[] = {base[i], mid[i], top[i], tip[i]};
+
+				ofVec2f basePos = handWithFingertipsSkeleton.getPositionAbsolute(joints[0]);
+				if (basePos.x < splayAxis) angleOffset = -abs(angleOffset);
+				else if (basePos.x > splayAxis) angleOffset = abs(angleOffset);
+				else angleOffset = 0;
+
+				ofVec2f positions[] = {basePos, handWithFingertipsSkeleton.getPositionAbsolute(joints[1]), handWithFingertipsSkeleton.getPositionAbsolute(joints[2]), handWithFingertipsSkeleton.getPositionAbsolute(joints[3])};
+				float lengths[] = {positions[0].distance(positions[1]), positions[1].distance(positions[2]), positions[2].distance(positions[3])};
+				ofVec2f dir = positions[1] - positions[0];
+				dir.normalize();
+
+				int fingerPartCount = 3;
+				for(int j = 0; j < fingerPartCount; j++) {
+					dir = dir.getRotated(angleOffset);
+					dir.normalize();
+					dir = dir * lengths[j];
+
+					ofVec2f parent = handWithFingertipsSkeleton.getPositionAbsolute(joints[j]);
+
+					handWithFingertipsSkeleton.setPosition(joints[j+1], parent, true, false);
+					handWithFingertipsSkeleton.setPosition(joints[j+1], dir, false, false);
+				}
+			}
+		}
+		setSkeleton(&handWithFingertipsSkeleton);
 	}
 
 	// we update the puppet using that skeleton
@@ -650,6 +742,11 @@ void ofApp::draw() {
 	if (scene == RETRACTION) {
 		ofSetColor(255);
 		ofLine(0, retractHeight, 768, retractHeight);
+	}
+	else if (scene == SPLAY) {
+		ofSetColor(255);
+		ofLine(0, splayHeight, 768, splayHeight);
+		ofLine(splayAxis, 0, splayAxis, 1024);
 	}
 }
 
