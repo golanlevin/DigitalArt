@@ -17,6 +17,52 @@ struct eigenMultiPartData {
 	float eigenValue;
 };
 
+enum HandType {
+	HAND_ERROR = -1,
+	HAND_NONE  =  0,
+	HAND_RIGHT =  1,
+	HAND_LEFT  =  2
+};
+
+#define N_HANDMARKS 16
+#define HANDMARK_HISTORY_LENGTH		24
+#define DESIRED_N_CONTOUR_POINTS	1250
+#define N_FINGER_LENGTH_SAMPLES		11
+#define N_FINGER_WIDTH_SAMPLES		5
+
+enum HandmarkType {
+	HANDMARK_INVALID			= -1,
+	HANDMARK_PINKY_TIP			= 0,
+	HANDMARK_PR_CROTCH			= 1,
+	HANDMARK_RING_TIP			= 2,
+	HANDMARK_RM_CROTCH			= 3,
+	HANDMARK_MIDDLE_TIP			= 4,
+	HANDMARK_MI_CROTCH			= 5,
+	HANDMARK_POINTER_TIP		= 6,
+	HANDMARK_POINTER_SIDE		= 7,
+	HANDMARK_IT_CROTCH			= 8,
+	HANDMARK_THUMB_TIP			= 9,
+	HANDMARK_THUMB_KNUCKLE		= 10,
+	HANDMARK_THUMB_BASE			= 11,
+	HANDMARK_THUMBSIDE_WRIST	= 12,
+	HANDMARK_PINKYSIDE_WRIST	= 13,
+	HANDMARK_PALM_BASE			= 14,
+	HANDMARK_PINKY_SIDE			= 15
+};
+
+struct Handmark { // analogous to landmark
+	ofVec2f			point;			// the final actual location
+	vector<ofVec2f>	pointHistory;
+	
+	ofVec2f			pointAvg;		// its running average
+	ofVec2f			pointStDv;		// its running standard deviation
+	
+	int				index;			// the final index in the handContourNice
+	HandmarkType	type;			// the name (or type) of the point
+	float			confidence;		// a score for the Handmark's stability, 0...1
+};
+
+
 
 
 class HandContourAnalyzerAndMeshBuilder {
@@ -25,6 +71,7 @@ public:
 	HandContourAnalyzerAndMeshBuilder();
 	
 	void process (ofPolyline inputContour, cv::Point2f inputCentroid);
+	void informThereIsNoHandPresent(); 
 	void draw ();
 	void draw (bool bDrawWireframe, bool bDrawJoints);
 	void drawAnalytics();
@@ -32,7 +79,7 @@ public:
 	ofMesh		&getMesh();
 	vector<int> &getJoints();
 	bool		isCalculated();
-	void		setContourFilterValues(float r, float s);
+	HandType	getHandType(); 
 	
 	vector<float> buildCurvatureAnalysis (ofPolyline& polyline, int offset);
 	vector<int>   findPeaks (vector<float>& values, float cutoff, int peakArea);
@@ -57,6 +104,8 @@ public:
 	float			peakNeighborDistance;
 	float			crotchAngleCutoff;
 	float			crotchNeighborDistance;
+	float			tooMuchMotionThresholdInStDevs;
+	float			indexInterpolationAlpha; 
 	
 	
 	vector<float>	handContourFilteredCurvatures;
@@ -64,11 +113,11 @@ public:
 	vector<int>		handContourFingerTipIndicesSorted;
 	
 	vector<ofVec2f> fingerTipPointsFiltered;
-	vector<ofVec2f> fingerTipPointsTmp; // on handContourNice
-	vector<ofVec2f> fingerTipPoints; // on handContourNice
+	vector<ofVec2f> fingerTipPointsTmp;      // on handContourNice
+	vector<ofVec2f> fingerTipPoints;         // on handContourNice
+	vector<int>		fingerTipContourIndices; // on handContourNice
 	
-	
-	vector<float>	handContourCurvatures;
+	vector<float>	handContourNiceCurvatures; // from "nice" (accurate) contour
 	vector<int>		handContourPossibleCrotchIndices;
 	vector<int>		handContourCrotchIndicesTmp;
 	vector<int>		handContourCrotchIndicesSorted;
@@ -85,11 +134,11 @@ public:
 	
 	void drawMousePoint (float mx);
 	
+	Handmark		Handmarks[N_HANDMARKS];
 	
 	
-	eigenMultiPartData	eigenData;
 	float getOrientation (vector<ofPoint> pts, ofVec2f COM);
-	void  calcEigenvector (float matrix_00, float matrix_01,
+	float calcEigenvector (float matrix_00, float matrix_01,
 						   float matrix_10, float matrix_11 );
 
 private:
@@ -98,8 +147,46 @@ private:
 	bool			bCalculatedMesh;
 	
 	
+	void		prepareContours (ofPolyline inputContour, cv::Point2f inputCentroid);
+	void		locateFingerTips();
+	void		locateFingerCrotches();
+	void		identifyThumbCrotchAndHandType();
+	void		computeHandOrientationAndSideLine();
+	void		locatePinkySide();
+	void		locatePointerSide();
 	
+	int			locateContourFeature(int startFeatureIndex,
+									 int endFeatureIndex,
+									 float startFeatureIndexOffsetPercent,
+									 float endFeatureIndexInsetPercent,
+									 bool bConcave);
+	void		locateThumbBase();
+	void		locatePalmBase();
+	void		locateThumbKnuckle();
+	void		computeHandmarkStatistics();
+	void		assembleHandmarksPreliminary();
+	void		assembleHandmarks();
+	void		refineFingertips();
+	void		refineHandmarksBasedOnMotionStDev();
+	void		buildMesh();
 	
+	float		distanceFromPointToLine (ofVec2f linePt1, ofVec2f linePt2,  ofVec2f aPoint);
+	
+	int			maxNCrotchesToConsider;
+	int			contourIndexOfPinkySide;
+	int			contourIndexOfPointerSide;
+	int			contourIndexOfThumbBase;
+	int			contourIndexOfPalmBase;
+	int			contourIndexOfThumbKnuckle; 
+	
+	HandType	currentHandType;
+	int			currentHandExistsFrameCount;
+	
+	float fingerOrientations[5];
+	float handOrientation;
+	
+	int	  fingerTipIndices[5];
+
 	
 	void drawMeshWireframe();
 	void drawJoints();

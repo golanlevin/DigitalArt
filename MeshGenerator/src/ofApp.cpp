@@ -50,10 +50,13 @@ void ofApp::setupGui() {
 	gui->addSlider("MaxContourArea%", 0.0, 0.25, &maxAllowableContourAreaAsAPercentOfImageSize);
 	gui->addSlider("ContourSmoothing", 0.0, 50.0,&(HCAAMB.contourSmoothingSize));
 	gui->addSlider("ContourResampling", 1.0, 20.0, &(HCAAMB.contourResampleSpacing));
+	gui->addSlider("nStDevMotionThresh", 0.0, 4.0, &(HCAAMB.tooMuchMotionThresholdInStDevs));
+	gui->addSlider("indexInterpAlpha", 0.0, 1.0, &(HCAAMB.indexInterpolationAlpha)); 
+	
 	gui->addSpacer();
-	gui->addSlider("Sample offset", 1, 40, &(HCAAMB.sampleOffset));
-	gui->addSlider("Crotch angle cutoff", -150, 0, &(HCAAMB.crotchAngleCutoff));
-	gui->addSlider("Crotch neighbor distance", 0, 100, &(HCAAMB.crotchNeighborDistance));
+	//gui->addSlider("Sample offset", 1, 40, &(HCAAMB.sampleOffset));
+	//gui->addSlider("Peak angle cutoff", -150, 0, &(HCAAMB.peakAngleCutoff));
+	//gui->addSlider("Peak neighbor distance", 0, 100, &(HCAAMB.peakNeighborDistance));
 	gui->addSlider("MinLaplaceEdgeStrength", 1, 255, &minLaplaceEdgeStrength);
 	
 	
@@ -193,10 +196,8 @@ void ofApp::update() {
 			handContourPolyline = contourFinder.getPolyline(indexOfHandContour);
 			handContourCentroid = contourFinder.getCentroid(indexOfHandContour);
 			HCAAMB.process(handContourPolyline, handContourCentroid);
-			
-			
-
-			
+		} else {
+			HCAAMB.informThereIsNoHandPresent();
 		}
 		
 		 
@@ -231,6 +232,10 @@ void ofApp::draw() {
 		
 		ofSetColor(255);
 		video.draw(0, 0);
+		
+		if (bValidHandContourExists){
+			HCAAMB.drawAnalytics();
+		}
 		
 		ofPopStyle();
 	}
