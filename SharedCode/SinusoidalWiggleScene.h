@@ -8,7 +8,7 @@ protected:
 	float angleRange;
 	float speedUp;
 	float phaseOffset;
-	ofxUIButton *baseJoint, *midJoint, *topJoint;
+	ofxUIToggle *baseJoint, *midJoint, *topJoint;
 public:
 	SinusoidalWiggleScene(ofxPuppet* puppet, HandWithFingertipsSkeleton* handWithFingertipsSkeleton, HandWithFingertipsSkeleton* immutableHandWithFingertipsSkeleton);
 	void setupGui();

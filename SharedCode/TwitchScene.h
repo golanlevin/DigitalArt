@@ -1,0 +1,20 @@
+#pragma once
+
+#include "Scene.h"
+#include "HandSkeleton.h"
+
+class TwitchScene : public Scene {
+protected:
+	float twitchSigmoidStrength;
+	float choiceSigmoidStrength;
+	float speedUp;
+	float offset;
+	ofxUIToggle *pinky, *ring, *middle, *index, *thumb; 
+public:
+	TwitchScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkeleton* immutableHandSkeleton);
+	void setupGui();
+	void setupMouseGui();
+	void update();
+	void updateMouse(float mx, float my);
+	void draw();
+};
