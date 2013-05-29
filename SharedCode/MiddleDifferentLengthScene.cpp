@@ -14,6 +14,8 @@ void MiddleDifferentLengthScene::setupGui() {
 
 	this->gui->addSlider("Middle Length", 0, 100, &middleLength);
 	this->gui->addSlider("Other Length", 0, 100, &otherLength);
+
+	this->gui->autoSizeToFitWidgets();
 }
 void MiddleDifferentLengthScene::setupMouseGui() {
 	MiddleDifferentLengthScene::initializeMouseGui();
@@ -23,6 +25,8 @@ void MiddleDifferentLengthScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void MiddleDifferentLengthScene::update() {
 	HandSkeleton* handSkeleton = (HandSkeleton*)this->skeleton;

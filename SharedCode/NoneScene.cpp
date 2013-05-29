@@ -8,6 +8,8 @@ NoneScene::NoneScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkeleton
 }
 void NoneScene::setupGui() {
 	NoneScene::initializeGui();
+
+	this->gui->autoSizeToFitWidgets();
 }
 void NoneScene::setupMouseGui() {
 	NoneScene::initializeMouseGui();
@@ -17,6 +19,8 @@ void NoneScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void NoneScene::update() {
 }

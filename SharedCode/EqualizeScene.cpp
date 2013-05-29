@@ -12,6 +12,7 @@ void EqualizeScene::setupGui() {
 	EqualizeScene::initializeGui();
 
 	this->gui->addSlider("Equalize Length", 0, 100, &equalizeLength);
+	this->gui->autoSizeToFitWidgets();
 }
 void EqualizeScene::setupMouseGui() {
 	EqualizeScene::initializeMouseGui();
@@ -21,6 +22,7 @@ void EqualizeScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void EqualizeScene::update() {
 	HandSkeleton* handSkeleton = (HandSkeleton*)this->skeleton;

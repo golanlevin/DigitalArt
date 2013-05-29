@@ -20,6 +20,8 @@ void PropogatingWiggleScene::setupGui() {
 	this->gui->addSlider("Top Angle Range", 10, 60, &topAngleRange);
 	this->gui->addSlider("Speed Up", 1, 5, &speedUp);
 	this->gui->addSlider("Phase Offset", 0, 1, &phaseOffset);
+
+	this->gui->autoSizeToFitWidgets();
 }
 void PropogatingWiggleScene::setupMouseGui() {
 	PropogatingWiggleScene::initializeMouseGui();
@@ -29,6 +31,8 @@ void PropogatingWiggleScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void PropogatingWiggleScene::update() {
 	HandWithFingertipsSkeleton* handWithFingertipsSkeleton = (HandWithFingertipsSkeleton*)this->skeleton;

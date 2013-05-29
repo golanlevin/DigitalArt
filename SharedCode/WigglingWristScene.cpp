@@ -20,6 +20,8 @@ void WigglingWristScene::setupGui() {
 	this->gui->addSlider("Mid Angle Range", 10, 60, &midAngleRange);
 	this->gui->addSlider("Speed Up", 1, 5, &speedUp);
 	this->gui->addSlider("Phase Offset", 0, 1, &phaseOffset);
+
+	this->gui->autoSizeToFitWidgets();
 }
 void WigglingWristScene::setupMouseGui() {
 	WigglingWristScene::initializeMouseGui();
@@ -29,6 +31,8 @@ void WigglingWristScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void WigglingWristScene::update() {
 	WristSpineSkeleton* wristSpineSkeleton = (WristSpineSkeleton*)this->skeleton;

@@ -24,6 +24,8 @@ void GrowingMiddleFingerScene::setupGui() {
 	this->gui->addSlider("Growth Amount", 1, 2, &growthAmount);
 	this->gui->addSlider("Speed Up", 1, 10, &speedUp);
 	this->gui->addSlider("Phase Offset", 0, 1, &phaseOffset);
+
+	this->gui->autoSizeToFitWidgets();
 }
 void GrowingMiddleFingerScene::setupMouseGui() {
 	GrowingMiddleFingerScene::initializeMouseGui();
@@ -33,6 +35,8 @@ void GrowingMiddleFingerScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void GrowingMiddleFingerScene::update() {
 	HandWithFingertipsSkeleton* handWithFingertipsSkeleton = (HandWithFingertipsSkeleton*)this->skeleton;

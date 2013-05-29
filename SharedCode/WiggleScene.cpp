@@ -8,6 +8,8 @@ WiggleScene::WiggleScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkel
 }
 void WiggleScene::setupGui() {
 	WiggleScene::initializeGui();
+
+	this->gui->autoSizeToFitWidgets();
 }
 void WiggleScene::setupMouseGui() {
 	WiggleScene::initializeMouseGui();
@@ -17,6 +19,8 @@ void WiggleScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void WiggleScene::update() {
 	HandSkeleton* handSkeleton = (HandSkeleton*)this->skeleton;

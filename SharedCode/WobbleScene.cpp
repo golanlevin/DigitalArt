@@ -8,6 +8,8 @@ WobbleScene::WobbleScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkel
 }
 void WobbleScene::setupGui() {
 	WobbleScene::initializeGui();
+
+	this->gui->autoSizeToFitWidgets();
 }
 void WobbleScene::setupMouseGui() {
 	WobbleScene::initializeMouseGui();
@@ -17,6 +19,8 @@ void WobbleScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void WobbleScene::update() {
 	HandSkeleton* handSkeleton = (HandSkeleton*)this->skeleton;

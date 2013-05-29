@@ -12,6 +12,7 @@ void MeanderScene::setupGui() {
 	MeanderScene::initializeGui();
 
 	this->gui->addSlider("Meander Amount", 0, 60, &meanderAmount);
+	this->gui->autoSizeToFitWidgets();
 }
 void MeanderScene::setupMouseGui() {
 	MeanderScene::initializeMouseGui();
@@ -21,6 +22,8 @@ void MeanderScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void MeanderScene::update() {
 	HandSkeleton* handSkeleton = (HandSkeleton*)this->skeleton;

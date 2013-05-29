@@ -8,8 +8,7 @@ protected:
 	float angleRange;
 	float speedUp;
 	float phaseOffset;
-	vector<string> wiggleJoints;
-	ofxUIRadio* jointsRadio;
+	ofxUIButton *baseJoint, *midJoint, *topJoint;
 public:
 	SinusoidalWiggleScene(ofxPuppet* puppet, HandWithFingertipsSkeleton* handWithFingertipsSkeleton, HandWithFingertipsSkeleton* immutableHandWithFingertipsSkeleton);
 	void setupGui();

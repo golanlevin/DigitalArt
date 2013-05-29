@@ -20,6 +20,8 @@ void RetractingFingersScene::setupGui() {
 	this->gui->addSlider("Top Ratio", 0, 1, &topRatio);
 	this->gui->addSlider("Middle Ratio", 0, 1, &middleRatio);
 	this->gui->addSlider("Bottom Ratio", 0, 1, &bottomRatio);
+
+	this->gui->autoSizeToFitWidgets();
 }
 void RetractingFingersScene::setupMouseGui() {
 	RetractingFingersScene::initializeMouseGui();
@@ -29,6 +31,8 @@ void RetractingFingersScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void RetractingFingersScene::update() {
 	HandWithFingertipsSkeleton* handWithFingertipsSkeleton = (HandWithFingertipsSkeleton*)this->skeleton;

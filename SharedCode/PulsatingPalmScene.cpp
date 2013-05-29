@@ -14,6 +14,8 @@ void PulsatingPalmScene::setupGui() {
 
 	this->gui->addSlider("Max Length", 5, 20, &maxLength);
 	this->gui->addSlider("Speed Up", 0, 5, &speedUp);
+
+	this->gui->autoSizeToFitWidgets();
 }
 void PulsatingPalmScene::setupMouseGui() {
 	PulsatingPalmScene::initializeMouseGui();
@@ -23,6 +25,8 @@ void PulsatingPalmScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void PulsatingPalmScene::update() {
 	PalmSkeleton* palmSkeleton = (PalmSkeleton*)this->skeleton;

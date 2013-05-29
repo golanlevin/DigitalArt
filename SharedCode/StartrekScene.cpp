@@ -8,6 +8,8 @@ StartrekScene::StartrekScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, Hand
 }
 void StartrekScene::setupGui() {
 	StartrekScene::initializeGui();
+
+	this->gui->autoSizeToFitWidgets();
 }
 void StartrekScene::setupMouseGui() {
 	StartrekScene::initializeMouseGui();
@@ -17,6 +19,8 @@ void StartrekScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void StartrekScene::update() {
 	HandSkeleton* handSkeleton = (HandSkeleton*)this->skeleton;

@@ -9,9 +9,6 @@ SinusoidalWiggleScene::SinusoidalWiggleScene(ofxPuppet* puppet, HandWithFingerti
 	this->angleRange = 45;
 	this->speedUp = 2;
 	this->phaseOffset = 0.5;
-	this->wiggleJoints.push_back("Base");
-	this->wiggleJoints.push_back("Mid");
-	this->wiggleJoints.push_back("Top");
 }
 void SinusoidalWiggleScene::setupGui() {
 	SinusoidalWiggleScene::initializeGui();
@@ -19,8 +16,11 @@ void SinusoidalWiggleScene::setupGui() {
 	this->gui->addSlider("Angle Range", 5, 85, &angleRange);
 	this->gui->addSlider("Speed Up", 1, 5, &speedUp);
 	this->gui->addSlider("Phase Offset", 0, 1, &phaseOffset);
-	this->jointsRadio = this->gui->addRadio("Wiggle Joint Options", wiggleJoints);
-	this->jointsRadio->getToggles()[0]->setValue(true);
+	this->baseJoint = this->gui->addToggle("Base", true);
+	this->midJoint = this->gui->addToggle("Mid", false);
+	this->topJoint = this->gui->addToggle("Top", false);
+	
+	this->gui->autoSizeToFitWidgets();
 }
 void SinusoidalWiggleScene::setupMouseGui() {
 	SinusoidalWiggleScene::initializeMouseGui();
@@ -30,6 +30,8 @@ void SinusoidalWiggleScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void SinusoidalWiggleScene::update() {
 	HandWithFingertipsSkeleton* handWithFingertipsSkeleton = (HandWithFingertipsSkeleton*)this->skeleton;
@@ -38,26 +40,21 @@ void SinusoidalWiggleScene::update() {
 	int mid[] = {HandWithFingertipsSkeleton::PINKY_MID, HandWithFingertipsSkeleton::RING_MID, HandWithFingertipsSkeleton::MIDDLE_MID, HandWithFingertipsSkeleton::INDEX_MID, HandWithFingertipsSkeleton::THUMB_MID};
 	int top[] = {HandWithFingertipsSkeleton::PINKY_TOP, HandWithFingertipsSkeleton::RING_TOP, HandWithFingertipsSkeleton::MIDDLE_TOP, HandWithFingertipsSkeleton::INDEX_TOP, HandWithFingertipsSkeleton::THUMB_TOP};
 			
-	int* toWiggle;
-	int toWiggleCount = 5;
-	switch(getSelection(jointsRadio)) {
-		case 0: // base
-			toWiggle = base;
-			break;
-		case 1: // mid
-			toWiggle = mid;
-			break;
-		case 2: // top
-			toWiggle = top;
-			break;
-	}
-		
-	for (int i=0; i < toWiggleCount; i++) {
-		float offset = i*phaseOffset + i;
+	vector<int*> toWiggle;
+	if (baseJoint->getValue()) toWiggle.push_back(base);
+	if (midJoint->getValue()) toWiggle.push_back(mid);
+	if (topJoint->getValue()) toWiggle.push_back(top);
 
-		int index = toWiggle[i];
-		float theta = ofMap(sin(speedUp*ofGetElapsedTimef() + offset), -1, 1, -(angleRange/2.0), angleRange/2.0);
-		handWithFingertipsSkeleton->setRotation(index, theta, false, false);
+	int toWiggleCount = 5;
+	for (int i=0; i < toWiggle.size(); i++) {
+		int* currentWiggle = toWiggle[i];
+		for (int j=0; j < toWiggleCount; j++) {
+			float offset = j*phaseOffset + j;
+
+			int index = currentWiggle[j];
+			float theta = ofMap(sin(speedUp*ofGetElapsedTimef() + offset), -1, 1, -(angleRange/2.0), angleRange/2.0);
+			handWithFingertipsSkeleton->setRotation(index, theta, false, false);
+		}
 	}
 }
 void SinusoidalWiggleScene::updateMouse(float mx, float my) {

@@ -8,6 +8,8 @@ StraightenFingersScene::StraightenFingersScene(ofxPuppet* puppet, HandWithFinger
 }
 void StraightenFingersScene::setupGui() {
 	StraightenFingersScene::initializeGui();
+
+	this->gui->autoSizeToFitWidgets();
 }
 void StraightenFingersScene::setupMouseGui() {
 	StraightenFingersScene::initializeMouseGui();
@@ -17,6 +19,8 @@ void StraightenFingersScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void StraightenFingersScene::update() {
 	HandWithFingertipsSkeleton* handWithFingertipsSkeleton = (HandWithFingertipsSkeleton*)this->skeleton;

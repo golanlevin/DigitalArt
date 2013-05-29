@@ -16,6 +16,8 @@ void SplayFingersScene::setupGui() {
 	this->gui->addSlider("Splay Height", 0, 1024, &splayHeight);
 	this->gui->addSlider("Splay Axis", 0, 768, &splayAxis);
 	this->gui->addSlider("Max Angle", 0, 90, &maxAngle);
+
+	this->gui->autoSizeToFitWidgets();
 }
 void SplayFingersScene::setupMouseGui() {
 	SplayFingersScene::initializeMouseGui();
@@ -25,6 +27,8 @@ void SplayFingersScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void SplayFingersScene::update() {
 	HandWithFingertipsSkeleton* handWithFingertipsSkeleton = (HandWithFingertipsSkeleton*)this->skeleton;

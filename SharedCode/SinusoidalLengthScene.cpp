@@ -16,6 +16,8 @@ void SinusoidalLengthScene::setupGui() {
 	this->gui->addSlider("Max Length", 10, 30, &maxLength);
 	this->gui->addSlider("Speed Up", 1, 5, &speedUp);
 	this->gui->addSlider("Phase Offset", 0, 1, &phaseOffset);
+
+	this->gui->autoSizeToFitWidgets();
 }
 void SinusoidalLengthScene::setupMouseGui() {
 	SinusoidalLengthScene::initializeMouseGui();
@@ -25,6 +27,8 @@ void SinusoidalLengthScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void SinusoidalLengthScene::update() {
 	HandSkeleton* handSkeleton = (HandSkeleton*)this->skeleton;

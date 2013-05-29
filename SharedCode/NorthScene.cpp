@@ -8,6 +8,8 @@ NorthScene::NorthScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkelet
 }
 void NorthScene::setupGui() {
 	NorthScene::initializeGui();
+
+	this->gui->autoSizeToFitWidgets();
 }
 void NorthScene::setupMouseGui() {
 	NorthScene::initializeMouseGui();
@@ -17,6 +19,8 @@ void NorthScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void NorthScene::update() {
 	HandSkeleton* handSkeleton = (HandSkeleton*)this->skeleton;

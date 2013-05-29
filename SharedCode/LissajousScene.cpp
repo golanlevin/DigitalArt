@@ -21,6 +21,8 @@ void LissajousScene::setupGui() {
 	this->gui->addSlider("Frequency", 0, 5, &frequency);
 	this->lissajousRadio = this->gui->addRadio("Lissajous Style Options", lissajousStyle);
 	this->lissajousRadio->getToggles()[0]->setValue(true);
+
+	this->gui->autoSizeToFitWidgets();
 }
 void LissajousScene::setupMouseGui() {
 	LissajousScene::initializeMouseGui();
@@ -30,6 +32,8 @@ void LissajousScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void LissajousScene::update() {
 	ThreePointSkeleton* threePointSkeleton = (ThreePointSkeleton*)this->skeleton;

@@ -8,6 +8,8 @@ WaveScene::WaveScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkeleton
 }
 void WaveScene::setupGui() {
 	WaveScene::initializeGui();
+
+	this->gui->autoSizeToFitWidgets();
 }
 void WaveScene::setupMouseGui() {
 	WaveScene::initializeMouseGui();
@@ -17,6 +19,8 @@ void WaveScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+
+	this->mouseGui->autoSizeToFitWidgets();
 }
 void WaveScene::update() {
 	HandSkeleton* handSkeleton = (HandSkeleton*)this->skeleton;
