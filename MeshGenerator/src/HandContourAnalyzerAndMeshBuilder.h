@@ -25,7 +25,10 @@ enum HandType {
 };
 
 #define N_HANDMARKS 16
-#define DESIRED_N_CONTOUR_POINTS 1250
+#define HANDMARK_HISTORY_LENGTH		24
+#define DESIRED_N_CONTOUR_POINTS	1250
+#define N_FINGER_LENGTH_SAMPLES		11
+#define N_FINGER_WIDTH_SAMPLES		5
 
 enum HandmarkType {
 	HANDMARK_INVALID			= -1,
@@ -48,9 +51,13 @@ enum HandmarkType {
 };
 
 struct Handmark { // analogous to landmark
-	ofVec2f			point;			// the actual location
-	ofVec2f			pointPrev;		// its previous location
-	int				index;			// the index in the handContourNice
+	ofVec2f			point;			// the final actual location
+	vector<ofVec2f>	pointHistory;
+	
+	ofVec2f			pointAvg;		// its running average
+	ofVec2f			pointStDv;		// its running standard deviation
+	
+	int				index;			// the final index in the handContourNice
 	HandmarkType	type;			// the name (or type) of the point
 	float			confidence;		// a score for the Handmark's stability, 0...1
 };
@@ -64,6 +71,7 @@ public:
 	HandContourAnalyzerAndMeshBuilder();
 	
 	void process (ofPolyline inputContour, cv::Point2f inputCentroid);
+	void informThereIsNoHandPresent(); 
 	void draw ();
 	void draw (bool bDrawWireframe, bool bDrawJoints);
 	void drawAnalytics();
@@ -96,6 +104,8 @@ public:
 	float			peakNeighborDistance;
 	float			crotchAngleCutoff;
 	float			crotchNeighborDistance;
+	float			tooMuchMotionThresholdInStDevs;
+	float			indexInterpolationAlpha; 
 	
 	
 	vector<float>	handContourFilteredCurvatures;
@@ -103,8 +113,8 @@ public:
 	vector<int>		handContourFingerTipIndicesSorted;
 	
 	vector<ofVec2f> fingerTipPointsFiltered;
-	vector<ofVec2f> fingerTipPointsTmp; // on handContourNice
-	vector<ofVec2f> fingerTipPoints; // on handContourNice
+	vector<ofVec2f> fingerTipPointsTmp;      // on handContourNice
+	vector<ofVec2f> fingerTipPoints;         // on handContourNice
 	vector<int>		fingerTipContourIndices; // on handContourNice
 	
 	vector<float>	handContourNiceCurvatures; // from "nice" (accurate) contour
@@ -126,9 +136,9 @@ public:
 	
 	Handmark		Handmarks[N_HANDMARKS];
 	
-	eigenMultiPartData	eigenData;
+	
 	float getOrientation (vector<ofPoint> pts, ofVec2f COM);
-	void  calcEigenvector (float matrix_00, float matrix_01,
+	float calcEigenvector (float matrix_00, float matrix_01,
 						   float matrix_10, float matrix_11 );
 
 private:
@@ -153,7 +163,12 @@ private:
 	void		locateThumbBase();
 	void		locatePalmBase();
 	void		locateThumbKnuckle();
+	void		computeHandmarkStatistics();
+	void		assembleHandmarksPreliminary();
 	void		assembleHandmarks();
+	void		refineFingertips();
+	void		refineHandmarksBasedOnMotionStDev();
+	void		buildMesh();
 	
 	float		distanceFromPointToLine (ofVec2f linePt1, ofVec2f linePt2,  ofVec2f aPoint);
 	
@@ -165,6 +180,12 @@ private:
 	int			contourIndexOfThumbKnuckle; 
 	
 	HandType	currentHandType;
+	int			currentHandExistsFrameCount;
+	
+	float fingerOrientations[5];
+	float handOrientation;
+	
+	int	  fingerTipIndices[5];
 
 	
 	void drawMeshWireframe();
