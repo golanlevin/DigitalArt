@@ -25,6 +25,7 @@ void ofApp::setup() {
 	}
 	
 	split(mesh, indices);
+	mesh = dropUnusedVertices(mesh);
 	
 	/*
 	int toRemove[] = {

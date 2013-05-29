@@ -97,7 +97,11 @@ void split(ofMesh& mesh, vector<ofIndexType>& indices) {
 	vector<ofIndexType> newIndices;
 	for(int i = 0; i < indices.size(); i++) {
 		newIndices.push_back(mesh.getNumVertices());
-		mesh.addVertex(mesh.getVertex(indices[i]));
+		int index = indices[i];
+		mesh.addVertex(mesh.getVertex(index));
+		if(mesh.hasTexCoords()) {
+			mesh.addTexCoord(mesh.getTexCoord(index));
+		}
 	}
 	cout << ofToString(newIndices) << endl;
 	for(int i = 0; i < n; i += 3) {
@@ -110,7 +114,7 @@ void split(ofMesh& mesh, vector<ofIndexType>& indices) {
 			
 			int si = indices[j];
 			if(si == i0 || si == i1 || si == i2) {
-				int diffIndex;
+				int diffIndex = i0;
 				if(si != i0) {
 					diffIndex = i0;
 				} else if(si != i1) {
