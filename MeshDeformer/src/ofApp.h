@@ -26,6 +26,7 @@
 #include "SplayFingersScene.h"
 #include "TwitchScene.h"
 #include "PinkyPuppeteerScene.h"
+#include "FingerLengthPuppeteerScene.h"
 
 #include "HandSkeleton.h"
 #include "ThreePointSkeleton.h"

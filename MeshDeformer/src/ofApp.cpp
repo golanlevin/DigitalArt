@@ -30,6 +30,7 @@ void ofApp::setup() {
 	scenes.push_back(new SplayFingersScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton)); 
 	scenes.push_back(new TwitchScene(&puppet, &handSkeleton, &immutableHandSkeleton));
 	scenes.push_back(new PinkyPuppeteerScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton));
+	scenes.push_back(new FingerLengthPuppeteerScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton));
 
 	// set up the main gui
 	setupGui();

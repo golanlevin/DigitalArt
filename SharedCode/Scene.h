@@ -50,15 +50,19 @@ public:
 	void initializeGui() {
 		gui = new ofxUICanvas();
 		gui->setFont("GUI/NewMedia Fett.ttf");
-		gui->setPosition(555, 0);
+		gui->setPosition(540, 0);
 		gui->setVisible(false);
+		gui->addLabel("Scene Adjustment Options");
+		gui->addSpacer();
 	}
 	virtual void setupGui(){}
 	void initializeMouseGui() {
 		mouseGui = new ofxUICanvas();
 		mouseGui->setFont("GUI/NewMedia Fett.ttf");
-		mouseGui->setPosition(0, 600);
+		mouseGui->setPosition(320, 0);
 		mouseGui->setVisible(false);
+		mouseGui->addLabel("Mouse Control Options");
+		mouseGui->addSpacer();
 	}
 	virtual void setupMouseGui() {}
 	bool guiIsOn() {
