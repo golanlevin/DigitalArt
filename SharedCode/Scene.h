@@ -16,6 +16,8 @@ protected:
 	bool beginSceneTimeSet;
 	float beginSceneTime;
 
+	bool startShowImage, startShowWireframe, startShowSkeleton, startMouseControl;
+
 public:	
 	Scene() {
 		this->name = "";
@@ -25,6 +27,11 @@ public:
 
 		this->beginSceneTimeSet = false;
 		this->beginSceneTime = 0;
+
+		this->startMouseControl = true;
+		this->startShowWireframe = false;
+		this->startShowSkeleton = true;
+		this->startMouseControl = false;
 	}
 	void setup(string name, ofxPuppet* puppet, Skeleton* skeleton, Skeleton* immutableSkeleton) {
 		this->name = name;
@@ -34,6 +41,11 @@ public:
 
 		this->beginSceneTimeSet = false;
 		this->beginSceneTime = 0;
+
+		this->startMouseControl = true;
+		this->startShowWireframe = false;
+		this->startShowSkeleton = true;
+		this->startMouseControl = false;
 	}
 	void initializeGui() {
 		gui = new ofxUICanvas();
@@ -89,6 +101,18 @@ public:
 	}
 	float getBeginSceneTime() {
 		return this->beginSceneTime;
+	}
+	bool isStartShowImage() {
+		return this->startShowImage;
+	}
+	bool isStartShowWireframe() {
+		return this->startShowWireframe;
+	}
+	bool isStartShowSkeleton() {
+		return this->startShowSkeleton;
+	}
+	bool isStartMouseControl() {
+		return this->startMouseControl;
 	}
 	int getSelection(ofxUIRadio* radio) {
 		vector<ofxUIToggle*> toggles = radio->getToggles();

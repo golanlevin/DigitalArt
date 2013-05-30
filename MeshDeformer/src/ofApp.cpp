@@ -29,6 +29,7 @@ void ofApp::setup() {
 	scenes.push_back(new StraightenFingersScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton)); 
 	scenes.push_back(new SplayFingersScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton)); 
 	scenes.push_back(new TwitchScene(&puppet, &handSkeleton, &immutableHandSkeleton));
+	scenes.push_back(new PinkyPuppeteerScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton));
 
 	// set up the main gui
 	setupGui();
@@ -138,7 +139,13 @@ void ofApp::update() {
 	}
 
 	// turn on the gui for the current scene
-	if (!scenes[scene]->guiIsOn()) scenes[scene]->turnOn();
+	if (!scenes[scene]->guiIsOn()) {
+		scenes[scene]->turnOn();
+		showImage = scenes[scene]->isStartShowImage();
+		showWireframe = scenes[scene]->isStartShowWireframe();
+		showSkeleton = scenes[scene]->isStartShowSkeleton();
+		mouseControl = scenes[scene]->isStartMouseControl();
+	}
 	// update skeleton
 	scenes[scene]->update();
 	setSkeleton(scenes[scene]->getSkeleton());
