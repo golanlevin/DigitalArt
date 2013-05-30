@@ -28,7 +28,8 @@ void ofApp::setup() {
 	scenes.push_back(new StartrekScene(&puppet, &handSkeleton, &immutableHandSkeleton)); 
 	scenes.push_back(new StraightenFingersScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton)); 
 	scenes.push_back(new SplayFingersScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton)); 
-	
+	scenes.push_back(new TwitchScene(&puppet, &handSkeleton, &immutableHandSkeleton));
+
 	// set up the main gui
 	setupGui();
 	sharedSetup();
@@ -131,6 +132,9 @@ void ofApp::update() {
 		if (!scenes[scene]->mouseGuiIsOn()) scenes[scene]->turnOnMouse();
 		// update the mouse
 		scenes[scene]->updateMouse(mouseX, mouseY);
+	}
+	else {
+		scenes[scene]->turnOffMouse();
 	}
 
 	// turn on the gui for the current scene

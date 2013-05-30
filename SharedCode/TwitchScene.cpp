@@ -11,7 +11,7 @@ TwitchScene::TwitchScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkel
 	this->twitchSigmoidStrength = 0.8;
 	this->choiceSigmoidStrength = 0.5;
 	this->speedUp = 5;
-	this->offset = 0.5;
+	this->minAngle = 0.9;
 }
 void TwitchScene::setupGui() {
 	TwitchScene::initializeGui();
@@ -19,12 +19,12 @@ void TwitchScene::setupGui() {
 	this->gui->addSlider("Twitch Sigmoid Strength", 0, 0.99, &twitchSigmoidStrength);
 	this->gui->addSlider("Choice Sigmoid Strength", 0, 0.99, &choiceSigmoidStrength);
 	this->gui->addSlider("Speed Up", 1, 10, &speedUp);
-	this->gui->addSlider("Offset", 0, 1, &offset);
+	this->gui->addSlider("Min Angle", 0, 1, &minAngle);
 	this->pinky = this->gui->addToggle("Pinky", true);
 	this->ring = this->gui->addToggle("Ring", true);
-	this->middle = this->gui->addToggle("Middle", true);
-	this->index = this->gui->addToggle("Index", true);
-	this->thumb = this->gui->addToggle("Thumb", true);
+	this->middle = this->gui->addToggle("Middle", false);
+	this->index = this->gui->addToggle("Index", false);
+	this->thumb = this->gui->addToggle("Thumb", false);
 
 	this->gui->autoSizeToFitWidgets();
 }
@@ -60,13 +60,14 @@ void TwitchScene::update() {
 		strength = ofClamp(strength, minStrength, maxStrength);
 		strength = 1 - strength;
 
-		float choice = ofNoise(speedUp*t + offset);
+		float choice = ofNoise(t, 1000);
 		if (choice < 0.5) {
 			choice = pow(2.0*choice, 1.0/strength)/ 2.0;
 		}
 		else {
-			choice = 1.0 - (pow(2.0*choice, 1.0/strength) / 2.0);
+			choice = 1.0 - (pow(2.0*(1.0-choice), 1.0/strength) / 2.0);
 		}
+
 		float sectionSize = 1.0 / (float)twitchOptions.size();
 		int toTwitch;
 		for (int i=0; i < twitchOptions.size(); i++) {
@@ -80,15 +81,17 @@ void TwitchScene::update() {
 		strength = ofClamp(strength, minStrength, maxStrength);
 		strength = 1 - strength;
 
-		float angle = ofNoise(speedUp*t);//ofMap(sin(speedUp*t), -1, 1, 0, 1);
+		float angle = ofNoise(speedUp*t);
 		if (angle < 0.5) {
 			angle = pow(2.0*angle, 1.0/strength)/ 2.0;
 		}
 		else {
-			angle = 1.0 - (pow(2.0*angle, 1.0/strength) / 2.0);
+			angle = 1.0 - (pow(2.0*(1.0-angle), 1.0/strength) / 2.0);
 		}
 
-		handSkeleton->setRotation(toTwitch, angle, false, false);
+		if (angle >= minAngle) {
+			handSkeleton->setRotation(toTwitch, angle, false, false);
+		}
 	}
 }
 void TwitchScene::updateMouse(float mx, float my) {

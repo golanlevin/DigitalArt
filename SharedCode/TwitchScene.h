@@ -8,7 +8,7 @@ protected:
 	float twitchSigmoidStrength;
 	float choiceSigmoidStrength;
 	float speedUp;
-	float offset;
+	float minAngle;
 	ofxUIToggle *pinky, *ring, *middle, *index, *thumb; 
 public:
 	TwitchScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkeleton* immutableHandSkeleton);

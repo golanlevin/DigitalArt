@@ -24,6 +24,7 @@
 #include "StartrekScene.h"
 #include "StraightenFingersScene.h"
 #include "SplayFingersScene.h"
+#include "TwitchScene.h"
 
 #include "HandSkeleton.h"
 #include "ThreePointSkeleton.h"
@@ -44,35 +45,12 @@ public:
 	
 	void setSkeleton(Skeleton* skeleton);
 
-	enum SceneIndex {
-		NONE = 0,
-		WAVE, WIGGLE, WOBBLE, 
-		EQUALIZE, NORTH, LISSAJOUS,
-		MEANDER, PROP_WIGGLE, SIN_LENGTH,
-		PULSE_PALM, RETRACTION, SIN_WIGGLE,
-		WRIST_WIGGLE, MIDDLE_LEN, GROWING_MIDDLE,
-		STARTREK, STRAIGHTEN, SPLAY
-	};
-
 	vector<Scene*> scenes;
 
 	ofxUICanvas* gui;
-	ofxUICanvas** guis;//, mouseGuis;
-	ofxUIRadio *sceneRadio;//, *lissajousRadio, *sinusoidalWiggleRadio;
-	//ofxUIRadio** mouseRadios;
+	ofxUICanvas** guis;
+	ofxUIRadio *sceneRadio;
 	bool showImage, showWireframe, showSkeleton, mouseControl;
-	//float equalizeLength;
-	//float lissajousAmplitude, lissajousFrequency;
-	//float meanderAmount;
-	//float propWiggleBaseAngleRange, propWiggleMidAngleRange, propWiggleTopAngleRange, propWiggleSpeedUp, propWigglePhaseOffset;
-	//float sinLength, sinLengthPhaseOffset;
-	//float pulseLength;
-	//float retractHeight, tipRatio, topRatio, middleRatio, bottomRatio;
-	//float sinWiggleAngleRange, sinWiggleSpeedUp, sinWigglePhaseOffset;
-	//float wristWigglePalmAngleRange, wristWiggleTopAngleRange, wristWiggleMidAngleRange, wristWiggleSpeedUp, wristWigglePhaseOffset;
-	//float middleLength, otherLength;
-	//float growingMiddleBaseAngleRange, growingMiddleMidAngleRange, growingMiddleTopAngleRange, growingMiddleLength, growingMiddleGrowthAmount, growingMiddleSpeedUp, growingMiddlePhaseOffset;
-	//float splayHeight, splayAxis, splayMaxAngle;
 	ofMesh mesh;
 	ofImage hand;
 	ofxPuppet puppet;
