@@ -5,6 +5,8 @@
 
 class SinusoidalWiggleScene : public Scene {
 protected:
+	float maxPalmAngleLeft, maxPalmAngleRight;	
+
 	float angleRange;
 	float speedUp;
 	float phaseOffset;

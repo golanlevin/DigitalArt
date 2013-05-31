@@ -4,6 +4,8 @@
 #include "HandSkeleton.h"
 
 class WobbleScene : public Scene {
+protected:
+	float maxPalmAngleLeft, maxPalmAngleRight;	
 public:
 	WobbleScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkeleton* immutableHandSkeleton);
 	void setupGui();

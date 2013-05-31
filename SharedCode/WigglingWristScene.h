@@ -5,6 +5,8 @@
 
 class WigglingWristScene : public Scene {
 protected:
+	float maxPalmAngleLeft, maxPalmAngleRight;	
+
 	float palmAngleRange;
 	float topAngleRange;
 	float midAngleRange;

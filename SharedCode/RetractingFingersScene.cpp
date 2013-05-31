@@ -6,6 +6,9 @@ RetractingFingersScene::RetractingFingersScene(ofxPuppet* puppet, HandWithFinger
 	Scene::Scene();
 	Scene::setup("Retracting Fingers", puppet, (Skeleton*)handWithFingertipsSkeleton, (Skeleton*)immutableHandWithFingertipsSkeleton);
 
+	this->maxPalmAngleLeft = 60;
+	this->maxPalmAngleRight = -60;
+
 	this->retractHeight = 150;
 	this->tipRatio = 0.2;
 	this->topRatio = 0.3;
@@ -16,10 +19,15 @@ void RetractingFingersScene::setupGui() {
 	RetractingFingersScene::initializeGui();
 
 	this->gui->addSlider("Retract Height", 0, 500, &retractHeight);
+	this->gui->addSpacer();
 	this->gui->addSlider("Tip Ratio", 0, 1, &tipRatio);
+	this->gui->addSpacer();
 	this->gui->addSlider("Top Ratio", 0, 1, &topRatio);
+	this->gui->addSpacer();
 	this->gui->addSlider("Middle Ratio", 0, 1, &middleRatio);
+	this->gui->addSpacer();
 	this->gui->addSlider("Bottom Ratio", 0, 1, &bottomRatio);
+	this->gui->addSpacer();
 
 	this->gui->autoSizeToFitWidgets();
 }
@@ -31,6 +39,7 @@ void RetractingFingersScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+	this->mouseGui->addSpacer();
 
 	this->mouseGui->autoSizeToFitWidgets();
 }
@@ -112,6 +121,30 @@ void RetractingFingersScene::updateMouse(float mx, float my) {
 			immutableHandWithFingertipsSkeleton->setPosition(HandWithFingertipsSkeleton::PALM, mouse, true);
 			break;
 		case 1: // palm rotation
+			ofVec2f xAxis(1, 0);
+
+			int wrist = HandWithFingertipsSkeleton::WRIST;
+			int palm = HandWithFingertipsSkeleton::PALM;
+
+
+			ofVec2f origWristPos = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(wrist));
+			ofVec2f origPalmPos = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(palm));
+
+			ofVec2f origPalmDir = origPalmPos - origWristPos;
+			
+			float curRot = origPalmDir.angle(xAxis);
+			float correction = 0;
+
+			float newRot;
+			if (mx <= 384) {
+				newRot = ofMap(mx, 0, 384, -(curRot+correction+maxPalmAngleLeft), -(curRot+correction));
+			}
+			else {
+				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxPalmAngleRight));
+			}
+
+			handWithFingertipsSkeleton->setRotation(palm, newRot, true, false);
+			immutableHandWithFingertipsSkeleton->setRotation(palm, newRot, true, false);
 			break;
 	}
 }

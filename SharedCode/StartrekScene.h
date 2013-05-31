@@ -4,6 +4,8 @@
 #include "HandSkeleton.h"
 
 class StartrekScene : public Scene {
+protected:
+	float maxPalmAngleLeft, maxPalmAngleRight;	
 public:
 	StartrekScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkeleton* immutableHandSkeleton);
 	void setupGui();

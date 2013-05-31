@@ -23,9 +23,14 @@ void PinkyPuppeteerScene::setupGui() {
 	PinkyPuppeteerScene::initializeGui();
 	
 	this->gui->addSlider("Max Base Angle", 0, 30, &maxPinkyBaseAngle);
+	this->gui->addSpacer();
 	this->gui->addSlider("Max Mid Angle", 0, 30, &maxPinkyMidAngle);
+	this->gui->addSpacer();
 	this->gui->addSlider("Max Top Angle", 0, 30, &maxPinkyTopAngle);
+	this->gui->addSpacer();
+	this->gui->addLabel("Pinky Mirrors Thumb", 2);
 	this->mirror = this->gui->addToggle("Mirror Movements", true);
+	this->gui->addSpacer();
 
 	this->gui->autoSizeToFitWidgets();
 }
@@ -38,6 +43,7 @@ void PinkyPuppeteerScene::setupMouseGui() {
 	mouseOptions.push_back("Thumb Top Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+	this->mouseGui->addSpacer();
 
 	this->mouseGui->autoSizeToFitWidgets();
 }

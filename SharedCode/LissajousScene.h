@@ -5,6 +5,8 @@
 
 class LissajousScene : public Scene {
 protected:
+	float maxPalmAngleLeft, maxPalmAngleRight;	
+
 	float amplitude;
 	float frequency;
 	vector<string> lissajousStyle;

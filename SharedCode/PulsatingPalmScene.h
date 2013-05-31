@@ -5,6 +5,8 @@
 
 class PulsatingPalmScene : public Scene {
 protected:
+	float maxPalmAngleLeft, maxPalmAngleRight;	
+
 	float maxLength;
 	float speedUp;
 public:

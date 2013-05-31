@@ -5,6 +5,8 @@
 
 class SplayFingersScene : public Scene {
 protected:
+	float maxPalmAngleLeft, maxPalmAngleRight;	
+
 	float splayHeight;
 	float splayAxis;
 	float maxAngle;

@@ -44,7 +44,7 @@ public:
 
 		this->startMouseControl = true;
 		this->startShowWireframe = false;
-		this->startShowSkeleton = true;
+		this->startShowSkeleton = false;
 		this->startMouseControl = false;
 	}
 	void initializeGui() {

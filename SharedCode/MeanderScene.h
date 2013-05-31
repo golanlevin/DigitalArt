@@ -5,6 +5,8 @@
 
 class MeanderScene : public Scene {
 protected:
+	float maxPalmAngleLeft, maxPalmAngleRight;	
+
 	float meanderAmount;
 public:
 	MeanderScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkeleton* immutableHandSkeleton);

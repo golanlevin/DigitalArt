@@ -5,6 +5,8 @@
 
 class PropogatingWiggleScene : public Scene {
 protected:
+	float maxPalmAngleLeft, maxPalmAngleRight;	
+
 	float baseAngleRange;
 	float midAngleRange;
 	float topAngleRange;

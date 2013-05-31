@@ -4,6 +4,12 @@
 #include "HandWithFingertipsSkeleton.h"
 
 class StraightenFingersScene : public Scene {
+protected:
+	float maxPalmAngleLeft, maxPalmAngleRight;	
+	float maxBaseAngleLeft, maxBaseAngleRight;
+	float maxMidAngleLeft, maxMidAngleRight;
+	float maxTopAngleLeft, maxTopAngleRight;
+
 public:
 	StraightenFingersScene(ofxPuppet* puppet, HandWithFingertipsSkeleton* handWithFingertipsSkeleton, HandWithFingertipsSkeleton* immutableHandWithFingertipsSkeleton);
 	void setupGui();

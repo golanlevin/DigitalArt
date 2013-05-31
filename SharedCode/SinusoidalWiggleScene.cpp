@@ -6,6 +6,9 @@ SinusoidalWiggleScene::SinusoidalWiggleScene(ofxPuppet* puppet, HandWithFingerti
 	Scene::Scene();
 	Scene::setup("Sinusoidal Wiggle", puppet, (Skeleton*)handWithFingertipsSkeleton, (Skeleton*)immutableHandWithFingertipsSkeleton);
 
+	this->maxPalmAngleLeft = 60;
+	this->maxPalmAngleRight = -60;
+
 	this->angleRange = 45;
 	this->speedUp = 2;
 	this->phaseOffset = 0.5;
@@ -14,12 +17,17 @@ void SinusoidalWiggleScene::setupGui() {
 	SinusoidalWiggleScene::initializeGui();
 
 	this->gui->addSlider("Angle Range", 5, 85, &angleRange);
+	this->gui->addSpacer();
 	this->gui->addSlider("Speed Up", 1, 5, &speedUp);
+	this->gui->addSpacer();
 	this->gui->addSlider("Phase Offset", 0, 1, &phaseOffset);
+	this->gui->addSpacer();
+	this->gui->addLabel("Joints to Wiggle", 2);
 	this->baseJoint = this->gui->addToggle("Base", true);
 	this->midJoint = this->gui->addToggle("Mid", false);
 	this->topJoint = this->gui->addToggle("Top", false);
-	
+	this->gui->addSpacer();
+
 	this->gui->autoSizeToFitWidgets();
 }
 void SinusoidalWiggleScene::setupMouseGui() {
@@ -30,6 +38,7 @@ void SinusoidalWiggleScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+	this->mouseGui->addSpacer();
 
 	this->mouseGui->autoSizeToFitWidgets();
 }
@@ -69,6 +78,30 @@ void SinusoidalWiggleScene::updateMouse(float mx, float my) {
 			immutableHandWithFingertipsSkeleton->setPosition(HandWithFingertipsSkeleton::PALM, mouse, true);
 			break;
 		case 1: // palm rotation
+			ofVec2f xAxis(1, 0);
+
+			int wrist = HandWithFingertipsSkeleton::WRIST;
+			int palm = HandWithFingertipsSkeleton::PALM;
+
+
+			ofVec2f origWristPos = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(wrist));
+			ofVec2f origPalmPos = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(palm));
+
+			ofVec2f origPalmDir = origPalmPos - origWristPos;
+			
+			float curRot = origPalmDir.angle(xAxis);
+			float correction = 0;
+
+			float newRot;
+			if (mx <= 384) {
+				newRot = ofMap(mx, 0, 384, -(curRot+correction+maxPalmAngleLeft), -(curRot+correction));
+			}
+			else {
+				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxPalmAngleRight));
+			}
+
+			handWithFingertipsSkeleton->setRotation(palm, newRot, true, false);
+			immutableHandWithFingertipsSkeleton->setRotation(palm, newRot, true, false);
 			break;
 	}
 }

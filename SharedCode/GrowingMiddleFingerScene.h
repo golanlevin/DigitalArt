@@ -5,6 +5,8 @@
 
 class GrowingMiddleFingerScene : public Scene {
 protected:
+	float maxPalmAngleLeft, maxPalmAngleRight;	
+
 	float baseAngleRange;
 	float midAngleRange;
 	float topAngleRange;
@@ -12,6 +14,7 @@ protected:
 	float growthAmount;
 	float speedUp;
 	float phaseOffset;
+	ofxUIToggle* keepWiggling;
 public:
 	GrowingMiddleFingerScene(ofxPuppet* puppet, HandWithFingertipsSkeleton* handWithFingertipsSkeleton, HandWithFingertipsSkeleton* immutableHandWithFingertipsSkeleton);
 	void setupGui();

@@ -4,6 +4,8 @@
 #include "HandSkeleton.h"
 
 class NoneScene : public Scene {
+protected:
+	float maxPalmAngleLeft, maxPalmAngleRight;	
 public:
 	NoneScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkeleton* immutableHandSkeleton);
 	void setupGui();

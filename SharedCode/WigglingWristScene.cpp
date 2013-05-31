@@ -6,6 +6,9 @@ WigglingWristScene::WigglingWristScene(ofxPuppet* puppet, WristSpineSkeleton* wr
 	Scene::Scene();
 	Scene::setup("Wiggling Wrist", puppet, (Skeleton*)wristSpineSkeleton, (Skeleton*)immutableWristSpineSkeleton);
 
+	this->maxPalmAngleLeft = 60;
+	this->maxPalmAngleRight = -60;
+
 	this->palmAngleRange = 45;
 	this->topAngleRange = 30;
 	this->midAngleRange = 15;
@@ -16,10 +19,15 @@ void WigglingWristScene::setupGui() {
 	WigglingWristScene::initializeGui();
 
 	this->gui->addSlider("Palm Angle Range", 10, 60, &palmAngleRange);
+	this->gui->addSpacer();
 	this->gui->addSlider("Top Angle Range", 10, 60, &topAngleRange);
+	this->gui->addSpacer();
 	this->gui->addSlider("Mid Angle Range", 10, 60, &midAngleRange);
+	this->gui->addSpacer();
 	this->gui->addSlider("Speed Up", 1, 5, &speedUp);
+	this->gui->addSpacer();
 	this->gui->addSlider("Phase Offset", 0, 1, &phaseOffset);
+	this->gui->addSpacer();
 
 	this->gui->autoSizeToFitWidgets();
 }
@@ -31,6 +39,7 @@ void WigglingWristScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+	this->mouseGui->addSpacer();
 
 	this->mouseGui->autoSizeToFitWidgets();
 }
@@ -69,6 +78,29 @@ void WigglingWristScene::updateMouse(float mx, float my) {
 			immutableWristSpineSkeleton->setPosition(WristSpineSkeleton::HAND_TOP, mouse, true);
 			break;
 		case 1: // palm rotation
+			ofVec2f xAxis(1, 0);
+
+			int wrist = WristSpineSkeleton::WRIST_TOP;
+			int palm = WristSpineSkeleton::PALM;
+
+			ofVec2f origWristPos = puppet->getOriginalMesh().getVertex(wristSpineSkeleton->getControlIndex(wrist));
+			ofVec2f origPalmPos = puppet->getOriginalMesh().getVertex(wristSpineSkeleton->getControlIndex(palm));
+
+			ofVec2f origPalmDir = origPalmPos - origWristPos;
+			
+			float curRot = origPalmDir.angle(xAxis);
+			float correction = 0;
+
+			float newRot;
+			if (mx <= 384) {
+				newRot = ofMap(mx, 0, 384, -(curRot+correction+maxPalmAngleLeft), -(curRot+correction));
+			}
+			else {
+				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxPalmAngleRight));
+			}
+
+			wristSpineSkeleton->setRotation(palm, newRot, true, false);
+			immutableWristSpineSkeleton->setRotation(palm, newRot, true, false);
 			break;
 	}
 }

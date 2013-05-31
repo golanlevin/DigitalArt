@@ -5,6 +5,8 @@
 
 class TwitchScene : public Scene {
 protected:
+	float maxPalmAngleLeft, maxPalmAngleRight;	
+
 	float twitchSigmoidStrength;
 	float choiceSigmoidStrength;
 	float speedUp;

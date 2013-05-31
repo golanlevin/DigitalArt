@@ -6,6 +6,9 @@ GrowingMiddleFingerScene::GrowingMiddleFingerScene(ofxPuppet* puppet, HandWithFi
 	Scene::Scene();
 	Scene::setup("Growing Middle Finger", puppet, (Skeleton*)handWithFingertipsSkeleton, (Skeleton*)immutableHandWithFingertipsSkeleton);
 
+	this->maxPalmAngleLeft = 60;
+	this->maxPalmAngleRight = -60;
+
 	this->baseAngleRange = 60;
 	this->midAngleRange = 30;
 	this->topAngleRange = 15;
@@ -18,12 +21,22 @@ void GrowingMiddleFingerScene::setupGui() {
 	GrowingMiddleFingerScene::initializeGui();
 
 	this->gui->addSlider("Base Angle Range", 10, 90, &baseAngleRange);
+	this->gui->addSpacer();
 	this->gui->addSlider("Mid Angle Range", 10, 90, &midAngleRange);
+	this->gui->addSpacer();
 	this->gui->addSlider("Top Angle Range", 10, 90, &topAngleRange);
+	this->gui->addSpacer();
 	this->gui->addSlider("Max Length", 200, 300, &maxLen);
+	this->gui->addSpacer();
 	this->gui->addSlider("Growth Amount", 1, 2, &growthAmount);
+	this->gui->addSpacer();
 	this->gui->addSlider("Speed Up", 1, 10, &speedUp);
+	this->gui->addSpacer();
 	this->gui->addSlider("Phase Offset", 0, 1, &phaseOffset);
+	this->gui->addSpacer();
+	this->gui->addLabel("Wiggle After Done Growing", 2);
+	this->keepWiggling = this->gui->addToggle("Keep Wiggling", false);
+	this->gui->addSpacer();
 
 	this->gui->autoSizeToFitWidgets();
 }
@@ -35,6 +48,7 @@ void GrowingMiddleFingerScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+	this->mouseGui->addSpacer();
 
 	this->mouseGui->autoSizeToFitWidgets();
 }
@@ -52,9 +66,12 @@ void GrowingMiddleFingerScene::update() {
 	ofVec2f fingerTip = immutableHandWithFingertipsSkeleton->getPositionAbsolute(HandWithFingertipsSkeleton::MIDDLE_TIP);
 	float len = fingerBase.distance(fingerTip);
 	float newLen = len + t*growthAmount;
-		
-	if (newLen > maxLen) newLen = maxLen;
-	else {
+
+	if (newLen > maxLen) {
+		newLen = maxLen;
+	}
+
+	if ((newLen < maxLen) || keepWiggling->getValue()) {
 		float angleRanges[] = {baseAngleRange, midAngleRange, topAngleRange};
 
 		for (int i=1; i < fingerPartCount+1; i++) {
@@ -92,6 +109,29 @@ void GrowingMiddleFingerScene::updateMouse(float mx, float my) {
 			immutableHandWithFingertipsSkeleton->setPosition(HandWithFingertipsSkeleton::PALM, mouse, true);
 			break;
 		case 1: // palm rotation
+			ofVec2f xAxis(1, 0);
+
+			int wrist = HandWithFingertipsSkeleton::WRIST;
+			int palm = HandWithFingertipsSkeleton::PALM;
+
+			ofVec2f origWristPos = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(wrist));
+			ofVec2f origPalmPos = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(palm));
+
+			ofVec2f origPalmDir = origPalmPos - origWristPos;
+			
+			float curRot = origPalmDir.angle(xAxis);
+			float correction = 0;
+
+			float newRot;
+			if (mx <= 384) {
+				newRot = ofMap(mx, 0, 384, -(curRot+correction+maxPalmAngleLeft), -(curRot+correction));
+			}
+			else {
+				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxPalmAngleRight));
+			}
+
+			handWithFingertipsSkeleton->setRotation(palm, newRot, true, false);
+			immutableHandWithFingertipsSkeleton->setRotation(palm, newRot, true, false);
 			break;
 	}
 }

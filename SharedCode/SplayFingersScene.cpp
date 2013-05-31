@@ -6,6 +6,9 @@ SplayFingersScene::SplayFingersScene(ofxPuppet* puppet, HandWithFingertipsSkelet
 	Scene::Scene();
 	Scene::setup("Splay Fingers", puppet, (Skeleton*)handWithFingertipsSkeleton, (Skeleton*)immutableHandWithFingertipsSkeleton);
 
+	this->maxPalmAngleLeft = 60;
+	this->maxPalmAngleRight = -60;
+
 	this->splayHeight = 530;
 	this->splayAxis = 291;
 	this->maxAngle = 45;
@@ -14,8 +17,11 @@ void SplayFingersScene::setupGui() {
 	SplayFingersScene::initializeGui();
 
 	this->gui->addSlider("Splay Height", 0, 1024, &splayHeight);
+	this->gui->addSpacer();
 	this->gui->addSlider("Splay Axis", 0, 768, &splayAxis);
+	this->gui->addSpacer();
 	this->gui->addSlider("Max Angle", 0, 90, &maxAngle);
+	this->gui->addSpacer();
 
 	this->gui->autoSizeToFitWidgets();
 }
@@ -27,6 +33,7 @@ void SplayFingersScene::setupMouseGui() {
 	mouseOptions.push_back("Palm Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
 	this->mouseRadio->getToggles()[0]->setValue(true);
+	this->mouseGui->addSpacer();
 
 	this->mouseGui->autoSizeToFitWidgets();
 }
@@ -85,6 +92,30 @@ void SplayFingersScene::updateMouse(float mx, float my) {
 			immutableHandWithFingertipsSkeleton->setPosition(HandWithFingertipsSkeleton::PALM, mouse, true);
 			break;
 		case 1: // palm rotation
+			ofVec2f xAxis(1, 0);
+
+			int wrist = HandWithFingertipsSkeleton::WRIST;
+			int palm = HandWithFingertipsSkeleton::PALM;
+
+
+			ofVec2f origWristPos = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(wrist));
+			ofVec2f origPalmPos = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(palm));
+
+			ofVec2f origPalmDir = origPalmPos - origWristPos;
+			
+			float curRot = origPalmDir.angle(xAxis);
+			float correction = 0;
+
+			float newRot;
+			if (mx <= 384) {
+				newRot = ofMap(mx, 0, 384, -(curRot+correction+maxPalmAngleLeft), -(curRot+correction));
+			}
+			else {
+				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxPalmAngleRight));
+			}
+
+			handWithFingertipsSkeleton->setRotation(palm, newRot, true, false);
+			immutableHandWithFingertipsSkeleton->setRotation(palm, newRot, true, false);
 			break;
 	}
 }

@@ -5,6 +5,8 @@
 
 class RetractingFingersScene : public Scene {
 protected:
+	float maxPalmAngleLeft, maxPalmAngleRight;	
+
 	float retractHeight;
 	float tipRatio;
 	float topRatio;

@@ -5,6 +5,8 @@
 
 class EqualizeScene : public Scene {
 protected:
+	float maxPalmAngleLeft, maxPalmAngleRight;	 
+
 	float equalizeLength;
 public:
 	EqualizeScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkeleton* immutableHandSkeleton);
