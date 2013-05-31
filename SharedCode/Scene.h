@@ -7,7 +7,7 @@
 
 class Scene {
 protected:
-	string name;
+	string name, nameWithSkeleton;
 	ofxPuppet* puppet;
 	Skeleton *skeleton, *immutableSkeleton;
 	ofxUICanvas *gui, *mouseGui;
@@ -21,6 +21,7 @@ protected:
 public:	
 	Scene() {
 		this->name = "";
+		this->nameWithSkeleton = "";
 		this->puppet = NULL;
 		this->skeleton = NULL;
 		this->immutableSkeleton = NULL;
@@ -33,8 +34,9 @@ public:
 		this->startShowSkeleton = true;
 		this->startMouseControl = false;
 	}
-	void setup(string name, ofxPuppet* puppet, Skeleton* skeleton, Skeleton* immutableSkeleton) {
+	void setup(string name, string nameWithSkeleton, ofxPuppet* puppet, Skeleton* skeleton, Skeleton* immutableSkeleton) {
 		this->name = name;
+		this->nameWithSkeleton = nameWithSkeleton;
 		this->puppet = puppet;
 		this->skeleton = skeleton;
 		this->immutableSkeleton = immutableSkeleton;
@@ -96,6 +98,9 @@ public:
 	virtual void draw() {}
 	string getName() {
 		return this->name;
+	}
+	string getNameWithSkeleton() {
+		return this->nameWithSkeleton;
 	}
 	Skeleton* getSkeleton() {
 		return this->skeleton;

@@ -5,7 +5,10 @@
 
 class StartrekScene : public Scene {
 protected:
-	float maxPalmAngleLeft, maxPalmAngleRight;	
+	float maxPalmAngleLeft, maxPalmAngleRight;
+	float maxBaseAngleLeft, maxBaseAngleRight;
+
+	float curPalmRot, newPalmRot;
 public:
 	StartrekScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkeleton* immutableHandSkeleton);
 	void setupGui();

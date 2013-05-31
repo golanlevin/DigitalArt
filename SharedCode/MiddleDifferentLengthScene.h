@@ -6,6 +6,8 @@
 class MiddleDifferentLengthScene : public Scene {
 protected:
 	float maxPalmAngleLeft, maxPalmAngleRight;	
+	float maxBaseAngleLeft, maxBaseAngleRight;
+	float maxMidAngleLeft, maxMidAngleRight;
 
 	float middleLength;
 	float otherLength;

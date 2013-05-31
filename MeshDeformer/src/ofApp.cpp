@@ -74,6 +74,7 @@ void ofApp::setupGui() {
 	// set up the guis for each scene
 	for (int i=0; i < scenes.size(); i++) {
 		sceneNames.push_back(scenes[i]->getName());
+		sceneWithSkeletonNames.push_back(scenes[i]->getNameWithSkeleton());
 		scenes[i]->setupGui();
 		scenes[i]->setupMouseGui();
 	}
@@ -86,6 +87,7 @@ void ofApp::setupGui() {
 	gui->addFPS();
 	gui->addSpacer();
 	sceneRadio = gui->addRadio("Scene", sceneNames);
+	//sceneRadio = gui->addRadio("Scene", sceneWithSkeletonNames);
 	gui->addSpacer();
 	gui->addLabelToggle("Show Image", &showImage);
 	gui->addLabelToggle("Show Wireframe", &showWireframe);

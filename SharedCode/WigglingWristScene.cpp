@@ -4,10 +4,10 @@
 
 WigglingWristScene::WigglingWristScene(ofxPuppet* puppet, WristSpineSkeleton* wristSpineSkeleton, WristSpineSkeleton* immutableWristSpineSkeleton) {
 	Scene::Scene();
-	Scene::setup("Wiggling Wrist", puppet, (Skeleton*)wristSpineSkeleton, (Skeleton*)immutableWristSpineSkeleton);
+	Scene::setup("Wiggling Wrist", "Wiggling Wrist (Wrist Spine)", puppet, (Skeleton*)wristSpineSkeleton, (Skeleton*)immutableWristSpineSkeleton);
 
-	this->maxPalmAngleLeft = 60;
-	this->maxPalmAngleRight = -60;
+	this->maxPalmAngleLeft = 30;
+	this->maxPalmAngleRight = -30;
 
 	this->palmAngleRange = 45;
 	this->topAngleRange = 30;
@@ -80,8 +80,8 @@ void WigglingWristScene::updateMouse(float mx, float my) {
 		case 1: // palm rotation
 			ofVec2f xAxis(1, 0);
 
-			int wrist = WristSpineSkeleton::WRIST_TOP;
-			int palm = WristSpineSkeleton::PALM;
+			int wrist = WristSpineSkeleton::HAND_MID;
+			int palm = WristSpineSkeleton::HAND_BASE;
 
 			ofVec2f origWristPos = puppet->getOriginalMesh().getVertex(wristSpineSkeleton->getControlIndex(wrist));
 			ofVec2f origPalmPos = puppet->getOriginalMesh().getVertex(wristSpineSkeleton->getControlIndex(palm));

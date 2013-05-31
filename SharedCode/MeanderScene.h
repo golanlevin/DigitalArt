@@ -6,6 +6,7 @@
 class MeanderScene : public Scene {
 protected:
 	float maxPalmAngleLeft, maxPalmAngleRight;	
+	float maxMidAngleLeft, maxMidAngleRight;
 
 	float meanderAmount;
 public:

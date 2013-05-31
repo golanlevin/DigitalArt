@@ -4,7 +4,10 @@
 
 StraightenFingersScene::StraightenFingersScene(ofxPuppet* puppet, HandWithFingertipsSkeleton* handWithFingertipsSkeleton, HandWithFingertipsSkeleton* immutableHandWithFingertipsSkeleton) {
 	Scene::Scene();
-	Scene::setup("Straighten Fingers", puppet, (Skeleton*)handWithFingertipsSkeleton, (Skeleton*)immutableHandWithFingertipsSkeleton);
+	Scene::setup("Straigthen Fingers", "Straighten Fingers (Hand With Fingertips)", puppet, (Skeleton*)handWithFingertipsSkeleton, (Skeleton*)immutableHandWithFingertipsSkeleton);
+
+	this->startShowSkeleton = true;
+	this->startMouseControl = true;
 
 	this->maxPalmAngleLeft = 60;
 	this->maxPalmAngleRight = -60;
@@ -30,7 +33,7 @@ void StraightenFingersScene::setupMouseGui() {
 	mouseOptions.push_back("Finger Mid Rotation");
 	mouseOptions.push_back("Finger Top Rotation");
 	this->mouseRadio = this->mouseGui->addRadio("Mouse Control Options", mouseOptions);
-	this->mouseRadio->getToggles()[0]->setValue(true);
+	this->mouseRadio->getToggles()[2]->setValue(true);
 	this->mouseGui->addSpacer();
 
 	this->mouseGui->autoSizeToFitWidgets();
@@ -112,9 +115,10 @@ void StraightenFingersScene::updateMouse(float mx, float my) {
 	float curRot;
 	float newRot;
 
-	float baseCorrection[] = {26.75, 26.75, 26.75, 26.75, 26.75};
-	float midCorrection[] = {6.75, 6.75, 6.75, 6.75, 6.75};
-	float topCorrection[] = {-16, -16, -16, -16, -16};
+	float correction = 0;
+	float baseCorrection[] = {26.75, -3, 1.75, 7.75, 9.75};
+	float midCorrection[] = {6.75, 2, -1.5, -1.75, -3.5};
+	float topCorrection[] = {-16, 3, 3.5, 2.25, 0.5};
 
 	switch(getSelection(mouseRadio)) {
 		case 0: // palm position
@@ -129,10 +133,10 @@ void StraightenFingersScene::updateMouse(float mx, float my) {
 
 			newRot;
 			if (mx <= 384) {
-				newRot = ofMap(mx, 0, 384, -(curRot+maxPalmAngleLeft), -(curRot));
+				newRot = ofMap(mx, 0, 384, -(curRot+correction+maxPalmAngleLeft), -(curRot+correction));
 			}
 			else {
-				newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxPalmAngleRight));
+				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxPalmAngleRight));
 			}
 
 			handWithFingertipsSkeleton->setRotation(palm, newRot, true, false);

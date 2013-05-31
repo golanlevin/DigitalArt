@@ -5,7 +5,8 @@
 
 class WaveScene : public Scene {
 protected:
-	float maxPalmAngleLeft, maxPalmAngleRight;	
+	float maxPalmAngleLeft, maxPalmAngleRight;
+	float maxBaseAngleLeft, maxBaseAngleRight;
 public:
 	WaveScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkeleton* immutableHandSkeleton);
 	void setupGui();

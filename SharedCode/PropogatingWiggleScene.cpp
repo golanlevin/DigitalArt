@@ -4,7 +4,7 @@
 
 PropogatingWiggleScene::PropogatingWiggleScene(ofxPuppet* puppet, HandWithFingertipsSkeleton* handWithFingertipsSkeleton, HandWithFingertipsSkeleton* immutableHandWithFingertipsSkeleton) {
 	Scene::Scene();
-	Scene::setup("Propogating Wiggle", puppet, (Skeleton*)handWithFingertipsSkeleton, (Skeleton*)immutableHandWithFingertipsSkeleton);
+	Scene::setup("Propogating Wiggle", "Propogating Wiggle (Hand With Fingertips)", puppet, (Skeleton*)handWithFingertipsSkeleton, (Skeleton*)immutableHandWithFingertipsSkeleton);
 
 	this->maxPalmAngleLeft = 60;
 	this->maxPalmAngleRight = -60;

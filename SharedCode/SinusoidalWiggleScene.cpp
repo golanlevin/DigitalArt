@@ -4,7 +4,7 @@
 
 SinusoidalWiggleScene::SinusoidalWiggleScene(ofxPuppet* puppet, HandWithFingertipsSkeleton* handWithFingertipsSkeleton, HandWithFingertipsSkeleton* immutableHandWithFingertipsSkeleton) {
 	Scene::Scene();
-	Scene::setup("Sinusoidal Wiggle", puppet, (Skeleton*)handWithFingertipsSkeleton, (Skeleton*)immutableHandWithFingertipsSkeleton);
+	Scene::setup("Sinusoidal Wiggle", "Sinusoidal Wiggle (Hand With Fingertips)", puppet, (Skeleton*)handWithFingertipsSkeleton, (Skeleton*)immutableHandWithFingertipsSkeleton);
 
 	this->maxPalmAngleLeft = 60;
 	this->maxPalmAngleRight = -60;

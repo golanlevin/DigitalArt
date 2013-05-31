@@ -6,6 +6,8 @@
 class WiggleScene : public Scene {
 protected:
 	float maxPalmAngleLeft, maxPalmAngleRight;	
+	float maxBaseAngleLeft, maxBaseAngleRight;
+	float maxMidAngleLeft, maxMidAngleRight;
 public:
 	WiggleScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkeleton* immutableHandSkeleton);
 	void setupGui();

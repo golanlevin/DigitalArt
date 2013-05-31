@@ -4,7 +4,7 @@
 
 PinkyPuppeteerScene::PinkyPuppeteerScene(ofxPuppet* puppet, HandWithFingertipsSkeleton* handWithFingertipsSkeleton, HandWithFingertipsSkeleton* immutableHandWithFingertipsSkeleton) {
 	Scene::Scene();
-	Scene::setup("Pinky Puppeteer", puppet, (Skeleton*)handWithFingertipsSkeleton, (Skeleton*)immutableHandWithFingertipsSkeleton);
+	Scene::setup("Pinky Puppeteer", "Pinky Puppeteer (Hand With Fingertips)", puppet, (Skeleton*)handWithFingertipsSkeleton, (Skeleton*)immutableHandWithFingertipsSkeleton);
 
 	this->startMouseControl = true;
 

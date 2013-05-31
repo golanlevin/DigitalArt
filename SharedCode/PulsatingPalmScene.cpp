@@ -4,10 +4,10 @@
 
 PulsatingPalmScene::PulsatingPalmScene(ofxPuppet* puppet, PalmSkeleton* palmSkeleton, PalmSkeleton* immutablePalmSkeleton) {
 	Scene::Scene();
-	Scene::setup("Pulsating Palm", puppet, (Skeleton*)palmSkeleton, (Skeleton*)immutablePalmSkeleton);
+	Scene::setup("Pulsating Palm", "Pulsating Palm (Palm)", puppet, (Skeleton*)palmSkeleton, (Skeleton*)immutablePalmSkeleton);
 
-	this->maxPalmAngleLeft = 60;
-	this->maxPalmAngleRight = -60;
+	this->maxPalmAngleLeft = 20;
+	this->maxPalmAngleRight = -20;
 
 	this->maxLength = 10;
 	this->speedUp = 1;

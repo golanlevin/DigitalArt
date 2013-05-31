@@ -52,7 +52,7 @@ public:
 	ofxUICanvas* gui;
 	ofxUICanvas** guis;
 	ofxUIRadio *sceneRadio;
-	bool showImage, showWireframe, showSkeleton, mouseControl;
+	bool showImage, showWireframe, showSkeleton, mouseControl, showSceneSkeletons;
 	ofMesh mesh;
 	ofImage hand;
 	ofxPuppet puppet;
@@ -62,5 +62,5 @@ public:
 	HandSkeleton handSkeleton, immutableHandSkeleton;
 	HandWithFingertipsSkeleton handWithFingertipsSkeleton, immutableHandWithFingertipsSkeleton;
 	Skeleton* previousSkeleton, *currentSkeleton;
-	vector<string> sceneNames;
+	vector<string> sceneNames, sceneWithSkeletonNames;
 };

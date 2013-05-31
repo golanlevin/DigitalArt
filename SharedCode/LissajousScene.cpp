@@ -4,7 +4,7 @@
 
 LissajousScene::LissajousScene(ofxPuppet* puppet, ThreePointSkeleton* threePointSkeleton, ThreePointSkeleton* immutableThreePointSkeleton) {
 	Scene::Scene();
-	Scene::setup("Lissajous", puppet, (Skeleton*)threePointSkeleton, (Skeleton*)immutableThreePointSkeleton);
+	Scene::setup("Lissajous", "Lissajous (Three Point)", puppet, (Skeleton*)threePointSkeleton, (Skeleton*)immutableThreePointSkeleton);
 
 	this->maxPalmAngleLeft = 60;
 	this->maxPalmAngleRight = -60;

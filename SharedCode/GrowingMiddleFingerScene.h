@@ -6,6 +6,9 @@
 class GrowingMiddleFingerScene : public Scene {
 protected:
 	float maxPalmAngleLeft, maxPalmAngleRight;	
+	float maxBaseAngleLeft, maxBaseAngleRight;
+	float maxMidAngleLeft, maxMidAngleRight;
+	float maxTopAngleLeft, maxTopAngleRight;
 
 	float baseAngleRange;
 	float midAngleRange;

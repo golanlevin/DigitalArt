@@ -6,6 +6,8 @@
 class SinusoidalLengthScene : public Scene {
 protected:
 	float maxPalmAngleLeft, maxPalmAngleRight;	
+	float maxBaseAngleLeft, maxBaseAngleRight;
+	float maxMidAngleLeft, maxMidAngleRight;
 
 	float maxLength;
 	float speedUp;

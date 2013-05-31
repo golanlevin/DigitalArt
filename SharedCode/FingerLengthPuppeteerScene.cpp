@@ -4,7 +4,7 @@
 
 FingerLengthPuppeteerScene::FingerLengthPuppeteerScene(ofxPuppet* puppet, HandWithFingertipsSkeleton* handWithFingertipsSkeleton, HandWithFingertipsSkeleton* immutableHandWithFingertipsSkeleton) {
 	Scene::Scene();
-	Scene::setup("Finger Length Puppeteer", puppet, (Skeleton*)handWithFingertipsSkeleton, (Skeleton*)immutableHandWithFingertipsSkeleton);
+	Scene::setup("Finger Length Puppeteer", "Finger Length Puppeteer (Hand With Fingertips)", puppet, (Skeleton*)handWithFingertipsSkeleton, (Skeleton*)immutableHandWithFingertipsSkeleton);
 
 	this->startMouseControl = true;
 
