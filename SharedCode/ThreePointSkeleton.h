@@ -12,9 +12,19 @@ public:
 	
 	void setup(ofMesh& mesh) {
 		int boneCount = 3;
+
+		/*
+		// Old (obsolete)
 		int controlIndicesRaw[] = {
 			1, 104, 8
 		};
+		*/
+	
+		// NEW (Actual)
+		int controlIndicesRaw[] = {
+			293, 366, 289
+		};
+		
 		int parentsRaw[] = {
 			-1, PALM, MIDDLE_HAND
 		};

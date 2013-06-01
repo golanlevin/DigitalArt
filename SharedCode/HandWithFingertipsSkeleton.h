@@ -16,6 +16,9 @@ public:
 	
 	void setup(ofMesh& mesh) {
 		int boneCount = 22;
+		
+		/*
+		 // These are for the old (CG) hand
 		int controlIndicesRaw[] = {
 			0, 1,
 			2, 3, 4, 188,
@@ -24,6 +27,19 @@ public:
 			11, 12, 13, 308,
 			14, 15, 16, 161
 		};
+		*/
+		
+		// These are for the new (Generated!) hand
+		int controlIndicesRaw[] = {
+			293, 366,
+			287, 80,  100, 110,
+			288, 137, 157, 167,
+			289, 194, 214, 224, 
+			290, 251, 271, 281,
+			320, 2,   27,  47
+		};
+		
+		
 		int parentsRaw[] = {
 			-1, WRIST,
 			PALM, PINKY_BASE, PINKY_MID, PINKY_TOP,

@@ -16,9 +16,18 @@ public:
 	
 	void setup(ofMesh& mesh) {
 		int boneCount = 7;
+		
+		/*
 		int controlIndicesRaw[] = {
 			8, 104, 81, 1, 143, 144, 145
 		};
+		*/
+		
+		// new
+		int controlIndicesRaw[] = {
+			289, 366, 363, 293, 299, 304, 309
+		};
+		
 		int parentsRaw[] = {
 			-1, HAND_TOP, HAND_MID,
 			HAND_BASE, PALM, WRIST_TOP, HAND_TOP,

@@ -33,12 +33,19 @@ void ofApp::setup() {
 	scenes.push_back(new FingerLengthPuppeteerScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton));
 
 	// set up the main gui
-	setupGui();
+	// setupGui();
 	sharedSetup();
+	setupGui();
 
 	// set up the mesh
+	/*
 	hand.loadImage("hand/genericHandCentered.jpg");
 	mesh.load("hand/handmarks.ply");
+	 */
+	
+	hand.loadImage("hand/genericHandCenteredNew.jpg");
+	mesh.load("hand/handmarksNew.ply");
+	
 	for(int i = 0; i < mesh.getNumVertices(); i++) {
 		mesh.addTexCoord(mesh.getVertex(i));
 	}
