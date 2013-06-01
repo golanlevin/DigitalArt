@@ -10,7 +10,7 @@ final int POINT_MOVING_MODE = 2;
 final int FACE_REORDERING_MODE = 3;
 int mode = POINT_ADDING_MODE; 
 
-String plyFilename = "handmarks_532_faces.ply";
+String plyFilename = "kyleHandMesh.ply"; //handmarks_532_faces.ply"; //handmarks_532_faces.ply";
 String loadedPlyFile[]; 
 ArrayList <Vertex> vertices;
 ArrayList <Face> faces; 

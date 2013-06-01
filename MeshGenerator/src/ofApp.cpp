@@ -268,4 +268,11 @@ void ofApp::keyPressed(int key) {
 	if (key == 'b'){
 		bHandyBool = !bHandyBool; 
 	}
+	if (key == 's'){
+		if (HCAAMB.bCalculatedMesh){
+			string fileOut = ofToDataPath("", true) + "genericHand.ply";
+			HCAAMB.handMesh.save(fileOut);
+			printf("Output %s!\n", fileOut.c_str());
+		}
+	}
 }
