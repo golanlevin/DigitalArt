@@ -722,9 +722,6 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 	//----------------------------------------------------
 	// Add vertices for the thumb webbing.
 	
-	
-	
-	
 	// Get interpolated values on the outside contour:
 	int thumbWebIndex0 = Handmarks[HANDMARK_POINTER_SIDE ].index;
 	int thumbWebIndex1 = Handmarks[HANDMARK_IT_CROTCH    ].index;
@@ -814,26 +811,141 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 	handMesh.addTriangle(wi+7, wi+8, wi+12 );
 	handMesh.addTriangle(wi+8, 233,  wi+12 );
 	
-	/*
-	int wi = nvBeforeThumbWeb;
-	for (int y=0; y<1; y++){ // y == 0 case
-		int topx = 4-y;
-		for (int x=0; x<topx; x++){
-			int wx = thumbWebSideIndices[x];
-			if (x == 0){
-				// handMesh.addTriangle(wx, wi+wx, wx+1);
-			} else {
-				handMesh.addTriangle(wx, wi+(x-1), wi+x);
-				handMesh.addTriangle(wx, wi+x,     wx+1);
+	
+	//----------------------------------------------------
+	// Mesh the palm itself.
+	
+	
+	
+	// Get interpolated values on the outside contour:
+	int palmContourIndex0 = Handmarks[HANDMARK_PALM_BASE     ].index;
+	int palmContourIndex1 = Handmarks[HANDMARK_PINKY_SIDE    ].index;
+	
+	
+	ofPolyline palmSideContour;
+	ofPolyline palmSideContourResampled;
+	bool bGotPalmSideContour = true;
+	if (palmContourIndex0 < palmContourIndex1){
+		for (int i=palmContourIndex0; i<=palmContourIndex1; i++){
+			ofPoint cpt = handContourNice[i]; 
+			palmSideContour.addVertex( cpt ); 
+		}
+		int nDesiredResampledPoints = 9;
+		palmSideContourResampled = palmSideContour.getResampledByCount(nDesiredResampledPoints-1);
+		
+		int nPalmSideContourPoints = palmSideContourResampled.size();
+		if (nPalmSideContourPoints != nDesiredResampledPoints){ // that weird resample bug again.
+			ofPoint cpt = handContourNice[palmContourIndex1];
+			palmSideContourResampled.addVertex( cpt.x, cpt.y );
+		}
+		
+	} else {
+		// hopefully this is really unlikely.
+		bGotPalmSideContour = false; 
+		printf("Crud, I didn't expect this. Problem meshing palm side.");
+	}
+	
+	if (bGotPalmSideContour){
+		
+		int nPalmSideResampledContourPoints = palmSideContourResampled.size();
+		for (int i=1; i<(nPalmSideResampledContourPoints-1); i++){
+			ofPoint cpt = palmSideContourResampled[i];
+			handMesh.addVertex (cpt); 
+			ofEllipse(cpt.x, cpt.y, 12,12);
+		}
+		
+		handMesh.addTriangle (344, 287, 58);
+		handMesh.addTriangle (287, 288, 62);
+		handMesh.addTriangle (288, 289, 119);
+		handMesh.addTriangle (289, 290, 176);
+		handMesh.addTriangle (290, 337, 233);
+		
+		int wristPointMeshIndex = 293;
+		int wristPointMeshIndices[]    = {292, 293,293,293,293, 294};
+		int knuckleMeshIndices[]       = {344, 287,288,289,290, 337, 337};
+		int thumbSidePalmMeshIndices[] = {295, 334, 325, 335, 329, 336, 332, 337, 233};
+		
+		for (int k=0; k<6; k++){
+			float wx = handMesh.getVertex(wristPointMeshIndices[k]).x; 
+			float wy = handMesh.getVertex(wristPointMeshIndices[k]).y; 
+			float kx = handMesh.getVertex(knuckleMeshIndices[k]).x;
+			float ky = handMesh.getVertex(knuckleMeshIndices[k]).y;
+			for (int i=1; i<7; i++){
+				float frac = (float)i/7.0;
+				float px = (1-frac)*wx + frac*kx;
+				float py = (1-frac)*wy + frac*ky;
+				handMesh.addVertex( ofVec3f (px,py, 0));
+				ofEllipse(px, py, 2,2);
 			}
 		}
+		
+		int starti = 338;
+		for (int j=0; j<=6; j++){
+			
+			int dn = 6;
+			if (j==0){
+				dn = 7;
+			}
+			
+			if (j == 6){
+				
+				for (int i=0; i<=5; i++){
+					int a = starti + i;
+					int b = thumbSidePalmMeshIndices[i+1];
+					int c = starti + i + 1;
+					int d = thumbSidePalmMeshIndices[i+2];
+					
+					if (i==5){
+						c = 337;
+						handMesh.addTriangle (a, b, c);
+					} else {
+						handMesh.addTriangle (a, b, c);
+						handMesh.addTriangle (c, b, d);
+					}
+					
+				}
+				
+			} else {
+				if ((j>=1) && (j <= 5)){
+					int a = starti;
+					int b = wristPointMeshIndex;
+					int c = starti + dn;
+					handMesh.addTriangle (a, b, c);
+				}
+				
+				for (int i=0; i<=5; i++){
+					int a = starti + i;
+					int b = starti + i + dn;
+					int c = starti + i + 1;
+					int d = starti + i + dn+1;
+
+					if (i==5){
+						if (j > 0){
+							c = knuckleMeshIndices[j-1];
+							d = knuckleMeshIndices[j  ];
+							handMesh.addTriangle (a, b, c);
+							handMesh.addTriangle (c, b, d);
+						}
+					} else {
+						handMesh.addTriangle (a, b, c);
+						handMesh.addTriangle (c, b, d);
+					}
+				}
+			}
+			
+			starti += dn;
+		}
+		
+		handMesh.addTriangle (344, 343, 350);
+		
+		
+		
+		
+		
 	}
-	 */
-	
-	//handMesh.getVertex(thumbWebSideIndices[y]); 
 	
 	
-	
+	//----------------------------------------------------
 	ofEnableAlphaBlending();
 	ofSetColor(255,100,100, 70);
 	handMesh.draw();

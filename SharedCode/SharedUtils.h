@@ -9,6 +9,6 @@ void sharedSetup() {
 	ofSetCircleResolution(32);
 	
 	string basePath = ofToDataPath("", true);
-	ofSetDataPathRoot(basePath + "../../../SharedData/");
-	//ofSetDataPathRoot("../../../../../SharedData/"); // for Golan's machine
+	//ofSetDataPathRoot(basePath + "../../../SharedData/");
+	ofSetDataPathRoot("../../../../../SharedData/"); // for Golan's machine. Don't delete this line please!
 }
