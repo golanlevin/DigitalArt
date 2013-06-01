@@ -82,4 +82,7 @@ public:
 	void draw(float x, float y, float w, float h) {
 		texture.draw(x, y, w, h);
 	}
+	int getCurrentFrameID(){
+		return currentFrame;
+	}
 };

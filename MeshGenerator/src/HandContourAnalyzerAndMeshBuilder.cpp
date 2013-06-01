@@ -554,7 +554,8 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 		
 		// move it slightly toward the hand centroid
 		ofVec3f Pc = ofVec3f(handCentroid.x, handCentroid.y, 0);
-		Pk = Pk - 0.05*(Pk - Pc);
+		float amountToMoveKnucklesTowardCentroid = 0.25;
+		Pk = Pk - amountToMoveKnucklesTowardCentroid*(Pk - Pc);
 		ofEllipse(Pk.x,Pk.y, 2, 2);
 		handMesh.addVertex(Pk);
 		
@@ -729,7 +730,6 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 	ofVec2f thumbWebHcn0 = handContourNice[thumbWebIndex0];
 	ofVec2f thumbWebHcn1 = handContourNice[thumbWebIndex1];
 	
-	
 	// create a polyline copy of the handContourNice sub-section between the 2 indices
 	ofPolyline thumbWebCurve;
 	if (thumbWebIndex0 < thumbWebIndex1){
@@ -813,14 +813,11 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 	
 	
 	//----------------------------------------------------
-	// Mesh the palm itself.
-	
-	
+	// Mesh the palm.
 	
 	// Get interpolated values on the outside contour:
 	int palmContourIndex0 = Handmarks[HANDMARK_PALM_BASE     ].index;
 	int palmContourIndex1 = Handmarks[HANDMARK_PINKY_SIDE    ].index;
-	
 	
 	ofPolyline palmSideContour;
 	ofPolyline palmSideContourResampled;
@@ -842,7 +839,7 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 	} else {
 		// hopefully this is really unlikely.
 		bGotPalmSideContour = false; 
-		printf("Crud, I didn't expect this. Problem meshing palm side.");
+		printf("Problem meshing palm side.");
 	}
 	
 	if (bGotPalmSideContour){
@@ -851,7 +848,7 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 		for (int i=1; i<(nPalmSideResampledContourPoints-1); i++){
 			ofPoint cpt = palmSideContourResampled[i];
 			handMesh.addVertex (cpt); 
-			ofEllipse(cpt.x, cpt.y, 12,12);
+			ofEllipse(cpt.x, cpt.y, 2,2);
 		}
 		
 		handMesh.addTriangle (344, 287, 58);
@@ -906,7 +903,7 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 				}
 				
 			} else {
-				if ((j>=1) && (j <= 5)){
+				if ((j>=1) && (j < 5)){
 					int a = starti;
 					int b = wristPointMeshIndex;
 					int c = starti + dn;
@@ -937,7 +934,13 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 		}
 		
 		handMesh.addTriangle (344, 343, 350);
-		
+		handMesh.addTriangle (291, 292, 338);
+		handMesh.addTriangle (292, 345, 338);
+		handMesh.addTriangle (292, 293, 345);
+		handMesh.addTriangle (293, 294, 369);
+		handMesh.addTriangle (294, 375, 369);
+		handMesh.addTriangle (294, 295, 375);
+		handMesh.addTriangle (295, 334, 375);
 		
 		
 		

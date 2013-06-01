@@ -233,6 +233,10 @@ void ofApp::draw() {
 		ofSetColor(255);
 		video.draw(0, 0);
 		
+		printf(" current frame id = %d\n", video.getCurrentFrameID()); 
+		//ofSetColor(255,255,0);
+		//ofDrawBitmapString( ofToString(video.getCurrentFrameID()), mouseX, mouseY);
+		
 		if (bValidHandContourExists){
 			HCAAMB.drawAnalytics();
 		}
