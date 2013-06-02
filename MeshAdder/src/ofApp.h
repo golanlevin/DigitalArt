@@ -24,4 +24,5 @@ public:
 	ofxPuppetInteractive puppet;
 	
 	ofPolyline splitPath;
+	vector<ofIndexType> indices;
 };

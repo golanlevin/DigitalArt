@@ -92,9 +92,50 @@ bool isLeft(ofVec2f a, ofVec2f b, ofVec2f c){
 	return ((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) > 0;
 }
 
+ofVec2f closestPointOnLine(const ofVec2f& p1, const ofVec2f& p2, const ofVec2f& p3) {
+	if(p1 == p2) {
+		return p1;
+	}
+	float u = (p3.x - p1.x) * (p2.x - p1.x);
+	u += (p3.y - p1.y) * (p2.y - p1.y);
+	float len = (p2 - p1).length();
+	u /= (len * len);
+	if(u > 1) {
+		u = 1;
+	} else if(u < 0) {
+		u = 0;
+	}
+	return p1.getInterpolated(p2, u);
+}
+
+bool sideTest(ofPolyline& polyline, ofVec2f position) {
+	ofPolyline reference = polyline.getResampledBySpacing(8);
+	reference = reference.getSmoothed(4);
+	ofVec2f a, b;
+	float bestDistance = 0;
+	for(int i = 0; i + 1 < reference.size(); i++) {
+		ofVec2f v0 = reference[i], v1 = reference[i + 1];
+		ofVec2f closest = closestPointOnLine(v0, v1, position);
+		float distance = closest.distance(position);
+		if(i == 0 || distance < bestDistance) {
+			bestDistance = distance;
+			a = v0, b = v1;
+		}
+	}
+	if(bestDistance == 0) {
+		return true;
+	} else {
+		return isLeft(a, b, position);
+	}
+}
+
 void split(ofMesh& mesh, vector<ofIndexType>& indices) {
 	int n = mesh.getNumIndices();
 	vector<ofIndexType> newIndices;
+	ofPolyline polyline;
+	for(int i = 0; i < indices.size(); i++) {
+		polyline.addVertex(mesh.getVertex(indices[i]));
+	}
 	for(int i = 0; i < indices.size(); i++) {
 		newIndices.push_back(mesh.getNumVertices());
 		int index = indices[i];
@@ -110,38 +151,18 @@ void split(ofMesh& mesh, vector<ofIndexType>& indices) {
 		ofIndexType i2 = mesh.getIndex(i + 2);
 		
 		for(int j = 0; j < indices.size(); j++) {
-			ofVec2f first, second, adjacent;
-			
-			int si = indices[j];
-			if(si == i0 || si == i1 || si == i2) {
-				int diffIndex = i0;
-				if(si != i0) {
-					diffIndex = i0;
-				} else if(si != i1) {
-					diffIndex = i1;
-				} else if(si != i2) {
-					diffIndex = i2;
-				}
-				adjacent = mesh.getVertex(diffIndex);
+			if(i0 == indices[j] || i1 == indices[j] || i2 == indices[j]) {
+				ofVec2f vi0 = mesh.getVertex(i0);
+				ofVec2f vi1 = mesh.getVertex(i1);
+				ofVec2f vi2 = mesh.getVertex(i2);
+				ofVec2f avg = (vi0 + vi1 + vi2) / 3;
 				
-				if(j + 1 < indices.size()) {
-					first = mesh.getVertex(indices[j]);
-					second = mesh.getVertex(indices[j + 1]);
-				} else {
-					first = mesh.getVertex(indices[j - 1]);
-					second = mesh.getVertex(indices[j]);
-				}
-				
-				if(isLeft(first, second, adjacent)) {
-					int sameIndex;
-					if(si == i0) {
-						sameIndex = 0;
-					} else if(si == i1) {
-						sameIndex = 1;
-					} else if(si == i2) {
-						sameIndex = 2;
+				if(sideTest(polyline, avg)) {
+					for(int k = 0; k < 3; k++) {
+						if(mesh.getIndex(i + k) == indices[j]) {
+							mesh.setIndex(i + k, newIndices[j]);							
+						}
 					}
-					mesh.setIndex(i + sameIndex, newIndices[j]);
 				}
 			}
 		}
