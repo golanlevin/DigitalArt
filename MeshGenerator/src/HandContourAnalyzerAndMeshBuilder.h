@@ -141,10 +141,14 @@ public:
 	float calcEigenvector (float matrix_00, float matrix_01,
 						   float matrix_10, float matrix_11 );
 
-private:
-	vector <int>	joints;
 	ofMesh			handMesh;
+	vector <int>	joints;
 	bool			bCalculatedMesh;
+	
+private:
+	
+	
+	
 	
 	
 	void		prepareContours (ofPolyline inputContour, cv::Point2f inputCentroid);

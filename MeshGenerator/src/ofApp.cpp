@@ -233,6 +233,10 @@ void ofApp::draw() {
 		ofSetColor(255);
 		video.draw(0, 0);
 		
+		printf(" current frame id = %d\n", video.getCurrentFrameID()); 
+		//ofSetColor(255,255,0);
+		//ofDrawBitmapString( ofToString(video.getCurrentFrameID()), mouseX, mouseY);
+		
 		if (bValidHandContourExists){
 			HCAAMB.drawAnalytics();
 		}
@@ -267,5 +271,12 @@ void ofApp::keyPressed(int key) {
 	}
 	if (key == 'b'){
 		bHandyBool = !bHandyBool; 
+	}
+	if (key == 's'){
+		if (HCAAMB.bCalculatedMesh){
+			string fileOut = ofToDataPath("", true) + "genericHand.ply";
+			HCAAMB.handMesh.save(fileOut);
+			printf("Output %s!\n", fileOut.c_str());
+		}
 	}
 }

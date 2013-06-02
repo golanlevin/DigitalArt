@@ -10,7 +10,7 @@ final int POINT_MOVING_MODE = 2;
 final int FACE_REORDERING_MODE = 3;
 int mode = POINT_ADDING_MODE; 
 
-String plyFilename = "handmarks_532_faces.ply";
+String plyFilename = "genericHand.ply"; //"handmarks_532_faces.ply"; 
 String loadedPlyFile[]; 
 ArrayList <Vertex> vertices;
 ArrayList <Face> faces; 
@@ -27,7 +27,7 @@ int linkVertexIndices[];
 
 void setup() {
 
-  handImg = loadImage("hand.jpg"); 
+  handImg = loadImage("genericHandInv.jpg"); 
   bRecordPdf = false; 
   mode = 0;
 
@@ -44,7 +44,7 @@ void setup() {
 
   loadPlyFile();
   
-  size (1024, 768, OPENGL);
+  size (1200, 768, OPENGL);
 }
 
 
@@ -79,7 +79,9 @@ void draw() {
 
 
   image(handImg, 0,0);
-
+  Vertex mv = vertices.get(mouseX% vertices.size()); 
+  ellipse (mv.x, mv.y, 16, 16);
+  println (mouseX); 
 
   noFill();
   stroke (0);
@@ -143,7 +145,8 @@ void draw() {
     pushMatrix(); 
     translate(512, 0);
     noSmooth();  
-    int nFaces = min(mouseX, min(faces.size(), 536)); 
+ 
+    int nFaces = min(mouseX, faces.size()); 
     for (int i=0; i<nFaces; i++) {
       Face f = faces.get(i);
       float q = map(i, 0, nFaces-1, 0, 255); 

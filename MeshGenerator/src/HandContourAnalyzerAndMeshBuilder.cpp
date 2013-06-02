@@ -149,7 +149,7 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 	
 	ofPushStyle();
 	bool bDrawFilteredContour			= false;
-	bool bDrawHandmarksOutline			= true;
+	bool bDrawHandmarksOutline			= false;
 	bool bDrawHandmarks					= true;
 	bool bDrawHandMarkTrails			= false; 
 	bool bDrawFirstFingerTipEstimates	= false;
@@ -313,7 +313,7 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 	}
 	
 	
-	//===========================================================
+	//============================================================================================================
 	float deltaX = -150;
 	float deltaY = -450;
 	ofPushMatrix();
@@ -325,14 +325,14 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 	handMesh.setupIndicesAuto();
 	handMesh.setMode( OF_PRIMITIVE_TRIANGLES );
 	
-	
+	// Add triangles for each finger to handMesh:
+	int nContourPoints = handContourNice.size();
 	for (int f=0; f<5; f++){
 	
 		int f0 = (fingerTipIndices[f] - 1 + N_HANDMARKS) % N_HANDMARKS;
 		int f1 = (fingerTipIndices[f]     + N_HANDMARKS) % N_HANDMARKS;
 		int f2 = (fingerTipIndices[f] + 1 + N_HANDMARKS) % N_HANDMARKS;
 		
-		int nContourPoints = handContourNice.size();
 		int contourIndex0 = Handmarks[f0].index;
 		int contourIndex1 = Handmarks[f1].index;
 		int contourIndex2 = Handmarks[f2].index;
@@ -415,8 +415,6 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 			}
 		}
 		
-		
-		
 		//---------------
 		// ADD VERTICES TO THE MESH. 
 		vector<ofPoint> poly01RSpts = poly01RS.getVertices();
@@ -454,7 +452,7 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 					handMesh.addVertex(ofPoint(QA.x, QA.y,0)); 
 					handMesh.addVertex(ofPoint(px01, py01,0)); 
 					handMesh.addVertex(ofPoint(QB.x, QB.y,0)); 
-				
+					
 					
 				} else {
 					// The usual case, up the sides of the finger.
@@ -466,7 +464,8 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 							handMesh.addVertex(ofPoint(ex,ey,0)); 
 						}
 					} else {
-						// skip the 0th point for fingers 2,3,4.
+						// skip the 0th point for fingers 2,3,4,
+						// because these are shared vertices with points we've already laid.
 						for (int j=0; j<N_FINGER_WIDTH_SAMPLES; j++){
 							float ex = ofMap(j, 0,N_FINGER_WIDTH_SAMPLES-1, px01,px21);
 							float ey = ofMap(j, 0,N_FINGER_WIDTH_SAMPLES-1, py01,py21);
@@ -540,7 +539,416 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 		}
 	}
 	
+	//----------------------------------------------------
+	// Add vertices for the knuckles.
+	// TRIAGE: START USING SPECIFIC INDICES (rather than computed indices) to build the rest of the mesh. 
+	// 60 = N_FINGER_LENGTH_SAMPLES*N_FINGER_WIDTH_SAMPLES + 3, then +2 more into the finger, etc.
+	//
+	int fingerBaseMiddleIndices[] = {60, 117, 174, 231};
+	for (int i=0; i<4; i++){
+		int fingerBaseMiddle0 = fingerBaseMiddleIndices[i];
+		int fingerBaseMiddle1 = fingerBaseMiddle0 + N_FINGER_WIDTH_SAMPLES;
+		ofVec3f P0 = handMesh.getVertex(fingerBaseMiddle0);
+		ofVec3f P1 = handMesh.getVertex(fingerBaseMiddle1);
+		ofVec3f Pk = P0 - 1.25*(P1 - P0);
+		
+		// move it slightly toward the hand centroid
+		ofVec3f Pc = ofVec3f(handCentroid.x, handCentroid.y, 0);
+		float amountToMoveKnucklesTowardCentroid = 0.25;
+		Pk = Pk - amountToMoveKnucklesTowardCentroid*(Pk - Pc);
+		ofEllipse(Pk.x,Pk.y, 2, 2);
+		handMesh.addVertex(Pk);
+		
+		int nv = handMesh.getNumVertices();
+		for (int j=0; j<4; j++){
+			if (i==0){
+				int fi0 = fingerBaseMiddle0 + j - 2;
+				int fi1 = fingerBaseMiddle0 + j - 1;
+				handMesh.addTriangle(nv-1, fi1, fi0);
+			} else {
+				int fi0 = fingerBaseMiddle0 + j - 2;
+				if (j == 0) { fi0 = fingerBaseMiddleIndices[i-1] + 2; }
+				int fi1 = fingerBaseMiddle0 + j - 1;
+				handMesh.addTriangle(nv-1, fi1, fi0);
+			}
+		}
+	}
 	
+	//----------------------------------------------------
+	// Add vertices for the wrist.
+	
+	int wristIndex0 = Handmarks[HANDMARK_THUMB_BASE      ].index;
+	int wristIndex1 = Handmarks[HANDMARK_THUMBSIDE_WRIST ].index;
+	int wristIndex2 = Handmarks[HANDMARK_PINKYSIDE_WRIST ].index;
+	int wristIndex3 = Handmarks[HANDMARK_PALM_BASE       ].index;
+	
+	ofVec2f wristP0 = handContourNice[wristIndex0];
+	ofVec2f wristP1 = handContourNice[wristIndex1];
+	ofVec2f wristP2 = handContourNice[wristIndex2];
+	ofVec2f wristP3 = handContourNice[wristIndex3];
+	
+	vector<ofPoint> wSide01;
+	vector<ofPoint> wSide32;
+	vector<ofPoint> wSide12;
+	
+	for (int i=0; i<=4; i++){
+		ofVec2f whcn = ((4.0 - (float)i)*wristP0 + ((float)i)*wristP1)/4.0;
+		ofPoint wristP_hcn = handContourNice.getClosestPoint(whcn);
+		wSide01.push_back (wristP_hcn);
+	}
+	for (int i=0; i<=4; i++){
+		ofVec2f whcn = ((4.0 - (float)i)*wristP3 + ((float)i)*wristP2)/4.0;
+		ofPoint wristP_hcn = handContourNice.getClosestPoint(whcn);
+		wSide32.push_back (wristP_hcn);
+	}
+	for (int i=0; i<=4; i++){
+		ofVec2f whcn = ((4.0 - (float)i)*wristP1 + ((float)i)*wristP2)/4.0;
+		ofPoint wristP_hcn = handContourNice.getClosestPoint(whcn);
+		wSide12.push_back (wristP_hcn);
+	}
+	
+	int nvBeforeWrist = handMesh.getNumVertices();
+	for (int wy=0; wy<=4; wy++){
+		ofVec2f pL = wSide01[wy];
+		ofVec2f pR = wSide32[wy];
+		if (wy < 4){
+			for (int wx=4; wx>=0; wx--){
+				ofVec2f wp = ((4.0 - (float)wx)*pL + ((float)wx)*pR)/4.0;
+				ofEllipse(wp.x,wp.y, 2, 2);
+				handMesh.addVertex(ofPoint(wp.x,wp.y,0));
+			}
+		} else {
+			for (int wx=4; wx>=0; wx--){
+				ofVec2f wp = wSide12[wx];
+				ofEllipse(wp.x,wp.y, 2, 2);
+				handMesh.addVertex(ofPoint(wp.x,wp.y,0));
+			}
+		}
+	}
+	
+	int nvb = nvBeforeWrist;
+	for (int wy=0; wy<4; wy++){
+		for (int wx=0; wx<4; wx++){
+			handMesh.addTriangle(nvb+wx,   nvb+wx+5, nvb+wx+1);
+			handMesh.addTriangle(nvb+wx+1, nvb+wx+5, nvb+wx+6);
+		}
+		nvb += 5;
+	}
+	
+	
+	//----------------------------------------------------
+	// Add vertices for the thumb base.
+	
+	// 0,1,2,3,4, 295
+	
+	// Get interpolated values on the outside contour: 
+	int thumbBaseIndex0 = Handmarks[HANDMARK_THUMB_KNUCKLE ].index;
+	int thumbBaseIndex1 = Handmarks[HANDMARK_THUMB_BASE    ].index;
+	
+	ofVec2f thumbBaseHcn0 = handContourNice[thumbBaseIndex0];
+	ofVec2f thumbBaseHcn1 = handContourNice[thumbBaseIndex1];
+	
+	// create a polyline copy of the handContourNice sub-section between the 2 indices
+	ofPolyline thumbCurve;
+	if (thumbBaseIndex0 < thumbBaseIndex1){
+		for (int i=thumbBaseIndex0; i<=thumbBaseIndex1; i++){
+			ofPoint tpoint = handContourNice[i];
+			thumbCurve.addVertex(tpoint);
+		}
+	} else {
+		// don't want to deal with an unlikely situation
+		thumbCurve = handContourNice;
+	}
+	
+	vector<ofPoint> thumbBaseSide;
+	for (int i=0; i<=4; i++){
+		ofVec2f hcn = ((4.0 - (float)i)*thumbBaseHcn0 + ((float)i)*thumbBaseHcn1)/4.0;
+		ofPoint Phcn = thumbCurve.getClosestPoint(hcn);
+		thumbBaseSide.push_back (Phcn);
+		//ofEllipse(Phcn.x,Phcn.y, 10, 10);
+		// n.b., we will not use points i=0 & i=4 because they are already stored as handMesh vertices 4 & 295
+	}
+	
+	vector<ofPoint> thumbBaseHypotenuse;
+	ofVec2f thumbBaseP0 = ofVec2f(handMesh.getVertex(0).x, handMesh.getVertex(0).y);
+	for (int i=0; i<=4; i++){
+		ofVec2f hcn = ((4.0 - (float)i)*thumbBaseP0 + ((float)i)*thumbBaseHcn1)/4.0;
+		thumbBaseHypotenuse.push_back (hcn);
+		//ofEllipse(hcn.x,hcn.y, 10, 10);
+		// n.b., we will not use points i=0 & i=4 because they are already stored as handMesh vertices 0 & 295
+	}
+	int nvBeforeThumbBase = handMesh.getNumVertices();
+	for (int y=1; y<4; y++){ // skipping y=0 and y=4 because those vertices already exist in handMesh.
+		int topx = 4-y;
+		for (int x=0; x<=topx; x++){
+			ofPoint T0 = thumbBaseHypotenuse[y];
+			ofPoint T1 = thumbBaseSide[y];
+			ofPoint Tinterp = ((topx-x)*T0 + (x)*T1) / (float)topx;
+			handMesh.addVertex(ofPoint(Tinterp.x,Tinterp.y,0));
+			ofEllipse(Tinterp.x,Tinterp.y, 2, 2);
+		}
+	}
+	
+	// clockwise triangles
+	int ti = nvBeforeThumbBase;
+	for (int y=0; y<1; y++){ // y == 0 case
+		int topx = 4-y;
+		for (int x=0; x<topx; x++){
+			if (x == 0){
+				handMesh.addTriangle(x, ti+x, x+1);
+			} else {
+				handMesh.addTriangle(x, ti+(x-1), ti+x);
+				handMesh.addTriangle(x, ti+x, x+1);
+			}
+		}
+	}
+	
+	int thumbBaseVertexIndex = 295;
+	for (int y=1; y<4; y++){
+		int topx = 4-y;
+		for (int x=0; x<topx; x++){
+			if (x == 0){
+				int tj = ti+x+topx+1;
+				if (y == 3){ tj = thumbBaseVertexIndex; }
+				handMesh.addTriangle(ti+x,   tj, ti+x+1);
+			} else {
+				handMesh.addTriangle(ti+x,   ti+x+topx+1,     ti+x+1);
+				handMesh.addTriangle(ti+x,   ti+x+topx  ,     ti+x+topx+1 );
+			}	
+		}
+		ti += topx+1;
+	}
+	 
+	
+	//----------------------------------------------------
+	// Add vertices for the thumb webbing.
+	
+	// Get interpolated values on the outside contour:
+	int thumbWebIndex0 = Handmarks[HANDMARK_POINTER_SIDE ].index;
+	int thumbWebIndex1 = Handmarks[HANDMARK_IT_CROTCH    ].index;
+
+	ofVec2f thumbWebHcn0 = handContourNice[thumbWebIndex0];
+	ofVec2f thumbWebHcn1 = handContourNice[thumbWebIndex1];
+	
+	// create a polyline copy of the handContourNice sub-section between the 2 indices
+	ofPolyline thumbWebCurve;
+	if (thumbWebIndex0 < thumbWebIndex1){
+		for (int i=thumbWebIndex0; i<=thumbWebIndex1; i++){
+			ofPoint tpoint = handContourNice[i];
+			thumbWebCurve.addVertex(tpoint);
+		}
+	} else {
+		// don't want to deal with an unlikely situation
+		thumbWebCurve = handContourNice;
+	}
+	
+	// vector of interpolated points along top edge
+	vector<ofPoint> thumbWebSide1;
+	for (int i=0; i<=4; i++){
+		ofVec2f hcn = ((4.0 - (float)i)*thumbWebHcn0 + ((float)i)*thumbWebHcn1)/4.0;
+		ofPoint Phcn = thumbWebCurve.getClosestPoint(hcn);
+		thumbWebSide1.push_back (Phcn);
+		// ofEllipse(Phcn.x,Phcn.y, 10, 10);
+		// n.b., we will not use points i=0 & i=4, becasue they are handMesh vertices 0 and 233 
+	}
+
+	vector<ofPoint> thumbWebHypotenuse;
+	ofVec2f thumbWebP0 = ofVec2f(handMesh.getVertex(233).x, handMesh.getVertex(233).y);
+	ofVec2f thumbWebP1 = ofVec2f(handMesh.getVertex(thumbBaseVertexIndex).x, handMesh.getVertex(thumbBaseVertexIndex).y);
+	int nWebHypSamps = 8;
+	for (int i=0; i<=nWebHypSamps; i++){
+		ofVec2f hcn = ((nWebHypSamps - (float)i)*thumbWebP0 + ((float)i)*thumbWebP1)/(float)nWebHypSamps;
+		thumbWebHypotenuse.push_back (hcn);
+		// ofEllipse(hcn.x,hcn.y, 10, 10);
+		// n.b., we will not use points i=0 & i=4 because they are already stored as handMesh vertices 233 & 295
+	}
+	
+	int nvBeforeThumbWeb = handMesh.getNumVertices();
+	for (int y=1; y<4; y++){ // skipping y=0 and y=4 because those vertices already exist in handMesh.
+		int topx = 4-y;
+		for (int x=0; x<=topx; x++){
+			ofPoint T0 = thumbWebHypotenuse[8-(y*2)];
+			ofPoint T1 = thumbWebSide1[4-y];
+			ofPoint Tinterp = ((topx-x)*T0 + (x)*T1) / (float)topx;
+			handMesh.addVertex(ofPoint(Tinterp.x,Tinterp.y,0));
+			ofEllipse(Tinterp.x,Tinterp.y, 2, 2);
+		}
+	}
+	for (int i=7; i>=1; i-=2){
+		handMesh.addVertex( thumbWebHypotenuse[i] );
+		ofEllipse(thumbWebHypotenuse[i].x,thumbWebHypotenuse[i].y, 2, 2);
+	}
+	
+	
+	int thumbWebSideIndices[] = {0, 316, 320, 323, 295};
+	
+	int wi = nvBeforeThumbWeb;
+	// handMesh.addTriangle(thumbWebSideIndices[4-0], thumbWebSideIndices[4-1], wi+0); // replace with 2 triangles
+	handMesh.addTriangle(thumbWebSideIndices[4-0],    thumbWebSideIndices[4-1], wi+9);
+	handMesh.addTriangle(thumbWebSideIndices[4-1],    wi+0, wi+9);
+	handMesh.addTriangle(thumbWebSideIndices[4-1], thumbWebSideIndices[4-2], wi+0);
+	handMesh.addTriangle(thumbWebSideIndices[4-2], wi+1, wi+0);
+	handMesh.addTriangle(thumbWebSideIndices[4-2], thumbWebSideIndices[4-3], wi+1);
+	handMesh.addTriangle(thumbWebSideIndices[4-3], wi+2, wi+1);
+	handMesh.addTriangle(thumbWebSideIndices[4-3], thumbWebSideIndices[4-4], wi+2);
+	handMesh.addTriangle(thumbWebSideIndices[4-4], wi+3, wi+2);
+	
+	// handMesh.addTriangle(wi+0, wi+1, wi+4); // replace with 2 triangles, as follows:
+	handMesh.addTriangle(wi+0, wi+1, wi+10);
+	handMesh.addTriangle(wi+1, wi+4, wi+10);
+	handMesh.addTriangle(wi+1, wi+2, wi+4);
+	handMesh.addTriangle(wi+2, wi+5, wi+4);
+	handMesh.addTriangle(wi+2, wi+3, wi+5);
+	handMesh.addTriangle(wi+3, wi+6, wi+5);
+	
+	// handMesh.addTriangle(wi+4, wi+5, wi+7); // replace with 2 triangles, as follows:
+	handMesh.addTriangle(wi+4, wi+5, wi+11);
+	handMesh.addTriangle(wi+5, wi+7, wi+11);
+	handMesh.addTriangle(wi+5, wi+6, wi+7);
+	handMesh.addTriangle(wi+6, wi+8, wi+7);
+	
+	// handMesh.addTriangle(wi+7, wi+8, 233 ); // replace with 2 triangles, as follows:
+	handMesh.addTriangle(wi+7, wi+8, wi+12 );
+	handMesh.addTriangle(wi+8, 233,  wi+12 );
+	
+	
+	//----------------------------------------------------
+	// Mesh the palm.
+	
+	// Get interpolated values on the outside contour:
+	int palmContourIndex0 = Handmarks[HANDMARK_PALM_BASE     ].index;
+	int palmContourIndex1 = Handmarks[HANDMARK_PINKY_SIDE    ].index;
+	
+	ofPolyline palmSideContour;
+	ofPolyline palmSideContourResampled;
+	bool bGotPalmSideContour = true;
+	if (palmContourIndex0 < palmContourIndex1){
+		for (int i=palmContourIndex0; i<=palmContourIndex1; i++){
+			ofPoint cpt = handContourNice[i]; 
+			palmSideContour.addVertex( cpt ); 
+		}
+		int nDesiredResampledPoints = 9;
+		palmSideContourResampled = palmSideContour.getResampledByCount(nDesiredResampledPoints-1);
+		
+		int nPalmSideContourPoints = palmSideContourResampled.size();
+		if (nPalmSideContourPoints != nDesiredResampledPoints){ // that weird resample bug again.
+			ofPoint cpt = handContourNice[palmContourIndex1];
+			palmSideContourResampled.addVertex( cpt.x, cpt.y );
+		}
+		
+	} else {
+		// hopefully this is really unlikely.
+		bGotPalmSideContour = false; 
+		printf("Problem meshing palm side.");
+	}
+	
+	if (bGotPalmSideContour){
+		
+		int nPalmSideResampledContourPoints = palmSideContourResampled.size();
+		for (int i=1; i<(nPalmSideResampledContourPoints-1); i++){
+			ofPoint cpt = palmSideContourResampled[i];
+			handMesh.addVertex (cpt); 
+			ofEllipse(cpt.x, cpt.y, 2,2);
+		}
+		
+		handMesh.addTriangle (344, 287, 58);
+		handMesh.addTriangle (287, 288, 62);
+		handMesh.addTriangle (288, 289, 119);
+		handMesh.addTriangle (289, 290, 176);
+		handMesh.addTriangle (290, 337, 233);
+		
+		int wristPointMeshIndex = 293;
+		int wristPointMeshIndices[]    = {292, 293,293,293,293, 294};
+		int knuckleMeshIndices[]       = {344, 287,288,289,290, 337, 337};
+		int thumbSidePalmMeshIndices[] = {295, 334, 325, 335, 329, 336, 332, 337, 233};
+		
+		for (int k=0; k<6; k++){
+			float wx = handMesh.getVertex(wristPointMeshIndices[k]).x; 
+			float wy = handMesh.getVertex(wristPointMeshIndices[k]).y; 
+			float kx = handMesh.getVertex(knuckleMeshIndices[k]).x;
+			float ky = handMesh.getVertex(knuckleMeshIndices[k]).y;
+			for (int i=1; i<7; i++){
+				float frac = (float)i/7.0;
+				float px = (1-frac)*wx + frac*kx;
+				float py = (1-frac)*wy + frac*ky;
+				handMesh.addVertex( ofVec3f (px,py, 0));
+				ofEllipse(px, py, 2,2);
+			}
+		}
+		
+		int starti = 338;
+		for (int j=0; j<=6; j++){
+			
+			int dn = 6;
+			if (j==0){
+				dn = 7;
+			}
+			
+			if (j == 6){
+				
+				for (int i=0; i<=5; i++){
+					int a = starti + i;
+					int b = thumbSidePalmMeshIndices[i+1];
+					int c = starti + i + 1;
+					int d = thumbSidePalmMeshIndices[i+2];
+					
+					if (i==5){
+						c = 337;
+						handMesh.addTriangle (a, b, c);
+					} else {
+						handMesh.addTriangle (a, b, c);
+						handMesh.addTriangle (c, b, d);
+					}
+					
+				}
+				
+			} else {
+				if ((j>=1) && (j < 5)){
+					int a = starti;
+					int b = wristPointMeshIndex;
+					int c = starti + dn;
+					handMesh.addTriangle (a, b, c);
+				}
+				
+				for (int i=0; i<=5; i++){
+					int a = starti + i;
+					int b = starti + i + dn;
+					int c = starti + i + 1;
+					int d = starti + i + dn+1;
+
+					if (i==5){
+						if (j > 0){
+							c = knuckleMeshIndices[j-1];
+							d = knuckleMeshIndices[j  ];
+							handMesh.addTriangle (a, b, c);
+							handMesh.addTriangle (c, b, d);
+						}
+					} else {
+						handMesh.addTriangle (a, b, c);
+						handMesh.addTriangle (c, b, d);
+					}
+				}
+			}
+			
+			starti += dn;
+		}
+		
+		handMesh.addTriangle (344, 343, 350);
+		handMesh.addTriangle (291, 292, 338);
+		handMesh.addTriangle (292, 345, 338);
+		handMesh.addTriangle (292, 293, 345);
+		handMesh.addTriangle (293, 294, 369);
+		handMesh.addTriangle (294, 375, 369);
+		handMesh.addTriangle (294, 295, 375);
+		handMesh.addTriangle (295, 334, 375);
+		
+		
+		
+		
+	}
+	
+	
+	//----------------------------------------------------
 	ofEnableAlphaBlending();
 	ofSetColor(255,100,100, 70);
 	handMesh.draw();
@@ -548,6 +956,7 @@ void HandContourAnalyzerAndMeshBuilder::drawAnalytics(){
 	handMesh.drawWireframe();
 	ofDisableAlphaBlending();
 	
+	bCalculatedMesh = true;
 	
 	
 	

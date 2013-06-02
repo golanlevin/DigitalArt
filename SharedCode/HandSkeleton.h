@@ -16,6 +16,8 @@ public:
 	
 	void setup(ofMesh& mesh) {
 		int boneCount = 17;
+		
+		/*
 		int controlIndicesRaw[] = {
 			0, 1,
 			2, 3, 4,
@@ -24,6 +26,18 @@ public:
 			11, 12, 13,
 			14, 15, 16
 		};
+		*/
+		
+		int controlIndicesRaw[] = {
+			293, 366,
+			287, 80,  100,
+			288, 137, 157,
+			289, 194, 214,
+			290, 251, 271,
+			320, 2,   27
+		};
+		
+		
 		int parentsRaw[] = {
 			-1, WRIST,
 			PALM, PINKY_BASE, PINKY_MID,
