@@ -33,15 +33,14 @@ void ofApp::setup() {
 	scenes.push_back(new FingerLengthPuppeteerScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton));
 
 	// set up the main gui
-	// setupGui();
-	sharedSetup();
 	setupGui();
+	sharedSetup();
+	//setupGui();
 
 	// set up the mesh
-	/*
-	hand.loadImage("hand/genericHandCentered.jpg");
-	mesh.load("hand/handmarks.ply");
-	 */
+	//hand.loadImage("hand/genericHandCentered.jpg");
+	//mesh.load("hand/handmarks.ply");
+	 
 	
 	hand.loadImage("hand/genericHandCenteredNew.jpg");
 	mesh.load("hand/handmarksNew.ply");
@@ -72,6 +71,8 @@ void ofApp::setup() {
 	showImage = true;
 	showWireframe = false;
 	showSkeleton = true;
+
+	showGuis = true;
 
 	// set the initial skeleton
 	setSkeleton(&handSkeleton);
@@ -104,7 +105,7 @@ void ofApp::setupGui() {
 	gui->autoSizeToFitWidgets();
 	
 	// set the initial scene
-	sceneRadio->getToggles()[scenes.size()-1]->setValue(true);
+	sceneRadio->getToggles()[0/*scenes.size()-1*/]->setValue(true);
 }
 
 int getSelection(ofxUIRadio* radio) {
@@ -156,6 +157,18 @@ void ofApp::update() {
 		showSkeleton = scenes[scene]->isStartShowSkeleton();
 		mouseControl = scenes[scene]->isStartMouseControl();
 	}
+
+	if (!showGuis) {
+		this->gui->setVisible(false);
+		for(int i=0; i < scenes.size(); i++) {
+			scenes[i]->turnOffGui();
+			scenes[i]->turnOffMouse();
+		}
+	}
+	else {
+		this->gui->setVisible(true);
+	}
+
 	// update skeleton
 	scenes[scene]->update();
 	setSkeleton(scenes[scene]->getSkeleton());
@@ -185,6 +198,11 @@ void ofApp::draw() {
 }
 
 void ofApp::keyPressed(int key) {
+	showGuis = !showGuis;
+
+	for (int i=0; i < scenes.size(); i++) {
+		scenes[i]->setShowGuis(showGuis);
+	}
 }
 
 void ofApp::setSkeleton(Skeleton* skeleton) {

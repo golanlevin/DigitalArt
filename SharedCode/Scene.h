@@ -17,6 +17,7 @@ protected:
 	float beginSceneTime;
 
 	bool startShowImage, startShowWireframe, startShowSkeleton, startMouseControl;
+	bool showGuis;
 
 public:	
 	Scene() {
@@ -33,6 +34,8 @@ public:
 		this->startShowWireframe = false;
 		this->startShowSkeleton = true;
 		this->startMouseControl = false;
+
+		this->showGuis = true;
 	}
 	void setup(string name, string nameWithSkeleton, ofxPuppet* puppet, Skeleton* skeleton, Skeleton* immutableSkeleton) {
 		this->name = name;
@@ -67,22 +70,28 @@ public:
 		mouseGui->addSpacer();
 	}
 	virtual void setupMouseGui() {}
-	bool guiIsOn() {
-		return this->gui->isVisible();
-	}
 	void turnOn() {
 		if (!beginSceneTimeSet) {
 			beginSceneTimeSet = true;
 			beginSceneTime = ofGetElapsedTimef();
 		}
 
-		this->gui->setVisible(true);
+		this->turnOnGui();
 	}
 	void turnOff() {
 		this->beginSceneTimeSet = false;
 
-		this->gui->setVisible(false);
+		this->turnOffGui();
 		this->turnOffMouse();
+	}
+	bool guiIsOn() {
+		return this->gui->isVisible();
+	}
+	void turnOnGui() {
+		this->gui->setVisible(true);
+	}
+	void turnOffGui() {
+		this->gui->setVisible(false);
 	}
 	bool mouseGuiIsOn() {
 		return this->mouseGui->isVisible();
@@ -122,6 +131,12 @@ public:
 	}
 	bool isStartMouseControl() {
 		return this->startMouseControl;
+	}
+	bool isShowGuis() {
+		return this->showGuis;
+	}
+	void setShowGuis(bool showGuis) {
+		this->showGuis = showGuis;
 	}
 	int getSelection(ofxUIRadio* radio) {
 		vector<ofxUIToggle*> toggles = radio->getToggles();
