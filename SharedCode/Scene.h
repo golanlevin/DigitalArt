@@ -134,19 +134,19 @@ public:
 	bool isStartMouseControl() {
 		return this->startMouseControl;
 	}
-<<<<<<< HEAD
+	
 	bool isUsingFrameBasedAnimation(){
 		return this->bUseFrameBasedAnimation;
 	}
 	void setFrameBasedAnimation (bool fba){
 		this->bUseFrameBasedAnimation = fba;
-=======
+    }
+	
 	bool isShowGuis() {
 		return this->showGuis;
 	}
 	void setShowGuis(bool showGuis) {
 		this->showGuis = showGuis;
->>>>>>> f35f80f093de4332e4b5012c339cb97666d4ea42
 	}
 	int getSelection(ofxUIRadio* radio) {
 		vector<ofxUIToggle*> toggles = radio->getToggles();
