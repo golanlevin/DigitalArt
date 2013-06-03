@@ -11,7 +11,7 @@ void ofApp::setup() {
 	blurKernelSize			= 4;
 	blurredStrengthWeight	= 0.07;
 	handyFloat01			= 0;
-	minLaplaceEdgeStrength  = 184;
+	minLaplaceEdgeStrength  = 218; //184;
 	
 
 	
@@ -48,7 +48,7 @@ void ofApp::setupGui() {
 	gui->addSpacer();
 	gui->addSlider("MinContourArea%", 0.0, 0.10, &minAllowableContourAreaAsAPercentOfImageSize);
 	gui->addSlider("MaxContourArea%", 0.0, 0.25, &maxAllowableContourAreaAsAPercentOfImageSize);
-	gui->addSlider("ContourSmoothing", 0.0, 50.0,&(HCAAMB.contourSmoothingSize));
+	gui->addSlider("ContourSmoothing", 0.0, 100.0,&(HCAAMB.contourSmoothingSize));
 	gui->addSlider("ContourResampling", 1.0, 20.0, &(HCAAMB.contourResampleSpacing));
 	gui->addSlider("nStDevMotionThresh", 0.0, 4.0, &(HCAAMB.tooMuchMotionThresholdInStDevs));
 	gui->addSlider("indexInterpAlpha", 0.0, 1.0, &(HCAAMB.indexInterpolationAlpha)); 
@@ -233,9 +233,8 @@ void ofApp::draw() {
 		ofSetColor(255);
 		video.draw(0, 0);
 		
-		printf(" current frame id = %d\n", video.getCurrentFrameID()); 
-		//ofSetColor(255,255,0);
-		//ofDrawBitmapString( ofToString(video.getCurrentFrameID()), mouseX, mouseY);
+		//printf(" current frame id = %d\n", video.getCurrentFrameID());
+		
 		
 		if (bValidHandContourExists){
 			HCAAMB.drawAnalytics();
@@ -243,6 +242,11 @@ void ofApp::draw() {
 		
 		ofPopStyle();
 	}
+	
+	ofSetColor(255,255,0);
+	ofDrawBitmapString( ofToString(video.getCurrentFrameID()), mouseX, mouseY);
+	
+	
 	if(intermediate) {
 		
 		ofPushMatrix();
@@ -274,7 +278,7 @@ void ofApp::keyPressed(int key) {
 	}
 	if (key == 's'){
 		if (HCAAMB.bCalculatedMesh){
-			string fileOut = ofToDataPath("", true) + "genericHand.ply";
+			string fileOut = ofToDataPath("", true) + "golanHand.ply";
 			HCAAMB.handMesh.save(fileOut);
 			printf("Output %s!\n", fileOut.c_str());
 		}

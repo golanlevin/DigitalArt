@@ -17,13 +17,15 @@ void testApp::setup() {
 	
 	// setup() will pick the first camera. Or if there are multiple cameras you
 	// can use the number, or the GUID of the camera.
+	camera.setExposure(1.0);
+	
 	camera.setup();
 	
 	// After setup it's still possible to change a lot of parameters. If you want
 	// to change a pre-setup parameter, the camera will auto-restart
 	camera.setBrightness(0);
 	camera.setGain(0);
-	camera.setExposure(1);
+	camera.setExposure(1.0);
 	camera.setGammaAbs(1);
 	camera.setShutterAbs(1. / 30.);
 	
@@ -46,6 +48,8 @@ void testApp::update() {
 	// (dropFrames) to false. By default, capture is non-blocking.
 	if(camera.grabVideo(curFrame)) {
 		curFrame.update();
+		
+		
 		if(recording) {
 			if(currentFrame < imageSequence.size()) {
 				ofPixels& target = imageSequence[currentFrame];
@@ -77,6 +81,7 @@ void testApp::keyPressed(int key) {
 		currentFrame = 0;
 	}
 	if(key == 'i') {
+		printf("Attempting save\n"); 
 		curFrame.saveImage(ofToString(ofGetFrameNum()) + ".png");
 	}
 }
