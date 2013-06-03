@@ -18,26 +18,27 @@ void ofApp::setup() {
 	
 	removalRegion.close();
 	int toRemove[] = {
-		1, 81, 112, 80,
-		104, 79, 99, 8,
-		23, 29, 296, 295,
-		37, 284, 283, 45,
-		272, 271, 53, 259,
-		19, 260, 54, 263,
-		264, 46, 276, 275,
-		38, 287, 288, 24,
-		24, 11, 100, 82,
-		105, 83, 111, 84};
+		293, 363, 364, 365,
+		366, 367, 368, 289,
+		176, 181, 186, 191,
+		196, 201, 206, 211,
+		216, 221, 226, 229,
+		228, 227, 222, 217,
+		212, 207, 202, 197,
+		192, 187, 182, 177,
+		119, 288, 362, 361,
+		360, 359, 358, 357
+	};
 	int toRemoveCount = 40;
 	for(int i = 0; i < toRemoveCount; i++) {
 		removalRegion.addVertex(mesh.getVertex(toRemove[i]));
 	}
 	
-	int toStitchLeft[] = {69, 100, 68, 92, 67, 87, 8, 20};
-	int toStitchRight[] = {72, 99, 71, 93, 70, 88, 9, 21};
-	int toStichCount = 8;
-	vector<pair<ofIndexType, ofIndexType> > stitch;
-	for(int i = 0; i < toStichCount; i++) {
+	// post-removal indices, not original indices
+	int toStitchLeft[] = {307, 308, 309, 310, 311, 312, 233, 173};
+	int toStitchRight[] = {301, 302, 303, 304, 305, 306, 232, 119,};
+	int toStitchCount = 8;
+	for(int i = 0; i < toStitchCount; i++) {
 		stitch.push_back(pair<ofIndexType, ofIndexType>(toStitchLeft[i], toStitchRight[i]));
 	}
 	

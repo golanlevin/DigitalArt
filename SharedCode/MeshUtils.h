@@ -48,6 +48,9 @@ ofMesh dropUnusedVertices(ofMesh& mesh) {
 }
 
 void mergeCoincidentVertices(ofMesh& mesh, float epsilon = 10e-5) {
+	mesh.mergeDuplicateVertices();
+	return;
+	
 	int n = mesh.getNumVertices();
 	vector<ofIndexType> newIndex(n);
 	float epsilonSquared = epsilon * epsilon;
@@ -84,7 +87,7 @@ ofMesh removeAndStitch(ofMesh& mesh, ofPolyline& removalRegion, vector<pair<ofIn
 	}
 	puppet.update();
 	out = puppet.getDeformedMesh();
-	mergeCoincidentVertices(out);
+	mergeCoincidentVertices(out); // could do this using stitch pairs instead?
 	return dropUnusedVertices(out);
 }
 

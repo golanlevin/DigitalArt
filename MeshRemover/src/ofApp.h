@@ -24,4 +24,5 @@ public:
 	ofxPuppetInteractive puppet;
 	
 	ofPolyline removalRegion;
+	vector<pair<ofIndexType, ofIndexType> > stitch;
 };
