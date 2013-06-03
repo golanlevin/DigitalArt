@@ -18,7 +18,6 @@
 #include "PulsatingPalmScene.h"
 #include "RetractingFingersScene.h"
 #include "SinusoidalWiggleScene.h"
-#include "WigglingWristScene.h"
 #include "MiddleDifferentLengthScene.h"
 #include "GrowingMiddleFingerScene.h"
 #include "StartrekScene.h"
@@ -52,7 +51,14 @@ public:
 	ofxUICanvas* gui;
 	ofxUICanvas** guis;
 	ofxUIRadio *sceneRadio;
-	bool showImage, showWireframe, showSkeleton, mouseControl, showSceneSkeletons;
+	
+	bool showImage;
+	bool showWireframe;
+	bool showSkeleton;
+	bool mouseControl;
+	bool showSceneSkeletons;
+	bool frameBasedAnimation;
+	
 	ofMesh mesh;
 	ofImage hand;
 	ofxPuppet puppet;

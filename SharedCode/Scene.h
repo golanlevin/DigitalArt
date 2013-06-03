@@ -15,24 +15,26 @@ protected:
 
 	bool beginSceneTimeSet;
 	float beginSceneTime;
+	bool bUseFrameBasedAnimation;
 
 	bool startShowImage, startShowWireframe, startShowSkeleton, startMouseControl;
 
 public:	
 	Scene() {
-		this->name = "";
-		this->nameWithSkeleton = "";
-		this->puppet = NULL;
-		this->skeleton = NULL;
-		this->immutableSkeleton = NULL;
+		this->name               = "";
+		this->nameWithSkeleton   = "";
+		this->puppet             = NULL;
+		this->skeleton           = NULL;
+		this->immutableSkeleton  = NULL;
 
-		this->beginSceneTimeSet = false;
-		this->beginSceneTime = 0;
+		this->beginSceneTimeSet  = false;
+		this->beginSceneTime     = 0;
 
-		this->startMouseControl = true;
+		this->startMouseControl  = true;
 		this->startShowWireframe = false;
-		this->startShowSkeleton = true;
-		this->startMouseControl = false;
+		this->startShowSkeleton  = true;
+		this->startMouseControl  = false;
+		this->bUseFrameBasedAnimation = false;
 	}
 	void setup(string name, string nameWithSkeleton, ofxPuppet* puppet, Skeleton* skeleton, Skeleton* immutableSkeleton) {
 		this->name = name;
@@ -122,6 +124,12 @@ public:
 	}
 	bool isStartMouseControl() {
 		return this->startMouseControl;
+	}
+	bool isUsingFrameBasedAnimation(){
+		return this->bUseFrameBasedAnimation;
+	}
+	void setFrameBasedAnimation (bool fba){
+		this->bUseFrameBasedAnimation = fba;
 	}
 	int getSelection(ofxUIRadio* radio) {
 		vector<ofxUIToggle*> toggles = radio->getToggles();

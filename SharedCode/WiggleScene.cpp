@@ -2,22 +2,27 @@
 
 #include "WiggleScene.h"
 
+//==========================================================================
 WiggleScene::WiggleScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkeleton* immutableHandSkeleton) {
 	Scene::Scene();
 	Scene::setup("Wiggle", "Wiggle (Hand)", puppet, (Skeleton*)handSkeleton, (Skeleton*)immutableHandSkeleton);
 
-	this->maxPalmAngleLeft = 60;
+	this->maxPalmAngleLeft  =  60;
 	this->maxPalmAngleRight = -60;
-	this->maxBaseAngleLeft = 20;
+	this->maxBaseAngleLeft  =  20;
 	this->maxBaseAngleRight = -20;
-	this->maxMidAngleLeft = 45;
-	this->maxMidAngleRight = -30;
+	this->maxMidAngleLeft   =  45;
+	this->maxMidAngleRight  = -30;
 }
+
+//==========================================================================
 void WiggleScene::setupGui() {
 	WiggleScene::initializeGui();
 
 	this->gui->autoSizeToFitWidgets();
 }
+
+//==========================================================================
 void WiggleScene::setupMouseGui() {
 	WiggleScene::initializeMouseGui();
 
@@ -32,19 +37,62 @@ void WiggleScene::setupMouseGui() {
 
 	this->mouseGui->autoSizeToFitWidgets();
 }
+
+//==========================================================================
 void WiggleScene::update() {
 	HandSkeleton* handSkeleton = (HandSkeleton*)this->skeleton;
 
-	int toWiggle[] = {HandSkeleton::PINKY_TIP, HandSkeleton::RING_TIP, HandSkeleton::MIDDLE_TIP, HandSkeleton::INDEX_TIP, HandSkeleton::THUMB_TIP};
-	int toWiggleCount = 5;
-	float wiggleRange = 10;
-	float t = ofGetElapsedTimef();
-	for(int i = 0; i < toWiggleCount; i++) {
+	int toWiggle[] = {
+		HandSkeleton::PINKY_BASE,
+		HandSkeleton::RING_BASE,
+		HandSkeleton::MIDDLE_BASE,
+		HandSkeleton::INDEX_BASE,
+		HandSkeleton::THUMB_BASE,
+		
+		HandSkeleton::PINKY_MID,
+		HandSkeleton::RING_MID,
+		HandSkeleton::MIDDLE_MID,
+		HandSkeleton::INDEX_MID,
+		HandSkeleton::THUMB_MID,
+		
+		HandSkeleton::PINKY_TIP,
+		HandSkeleton::RING_TIP,
+		HandSkeleton::MIDDLE_TIP,
+		HandSkeleton::INDEX_TIP,
+		HandSkeleton::THUMB_TIP,
+	};
+	
+	int toWiggleCount = 15;
+	float wiggleRangeBase =  0.6;
+	float wiggleRangeMid  =  1.8;
+	float wiggleRangeTip  = 10.0;
+	
+	float timeVal = ofGetElapsedTimef();
+	if (bUseFrameBasedAnimation){
+		timeVal = (float)ofGetFrameNum()/ 60.0;
+	}
+	
+	for (int i = 0; i < toWiggleCount; i++) {
 		int index = toWiggle[i];
-		ofVec2f position(wiggleRange * ofVec2f(ofNoise(i, t, 0), ofNoise(i, t, 1)));
+		float noiseX = ofNoise(i, timeVal, 0);
+		float noiseY = ofNoise(i, timeVal, 1);
+		
+		noiseX = 1.00 * ofMap(noiseX, 0,1, -1,1);
+		noiseY = 0.85 * ofMap(noiseY, 0,1, -1,1);
+		
+		float wiggleRange = 0;
+		switch (i / 5){
+			case 0: wiggleRange = wiggleRangeBase; break;
+			case 1: wiggleRange = wiggleRangeMid;  break;
+			case 2: wiggleRange = wiggleRangeTip;  break;
+		}
+		
+		ofVec2f position (wiggleRange * ofVec2f (noiseX, noiseY));
 		handSkeleton->setPosition(index, position, false, false);
 	}
 }
+
+//==========================================================================
 void WiggleScene::updateMouse(float mx, float my) {
 	ofVec2f mouse(mx, my);
 
@@ -136,5 +184,7 @@ void WiggleScene::updateMouse(float mx, float my) {
 			break;
 	}
 }
+
+//==========================================================================
 void WiggleScene::draw() {
 }
