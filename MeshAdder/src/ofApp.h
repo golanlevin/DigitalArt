@@ -17,7 +17,7 @@ public:
 	void keyPressed(int key);
 	
 	ofxUICanvas* gui;
-	bool showImage, showWireframe, showSplit;
+	bool showImage, showWireframe, showSplit, showCopy;
 	
 	ofMesh mesh;
 	ofImage hand;
@@ -25,4 +25,7 @@ public:
 	
 	ofPolyline splitPath;
 	vector<ofIndexType> indices;
+	
+	ofPolyline copyRegion;
+	ofMesh copyMesh;
 };
