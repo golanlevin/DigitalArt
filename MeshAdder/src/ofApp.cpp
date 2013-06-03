@@ -9,6 +9,7 @@ void ofApp::setup() {
 	showImage = true;
 	showWireframe = true;
 	showSplit = true;
+	showCopy = true;
 	
 	hand.loadImage("hand/genericHandCentered.jpg");
 	mesh.load("hand/handmarks.ply");
@@ -24,35 +25,33 @@ void ofApp::setup() {
 	}
 	
 	split(mesh, indices);
-	//mesh = dropUnusedVertices(mesh);
 	
-	/*
-	 int toRemove[] = {
-	 1, 81, 112, 80,
-	 104, 79, 99, 8,
-	 23, 29, 296, 295,
-	 37, 284, 283, 45,
-	 272, 271, 53, 259,
-	 19, 260, 54, 263,
-	 264, 46, 276, 275,
-	 38, 287, 288, 24,
-	 24, 11, 100, 82,
-	 105, 83, 111, 84};
-	 int toRemoveCount = 40;
-	 for(int i = 0; i < toRemoveCount; i++) {
-	 removalRegion.addVertex(mesh.getVertex(toRemove[i]));
-	 }
-	 
-	 int toStitchLeft[] = {69, 100, 68, 92, 67, 87, 8, 20};
-	 int toStitchRight[] = {72, 99, 71, 93, 70, 88, 9, 21};
-	 int toStichCount = 8;
-	 vector<pair<ofIndexType, ofIndexType> > stitch;
-	 for(int i = 0; i < toStichCount; i++) {
-	 stitch.push_back(pair<ofIndexType, ofIndexType>(toStitchLeft[i], toStitchRight[i]));
-	 }
-	 
-	 mesh = removeAndStitch(mesh, removalRegion, stitch);
-	 */
+	int toCopy[] = {
+		1, 78, 113, 77, 103, 76, 98, 5, 23, 29, 296, 295, 37, 284, 283, 45, 272, 271, 53, 259, 19, 260, 54, 263, 264, 46, 276, 275, 38, 287, 288, 30, 24,	8, 99, 79, 104, 80, 112, 81,
+	};
+	int toCopyCount = 40;
+	for(int i = 0; i < toCopyCount; i++) {
+		copyRegion.addVertex(mesh.getVertex(toCopy[i]));
+	}
+	copyRegion.close();
+	
+	copyMesh.setMode(OF_PRIMITIVE_TRIANGLES);
+	for(int i = 0; i < mesh.getNumIndices(); i += 3) {
+		int i0 = mesh.getIndex(i + 0), i1 = mesh.getIndex(i + 1), i2 = mesh.getIndex(i + 2);
+		ofVec2f vi0 = mesh.getVertex(i0), vi1 = mesh.getVertex(i1), vi2 = mesh.getVertex(i2);
+		ofVec2f avg = (vi0 + vi1 + vi2) / 3;
+		if(copyRegion.inside(avg)) {
+			// this needs to be adding indexed vertices instead
+			copyMesh.addVertex(vi0);
+			copyMesh.addVertex(vi1);
+			copyMesh.addVertex(vi2);
+		}
+	}
+	
+	// after creating a copy of the mesh, we need to deform the original using a puppet
+	// this involves picking some seams and using control points to position the seams to match the copy
+	// then we stitch the copied mesh into the original mesh, reusing vertices that are along the seams (merge coincident)
+	
 	puppet.setup(mesh);
 }
 
@@ -65,6 +64,7 @@ void ofApp::setupGui() {
 	gui->addLabelToggle("Show Image", &showImage);
 	gui->addLabelToggle("Show Wireframe", &showWireframe);
 	gui->addLabelToggle("Show Removal", &showSplit);
+	gui->addLabelToggle("Show Copy", &showCopy);
 	gui->autoSizeToFitWidgets();
 }
 
@@ -90,6 +90,14 @@ void ofApp::draw() {
 		splitPath.draw();
 		ofPopStyle();
 	}
+	if(showCopy) {
+		ofPushStyle();
+		ofSetLineWidth(1);
+		ofSetColor(ofColor::blue);
+		copyRegion.draw();
+		copyMesh.draw();
+		ofPopStyle();
+	}
 	
 	int n = mesh.getNumIndices();
 	vector<ofIndexType> newIndices;
@@ -101,63 +109,6 @@ void ofApp::draw() {
 			//mesh.addTexCoord(mesh.getTexCoord(index));
 		}
 	}
-	
-	/*
-	ofMesh edgeTriangles;
-	edgeTriangles.setMode(OF_PRIMITIVE_TRIANGLES);
-	for(int i = 0; i < n; i += 3) {
-		ofIndexType i0 = mesh.getIndex(i + 0);
-		ofIndexType i1 = mesh.getIndex(i + 1);
-		ofIndexType i2 = mesh.getIndex(i + 2);
-		
-		set<ofIndexType> triangleIndices;
-		triangleIndices.insert(i0);
-		triangleIndices.insert(i1);
-		triangleIndices.insert(i2);
-		
-		for(int j = 0; j < indices.size() - 1; j++) {
-			int j0 = indices[j], j1 = indices[j + 1];
-			
-			set<ofIndexType> lineIndices;
-			lineIndices.insert(j0);
-			lineIndices.insert(j1);
-			
-			set<ofIndexType> result;
-			set_intersection(lineIndices.begin(), lineIndices.end(), triangleIndices.begin(), triangleIndices.end(), std::inserter(result, result.end()));
-			
-			if(!result.empty()) {
-				ofVec2f vj0 = mesh.getVertex(j0);
-				ofVec2f vj1 = mesh.getVertex(j1);
-				ofVec2f vi0 = mesh.getVertex(i0);
-				ofVec2f vi1 = mesh.getVertex(i1);
-				ofVec2f vi2 = mesh.getVertex(i2);
-				ofVec2f avg = (vi0 + vi1 + vi2) / 3;
-				
-				if(isLeft(vj0, vj1, avg)) {
-					for(int k = 0; k < 3; k++) {
-						int cur = mesh.getIndex(i + k);
-						if(cur == indices[j]) {
-							mesh.setIndex(i + k, newIndices[j]);
-						} else if(cur == indices[j + 1]) {
-							mesh.setIndex(i + k, newIndices[j + 1]);
-						}
-					}
-					edgeTriangles.addColor(ofColor::red);
-					edgeTriangles.addColor(ofColor::red);
-					edgeTriangles.addColor(ofColor::red);
-				} else {
-					edgeTriangles.addColor(ofColor::blue);
-					edgeTriangles.addColor(ofColor::blue);
-					edgeTriangles.addColor(ofColor::blue);
-				}
-				edgeTriangles.addVertex(vi0);
-				edgeTriangles.addVertex(vi1);
-				edgeTriangles.addVertex(vi2);
-			}
-		}
-	}
-	edgeTriangles.drawWireframe();
-	 */
 }
 
 void ofApp::keyPressed(int key) {
