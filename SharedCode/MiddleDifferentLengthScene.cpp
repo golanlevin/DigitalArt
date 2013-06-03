@@ -6,15 +6,15 @@ MiddleDifferentLengthScene::MiddleDifferentLengthScene(ofxPuppet* puppet, HandSk
 	Scene::Scene();
 	Scene::setup("Middle Different Length", "Middle Different Length (Hand)", puppet, (Skeleton*)handSkeleton, (Skeleton*)immutableHandSkeleton);
 
-	this->maxPalmAngleLeft = 60;
+	this->maxPalmAngleLeft  =  60;
 	this->maxPalmAngleRight = -60;
-	this->maxBaseAngleLeft = 20;
+	this->maxBaseAngleLeft  =  20;
 	this->maxBaseAngleRight = -20;
-	this->maxMidAngleLeft = 45;
-	this->maxMidAngleRight = -30;
+	this->maxMidAngleLeft   =  45;
+	this->maxMidAngleRight  = -30;
 
-	this->middleLength = 80;
-	this->otherLength = 40;
+	this->middleLength      =  86;
+	this->otherLength       =  40;
 }
 void MiddleDifferentLengthScene::setupGui() {
 	MiddleDifferentLengthScene::initializeGui();

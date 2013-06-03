@@ -8,7 +8,9 @@ void updatePuppet(Skeleton* skeleton, ofxPuppet& puppet) {
 }
 
 void ofApp::setup() {
-	// create all of the scenes
+	
+	//----------------------------
+	// Create all of the scenes
 	scenes.push_back(new NoneScene(&puppet, &handSkeleton, &immutableHandSkeleton));
 	scenes.push_back(new WaveScene(&puppet, &handSkeleton, &immutableHandSkeleton));
 	scenes.push_back(new WiggleScene(&puppet, &handSkeleton, &immutableHandSkeleton)); 
@@ -21,8 +23,7 @@ void ofApp::setup() {
 	scenes.push_back(new SinusoidalLengthScene(&puppet, &handSkeleton, &immutableHandSkeleton)); 
 	scenes.push_back(new PulsatingPalmScene(&puppet, &palmSkeleton, &immutablePalmSkeleton)); 
 	scenes.push_back(new RetractingFingersScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton)); 
-	scenes.push_back(new SinusoidalWiggleScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton)); 
-	scenes.push_back(new WigglingWristScene(&puppet, &wristSpineSkeleton, &immutableWristSpineSkeleton)); 
+	scenes.push_back(new SinusoidalWiggleScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton));  
 	scenes.push_back(new MiddleDifferentLengthScene(&puppet, &handSkeleton, &immutableHandSkeleton)); 
 	scenes.push_back(new GrowingMiddleFingerScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton)); 
 	scenes.push_back(new StartrekScene(&puppet, &handSkeleton, &immutableHandSkeleton)); 
@@ -33,45 +34,52 @@ void ofApp::setup() {
 	scenes.push_back(new FingerLengthPuppeteerScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton));
 
 	// set up the main gui
-	// setupGui();
-	sharedSetup();
+
 	setupGui();
+	sharedSetup();
+	//setupGui();
 
 	// set up the mesh
-	/*
-	hand.loadImage("hand/genericHandCentered.jpg");
-	mesh.load("hand/handmarks.ply");
-	 */
+	//hand.loadImage("hand/genericHandCentered.jpg");
+	//mesh.load("hand/handmarks.ply");
 	
+	// This is the NEW mesh, produced by the MeshGenerator
 	hand.loadImage("hand/genericHandCenteredNew.jpg");
 	mesh.load("hand/handmarksNew.ply");
 	
-	for(int i = 0; i < mesh.getNumVertices(); i++) {
+	for (int i = 0; i < mesh.getNumVertices(); i++) {
 		mesh.addTexCoord(mesh.getVertex(i));
 	}
 	
-	// set up the puppet
-	puppet.setup(mesh);
+	//----------------------------
+	// Set up the puppet.
+	puppet.setup (mesh);
 
-	// set up all of the skeletons
+	//----------------------------	
+	// Set up all of the skeletons.
 	previousSkeleton = NULL;
-	currentSkeleton = NULL;
-	handWithFingertipsSkeleton.setup(mesh);
+	currentSkeleton  = NULL;
+	
+	handWithFingertipsSkeleton.setup         (mesh);
 	immutableHandWithFingertipsSkeleton.setup(mesh);
-	handSkeleton.setup(mesh);
-	immutableHandSkeleton.setup(mesh);
-	threePointSkeleton.setup(mesh);
-	immutableThreePointSkeleton.setup(mesh);
-	palmSkeleton.setup(mesh);
-	immutablePalmSkeleton.setup(mesh);
-	wristSpineSkeleton.setup(mesh);
-	immutableWristSpineSkeleton.setup(mesh);
+	handSkeleton.setup                       (mesh);
+	immutableHandSkeleton.setup              (mesh);
+	threePointSkeleton.setup                 (mesh);
+	immutableThreePointSkeleton.setup        (mesh);
+	palmSkeleton.setup                       (mesh);
+	immutablePalmSkeleton.setup              (mesh);
+	wristSpineSkeleton.setup                 (mesh);
+	immutableWristSpineSkeleton.setup        (mesh);
 
-	// initialize gui features
-	mouseControl = false;
-	showImage = true;
+	//----------------------------
+	// Initialize gui features
+	mouseControl  = false;
+	showImage     = true;
 	showWireframe = false;
-	showSkeleton = true;
+	showSkeleton  = true;
+	frameBasedAnimation = false;
+
+	showGuis = true;
 
 	// set the initial skeleton
 	setSkeleton(&handSkeleton);
@@ -98,13 +106,14 @@ void ofApp::setupGui() {
 	gui->addSpacer();
 	gui->addLabelToggle("Show Image", &showImage);
 	gui->addLabelToggle("Show Wireframe", &showWireframe);
-	gui->addLabelToggle("Show Skeleton", &showSkeleton);
-	gui->addLabelToggle("Mouse Control", &mouseControl);
+	gui->addLabelToggle("Show Skeleton",  &showSkeleton);
+	gui->addLabelToggle("Mouse Control",  &mouseControl);
+	gui->addLabelToggle("FrameBasedAnim", &frameBasedAnimation);
 	gui->addSpacer();
 	gui->autoSizeToFitWidgets();
 	
 	// set the initial scene
-	sceneRadio->getToggles()[scenes.size()-1]->setValue(true);
+	sceneRadio->getToggles()[0/*scenes.size()-1*/]->setValue(true);
 }
 
 int getSelection(ofxUIRadio* radio) {
@@ -156,6 +165,18 @@ void ofApp::update() {
 		showSkeleton = scenes[scene]->isStartShowSkeleton();
 		mouseControl = scenes[scene]->isStartMouseControl();
 	}
+
+	if (!showGuis) {
+		this->gui->setVisible(false);
+		for(int i=0; i < scenes.size(); i++) {
+			scenes[i]->turnOffGui();
+			scenes[i]->turnOffMouse();
+		}
+	}
+	else {
+		this->gui->setVisible(true);
+	}
+
 	// update skeleton
 	scenes[scene]->update();
 	setSkeleton(scenes[scene]->getSkeleton());
@@ -185,6 +206,11 @@ void ofApp::draw() {
 }
 
 void ofApp::keyPressed(int key) {
+	showGuis = !showGuis;
+
+	for (int i=0; i < scenes.size(); i++) {
+		scenes[i]->setShowGuis(showGuis);
+	}
 }
 
 void ofApp::setSkeleton(Skeleton* skeleton) {

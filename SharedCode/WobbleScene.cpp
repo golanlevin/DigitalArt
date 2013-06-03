@@ -2,22 +2,26 @@
 
 #include "WobbleScene.h"
 
+//==========================================================================
 WobbleScene::WobbleScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, HandSkeleton* immutableHandSkeleton) {
 	Scene::Scene();
 	Scene::setup("Wobble", "Wobble (Hand)", puppet, (Skeleton*)handSkeleton, (Skeleton*)immutableHandSkeleton);
 
-	this->maxPalmAngleLeft = 60;
+	this->maxPalmAngleLeft  =  60;
 	this->maxPalmAngleRight = -60;
-	this->maxBaseAngleLeft = 20;
+	this->maxBaseAngleLeft  =  20;
 	this->maxBaseAngleRight = -20;
-	this->maxMidAngleLeft = 45;
-	this->maxMidAngleRight = -30;
+	this->maxMidAngleLeft   =  45;
+	this->maxMidAngleRight  = -30;
 }
+
+//==========================================================================
 void WobbleScene::setupGui() {
 	WobbleScene::initializeGui();
-
 	this->gui->autoSizeToFitWidgets();
 }
+
+//==========================================================================
 void WobbleScene::setupMouseGui() {
 	WobbleScene::initializeMouseGui();
 
@@ -32,14 +36,68 @@ void WobbleScene::setupMouseGui() {
 
 	this->mouseGui->autoSizeToFitWidgets();
 }
+
+//==========================================================================
 void WobbleScene::update() {
 	HandSkeleton* handSkeleton = (HandSkeleton*)this->skeleton;
+	
+	float timeVal = ofGetElapsedTimef();
+	if (bUseFrameBasedAnimation){
+		timeVal = (float)ofGetFrameNum()/ 60.0;
+	}
 
-	float wobbleRange = 50;
-	float t = ofGetElapsedTimef();
-	ofVec2f position(wobbleRange * ofVec2f(ofNoise(t, 0), ofNoise(t, 1)));
-	handSkeleton->setPosition(HandSkeleton::PALM, position, false, true);
+	float wobbleRange      = 5;
+	float palmNoiseVal0 = ofNoise (0.03 * timeVal, 0);
+	float palmNoiseVal1 = ofNoise (0.03 * timeVal, 1);
+	float palmDx = ofMap(palmNoiseVal0,  0,1, -1,1);
+	float palmDy = ofMap(palmNoiseVal1,  0,1, -1,1);
+	
+	// get the original positions 
+	ofVec2f origPalmPos       = puppet->getOriginalMesh().getVertex(handSkeleton->getControlIndex(HandSkeleton::PALM));
+	ofVec2f origThumbBasePos  = puppet->getOriginalMesh().getVertex(handSkeleton->getControlIndex(HandSkeleton::THUMB_BASE));
+	ofVec2f origPBasePos      = puppet->getOriginalMesh().getVertex(handSkeleton->getControlIndex(HandSkeleton::PINKY_BASE));
+	ofVec2f origRBasePos      = puppet->getOriginalMesh().getVertex(handSkeleton->getControlIndex(HandSkeleton::RING_BASE));
+	ofVec2f origMBasePos      = puppet->getOriginalMesh().getVertex(handSkeleton->getControlIndex(HandSkeleton::MIDDLE_BASE));
+	ofVec2f origIBasePos      = puppet->getOriginalMesh().getVertex(handSkeleton->getControlIndex(HandSkeleton::INDEX_BASE));
+	
+	// move the palm
+	ofVec2f palmPosition (wobbleRange * ofVec2f (palmDx, palmDy ));
+	handSkeleton->setPosition(HandSkeleton::PALM, palmPosition, false, true);
+	ofVec2f newPalmPos = origPalmPos + palmPosition;
+	
+	ofVec2f vecFromThumbBaseToNewPalm = newPalmPos - origThumbBasePos;
+	handSkeleton->setPosition(HandSkeleton::THUMB_BASE, -0.5 * vecFromThumbBaseToNewPalm, false, false);
+	
+	
+	ofVec2f  RMI = (origRBasePos + origMBasePos + origIBasePos) / 3.0;
+	ofVec2f  PMI = (origPBasePos + origMBasePos + origIBasePos) / 3.0;
+	ofVec2f  PRI = (origPBasePos + origRBasePos + origIBasePos) / 3.0;
+	ofVec2f  PRM = (origPBasePos + origRBasePos + origMBasePos) / 3.0;
+	
+	ofVec2f dRMI = RMI - origPBasePos;
+	ofVec2f dPMI = PMI - origRBasePos;
+	ofVec2f dPRI = PRI - origMBasePos;
+	ofVec2f dPRM = PRM - origIBasePos;
+	
+	float baseMoveAmount = -0.25;
+	ofVec2f newP = baseMoveAmount * dRMI;
+	ofVec2f newR = baseMoveAmount * dPMI;
+	ofVec2f newM = baseMoveAmount * dPRI;
+	ofVec2f newI = baseMoveAmount * dPRM;
+	
+	handSkeleton->setPosition(HandSkeleton::PINKY_BASE,  newP, false, false);
+	handSkeleton->setPosition(HandSkeleton::RING_BASE,   newR, false, false);
+	handSkeleton->setPosition(HandSkeleton::MIDDLE_BASE, newM, false, false);
+	handSkeleton->setPosition(HandSkeleton::INDEX_BASE,  newI, false, false);
+	 
+	
+	// printf ("%f	%f\n", origPalmPos.x, newPalmPos.x);
+	// ofVec2f thumbBasePosition (0.5 * wobbleRange * ofVec2f (palmDx, palmDy ));
+	// handSkeleton->setPosition(HandSkeleton::THUMB_BASE, thumbBasePosition, false, false);
 }
+
+
+//==========================================================================
 void WobbleScene::updateMouse(float mx, float my) {
 	ofVec2f mouse(mx, my);
 
@@ -76,7 +134,7 @@ void WobbleScene::updateMouse(float mx, float my) {
 	float baseCorrection[] = {26.75, -3, 1.75, 7.75, 9.75};
 	float midCorrection[] = {6.75, 2, -1.5, -1.75, -3.5};
 
-	switch(getSelection(mouseRadio)) {
+	switch (getSelection(mouseRadio)) {
 		case 0: // palm position
 			handSkeleton->setPosition(HandSkeleton::PALM, mouse, true);
 			immutableHandSkeleton->setPosition(HandSkeleton::PALM, mouse, true);
@@ -131,5 +189,7 @@ void WobbleScene::updateMouse(float mx, float my) {
 			break;
 	}
 }
+
+//==========================================================================
 void WobbleScene::draw() {
 }

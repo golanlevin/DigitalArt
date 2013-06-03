@@ -16,15 +16,20 @@ SinusoidalLengthScene::SinusoidalLengthScene(ofxPuppet* puppet, HandSkeleton* ha
 	this->maxLength = 15;
 	this->speedUp = 2;
 	this->phaseOffset = 0.5;
+	this->sigmoidStrengthMid = 0.90;
+	this->sigmoidStrengthTip = 0.60;
 }
 void SinusoidalLengthScene::setupGui() {
 	SinusoidalLengthScene::initializeGui();
 
-	this->gui->addSlider("Max Length", 10, 30, &maxLength);
+	this->gui->addSlider("Max Length", 0, 30, &maxLength);
 	this->gui->addSpacer();
 	this->gui->addSlider("Speed Up", 1, 5, &speedUp);
 	this->gui->addSpacer();
 	this->gui->addSlider("Phase Offset", 0, 1, &phaseOffset);
+	this->gui->addSpacer();
+	this->gui->addSlider("Sigmoid Str.Mid", 0, 1, &sigmoidStrengthMid);
+	this->gui->addSlider("Sigmoid Str.Tip", 0, 1, &sigmoidStrengthTip);
 	this->gui->addSpacer();
 
 	this->gui->autoSizeToFitWidgets();
@@ -43,6 +48,8 @@ void SinusoidalLengthScene::setupMouseGui() {
 
 	this->mouseGui->autoSizeToFitWidgets();
 }
+
+//==========================================================================
 void SinusoidalLengthScene::update() {
 	HandSkeleton* handSkeleton = (HandSkeleton*)this->skeleton;
 	HandSkeleton* immutableHandSkeleton = (HandSkeleton*)this->immutableSkeleton;
@@ -50,30 +57,91 @@ void SinusoidalLengthScene::update() {
 	int mid[] = {HandSkeleton::PINKY_MID, HandSkeleton::RING_MID, HandSkeleton::MIDDLE_MID, HandSkeleton::INDEX_MID, HandSkeleton::THUMB_MID};
 	int tip[] = {HandSkeleton::PINKY_TIP, HandSkeleton::RING_TIP, HandSkeleton::MIDDLE_TIP, HandSkeleton::INDEX_TIP, HandSkeleton::THUMB_TIP};
 	int fingerCount = 5;
-	float t = ofGetElapsedTimef();
+	
+	float timeVal = ofGetElapsedTimef();
+	if (bUseFrameBasedAnimation){
+		timeVal = (float)ofGetFrameNum()/ 60.0;
+	}
 		
-	int index;
+	int indexMid;
+	int indexTip;
 	ofVec2f original;
 	ofVec2f parent;
 	ofVec2f position;
+	float wiggleValue;
+	
 	for(int i = 0; i < fingerCount; i++) {
-		index = mid[i];
-		original = immutableSkeleton->getPositionAbsolute(index);
-		parent = immutableSkeleton->getPositionAbsolute((int) ((int)index-1));
+		indexMid = mid[i];
+		original = immutableSkeleton->getPositionAbsolute(indexMid);
+		parent   = immutableSkeleton->getPositionAbsolute((int) ((int)indexMid-1));
 		position = original-parent;
 		position.normalize();
-		position = position * (maxLength*sin(speedUp*t + i*phaseOffset));
-		handSkeleton->setPosition(index, position, false, false);
+		
+		// wiggleValue = 0.5 + 0.5*sin(speedUp*timeVal + i*phaseOffset);
+		wiggleValue = ofNoise(speedUp*timeVal + i*phaseOffset, i*phaseOffset);
+		wiggleValue = function_NormalizedLogisticSigmoid (wiggleValue, this->sigmoidStrengthMid);
+		wiggleValue = (wiggleValue * 2.0) - 1.0;
+		position = position * (maxLength * wiggleValue);
+		handSkeleton->setPosition(indexMid, position, false, false);
 
-		index = tip[i];
-		original = immutableSkeleton->getPositionAbsolute(index);
-		parent = immutableSkeleton->getPositionAbsolute((int) ((int)index-1));
+		indexTip = tip[i];
+		original = immutableSkeleton->getPositionAbsolute(indexTip);
+		parent   = immutableSkeleton->getPositionAbsolute((int) ((int)indexTip-1));
 		position = original-parent;
 		position.normalize();
-		position = position * (maxLength*sin(speedUp*t + i*phaseOffset));
-		handSkeleton->setPosition(index, position, false, false);
+		
+		// wiggleValue = 0.5 + 0.5*sin(speedUp*timeVal + i*phaseOffset);
+		wiggleValue = ofNoise(speedUp*timeVal + i*phaseOffset, i*phaseOffset);
+		wiggleValue = function_NormalizedLogisticSigmoid (wiggleValue, this->sigmoidStrengthTip);
+		wiggleValue = (wiggleValue * 2.0) - 1.0; 
+		position = position * (maxLength * wiggleValue);
+		handSkeleton->setPosition(indexTip, position, false, false);
 	}
 }
+
+
+
+//==========================================================================
+float SinusoidalLengthScene::function_NormalizedLogisticSigmoid (float x, float a) {
+	
+	float min_param_a = 0.00001;
+	float max_param_a = 1.0 - min_param_a;
+	float emph = 5.0;
+	
+	a = ofClamp(a, min_param_a, max_param_a);
+	a = (1.0/(1.0-a) - 1.0);
+	a = emph * a;
+	
+	float y    = 1.0 / (1.0 + expf(0 - (x-0.5)*a    ));
+	float miny = 1.0 / (1.0 + expf(  0.5*a    ));
+	float maxy = 1.0 / (1.0 + expf( -0.5*a    ));
+	y = ofMap(y, miny,maxy, 0,1);
+	return y;
+}
+
+
+//==========================================================================
+float SinusoidalLengthScene::function_DoubleExponentialSigmoid (float x, float a){
+		
+	float min_param_a = 0.00001;
+	float max_param_a = 1.0 - min_param_a;
+	a = ofClamp(a, min_param_a, max_param_a);
+	a = 1-a;
+	
+	float y = 0;
+	if (x<=0.5){
+		y = (powf(2.0*x, 1.0/a))/2.0;
+	}
+	else {
+		y = 1.0 - (powf(2.0*(1.0-x), 1.0/a))/2.0;
+	}
+	return y;
+}
+
+
+
+
+//==========================================================================
 void SinusoidalLengthScene::updateMouse(float mx, float my) {
 	ofVec2f mouse(mx, my);
 
@@ -165,5 +233,7 @@ void SinusoidalLengthScene::updateMouse(float mx, float my) {
 			break;
 	}
 }
+
+//==========================================================================
 void SinusoidalLengthScene::draw() {
 }

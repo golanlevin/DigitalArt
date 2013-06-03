@@ -15,24 +15,29 @@ protected:
 
 	bool beginSceneTimeSet;
 	float beginSceneTime;
+	bool bUseFrameBasedAnimation;
 
 	bool startShowImage, startShowWireframe, startShowSkeleton, startMouseControl;
+	bool showGuis;
 
 public:	
 	Scene() {
-		this->name = "";
-		this->nameWithSkeleton = "";
-		this->puppet = NULL;
-		this->skeleton = NULL;
-		this->immutableSkeleton = NULL;
+		this->name               = "";
+		this->nameWithSkeleton   = "";
+		this->puppet             = NULL;
+		this->skeleton           = NULL;
+		this->immutableSkeleton  = NULL;
 
-		this->beginSceneTimeSet = false;
-		this->beginSceneTime = 0;
+		this->beginSceneTimeSet  = false;
+		this->beginSceneTime     = 0;
 
-		this->startMouseControl = true;
+		this->startShowImage = true;
 		this->startShowWireframe = false;
+
 		this->startShowSkeleton = true;
 		this->startMouseControl = false;
+
+		this->showGuis = true;
 	}
 	void setup(string name, string nameWithSkeleton, ofxPuppet* puppet, Skeleton* skeleton, Skeleton* immutableSkeleton) {
 		this->name = name;
@@ -44,7 +49,7 @@ public:
 		this->beginSceneTimeSet = false;
 		this->beginSceneTime = 0;
 
-		this->startMouseControl = true;
+		this->startShowImage = true;
 		this->startShowWireframe = false;
 		this->startShowSkeleton = false;
 		this->startMouseControl = false;
@@ -67,22 +72,28 @@ public:
 		mouseGui->addSpacer();
 	}
 	virtual void setupMouseGui() {}
-	bool guiIsOn() {
-		return this->gui->isVisible();
-	}
 	void turnOn() {
 		if (!beginSceneTimeSet) {
 			beginSceneTimeSet = true;
 			beginSceneTime = ofGetElapsedTimef();
 		}
 
-		this->gui->setVisible(true);
+		this->turnOnGui();
 	}
 	void turnOff() {
 		this->beginSceneTimeSet = false;
 
-		this->gui->setVisible(false);
+		this->turnOffGui();
 		this->turnOffMouse();
+	}
+	bool guiIsOn() {
+		return this->gui->isVisible();
+	}
+	void turnOnGui() {
+		this->gui->setVisible(true);
+	}
+	void turnOffGui() {
+		this->gui->setVisible(false);
 	}
 	bool mouseGuiIsOn() {
 		return this->mouseGui->isVisible();
@@ -122,6 +133,20 @@ public:
 	}
 	bool isStartMouseControl() {
 		return this->startMouseControl;
+	}
+<<<<<<< HEAD
+	bool isUsingFrameBasedAnimation(){
+		return this->bUseFrameBasedAnimation;
+	}
+	void setFrameBasedAnimation (bool fba){
+		this->bUseFrameBasedAnimation = fba;
+=======
+	bool isShowGuis() {
+		return this->showGuis;
+	}
+	void setShowGuis(bool showGuis) {
+		this->showGuis = showGuis;
+>>>>>>> f35f80f093de4332e4b5012c339cb97666d4ea42
 	}
 	int getSelection(ofxUIRadio* radio) {
 		vector<ofxUIToggle*> toggles = radio->getToggles();

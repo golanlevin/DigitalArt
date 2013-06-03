@@ -2,17 +2,21 @@
 
 #include "SinusoidalWiggleScene.h"
 
+//==========================================================================
 SinusoidalWiggleScene::SinusoidalWiggleScene(ofxPuppet* puppet, HandWithFingertipsSkeleton* handWithFingertipsSkeleton, HandWithFingertipsSkeleton* immutableHandWithFingertipsSkeleton) {
 	Scene::Scene();
 	Scene::setup("Sinusoidal Wiggle", "Sinusoidal Wiggle (Hand With Fingertips)", puppet, (Skeleton*)handWithFingertipsSkeleton, (Skeleton*)immutableHandWithFingertipsSkeleton);
 
-	this->maxPalmAngleLeft = 60;
+	this->maxPalmAngleLeft  =  60;
 	this->maxPalmAngleRight = -60;
 
-	this->angleRange = 45;
-	this->speedUp = 2;
-	this->phaseOffset = 0.5;
+	this->angleRange        = 25;
+	this->speedUp           = 1.7;
+	this->phaseOffset       = 0.5;
+	
 }
+
+//==========================================================================
 void SinusoidalWiggleScene::setupGui() {
 	SinusoidalWiggleScene::initializeGui();
 
@@ -23,13 +27,15 @@ void SinusoidalWiggleScene::setupGui() {
 	this->gui->addSlider("Phase Offset", 0, 1, &phaseOffset);
 	this->gui->addSpacer();
 	this->gui->addLabel("Joints to Wiggle", 2);
-	this->baseJoint = this->gui->addToggle("Base", true);
-	this->midJoint = this->gui->addToggle("Mid", false);
-	this->topJoint = this->gui->addToggle("Top", false);
+	this->baseJoint = this->gui->addToggle("Base", false);
+	this->midJoint  = this->gui->addToggle("Mid",  true);
+	this->topJoint  = this->gui->addToggle("Top",  true);
 	this->gui->addSpacer();
 
 	this->gui->autoSizeToFitWidgets();
 }
+
+//==========================================================================
 void SinusoidalWiggleScene::setupMouseGui() {
 	SinusoidalWiggleScene::initializeMouseGui();
 
@@ -42,17 +48,42 @@ void SinusoidalWiggleScene::setupMouseGui() {
 
 	this->mouseGui->autoSizeToFitWidgets();
 }
+
+//==========================================================================
 void SinusoidalWiggleScene::update() {
 	HandWithFingertipsSkeleton* handWithFingertipsSkeleton = (HandWithFingertipsSkeleton*)this->skeleton;
 	
-	int base[] = {HandWithFingertipsSkeleton::PINKY_BASE, HandWithFingertipsSkeleton::RING_BASE, HandWithFingertipsSkeleton::MIDDLE_BASE, HandWithFingertipsSkeleton::INDEX_BASE, HandWithFingertipsSkeleton::THUMB_BASE};
-	int mid[] = {HandWithFingertipsSkeleton::PINKY_MID, HandWithFingertipsSkeleton::RING_MID, HandWithFingertipsSkeleton::MIDDLE_MID, HandWithFingertipsSkeleton::INDEX_MID, HandWithFingertipsSkeleton::THUMB_MID};
-	int top[] = {HandWithFingertipsSkeleton::PINKY_TOP, HandWithFingertipsSkeleton::RING_TOP, HandWithFingertipsSkeleton::MIDDLE_TOP, HandWithFingertipsSkeleton::INDEX_TOP, HandWithFingertipsSkeleton::THUMB_TOP};
+	int base[] = {
+		HandWithFingertipsSkeleton::PINKY_BASE,
+		HandWithFingertipsSkeleton::RING_BASE,
+		HandWithFingertipsSkeleton::MIDDLE_BASE,
+		HandWithFingertipsSkeleton::INDEX_BASE,
+		HandWithFingertipsSkeleton::THUMB_BASE};
+	
+	int mid[] = {
+		HandWithFingertipsSkeleton::PINKY_MID,
+		HandWithFingertipsSkeleton::RING_MID,
+		HandWithFingertipsSkeleton::MIDDLE_MID,
+		HandWithFingertipsSkeleton::INDEX_MID,
+		HandWithFingertipsSkeleton::THUMB_MID};
+	
+	int top[] = {
+		HandWithFingertipsSkeleton::PINKY_TOP,
+		HandWithFingertipsSkeleton::RING_TOP,
+		HandWithFingertipsSkeleton::MIDDLE_TOP,
+		HandWithFingertipsSkeleton::INDEX_TOP,
+		HandWithFingertipsSkeleton::THUMB_TOP};
 			
 	vector<int*> toWiggle;
 	if (baseJoint->getValue()) toWiggle.push_back(base);
-	if (midJoint->getValue()) toWiggle.push_back(mid);
-	if (topJoint->getValue()) toWiggle.push_back(top);
+	if (midJoint->getValue())  toWiggle.push_back(mid);
+	if (topJoint->getValue())  toWiggle.push_back(top);
+	
+	
+	float timeVal = ofGetElapsedTimef();
+	if (bUseFrameBasedAnimation){
+		timeVal = (float)ofGetFrameNum()/ 60.0;
+	}
 
 	int toWiggleCount = 5;
 	for (int i=0; i < toWiggle.size(); i++) {
@@ -61,11 +92,14 @@ void SinusoidalWiggleScene::update() {
 			float offset = j*phaseOffset + j;
 
 			int index = currentWiggle[j];
-			float theta = ofMap(sin(speedUp*ofGetElapsedTimef() + offset), -1, 1, -(angleRange/2.0), angleRange/2.0);
+			float sinValue = sin(speedUp*timeVal + offset);
+			float theta = ofMap(sinValue, -1, 1, -(angleRange/2.0), angleRange/2.0);
 			handWithFingertipsSkeleton->setRotation(index, theta, false, false);
 		}
 	}
 }
+
+//==========================================================================
 void SinusoidalWiggleScene::updateMouse(float mx, float my) {
 	ofVec2f mouse(mx, my);
 
@@ -100,10 +134,13 @@ void SinusoidalWiggleScene::updateMouse(float mx, float my) {
 				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxPalmAngleRight));
 			}
 
-			handWithFingertipsSkeleton->setRotation(palm, newRot, true, false);
+			handWithFingertipsSkeleton->setRotation         (palm, newRot, true, false);
 			immutableHandWithFingertipsSkeleton->setRotation(palm, newRot, true, false);
 			break;
 	}
 }
+
+//==========================================================================
 void SinusoidalWiggleScene::draw() {
+	
 }

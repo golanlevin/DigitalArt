@@ -51,7 +51,6 @@
 		3B03F5AA175A5B5700B8D0F6 /* StartrekScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3B03F59B175A5B5700B8D0F6 /* StartrekScene.cpp */; };
 		3B03F5AB175A5B5700B8D0F6 /* StraightenFingersScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3B03F59D175A5B5700B8D0F6 /* StraightenFingersScene.cpp */; };
 		3B03F5AC175A5B5700B8D0F6 /* TwitchScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3B03F59F175A5B5700B8D0F6 /* TwitchScene.cpp */; };
-		3B03F5AD175A5B5700B8D0F6 /* WigglingWristScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3B03F5A1175A5B5700B8D0F6 /* WigglingWristScene.cpp */; };
 		45cc483a999bf1065a6b926c53724159 /* Distance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9dbd717072c35d324e1016697d7aa720 /* Distance.cpp */; };
 		5a4349e9754d6fa14c0f2a3a1abc30b6 /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = fc5da1c87211d4f6377da7199d8c5a1e /* tinyxmlparser.cpp */; };
 		5cc34d433f5806179935b89ddc75729f /* Flow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 03a75a648bc4cf1d9dedd0cea7826717 /* Flow.cpp */; };
@@ -246,11 +245,11 @@
 		3B03F59E175A5B5700B8D0F6 /* StraightenFingersScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StraightenFingersScene.h; path = ../../SharedCode/StraightenFingersScene.h; sourceTree = "<group>"; };
 		3B03F59F175A5B5700B8D0F6 /* TwitchScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TwitchScene.cpp; path = ../../SharedCode/TwitchScene.cpp; sourceTree = "<group>"; };
 		3B03F5A0175A5B5700B8D0F6 /* TwitchScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TwitchScene.h; path = ../../SharedCode/TwitchScene.h; sourceTree = "<group>"; };
-		3B03F5A1175A5B5700B8D0F6 /* WigglingWristScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WigglingWristScene.cpp; path = ../../SharedCode/WigglingWristScene.cpp; sourceTree = "<group>"; };
-		3B03F5A2175A5B5700B8D0F6 /* WigglingWristScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WigglingWristScene.h; path = ../../SharedCode/WigglingWristScene.h; sourceTree = "<group>"; };
 		3B03F5AF175A5FC700B8D0F6 /* HandWithFingertipsSkeleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HandWithFingertipsSkeleton.h; sourceTree = "<group>"; };
 		3B03F5B0175A5FF200B8D0F6 /* WristSpineSkeleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WristSpineSkeleton.h; sourceTree = "<group>"; };
 		3B03F5B1175A601F00B8D0F6 /* PalmSkeleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PalmSkeleton.h; sourceTree = "<group>"; };
+		3B03F5B2175AAECD00B8D0F6 /* Scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Scene.h; sourceTree = "<group>"; };
+		3B03F5B3175AAF0200B8D0F6 /* MeshUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshUtils.h; sourceTree = "<group>"; };
 		3c232045833313b99efe0b14840b6108 /* ofxCvMain.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxCvMain.h; path = ../../../addons/ofxOpenCv/src/ofxCvMain.h; sourceTree = SOURCE_ROOT; };
 		402c8f4015542356d362ac883b9c826c /* Calibration.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = Calibration.cpp; path = ../../../addons/ofxCv/libs/ofxCv/src/Calibration.cpp; sourceTree = SOURCE_ROOT; };
 		4117b8c24d49837d3df9c23bd2405bdc /* ofxUIToggle.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxUIToggle.h; path = ../../../addons/ofxUI/src/ofxUIToggle.h; sourceTree = SOURCE_ROOT; };
@@ -587,7 +586,10 @@
 				2790D1BC1749688E00118422 /* BufferedVideo.h */,
 				272F826D174AA82C00A9DB83 /* Skeleton.h */,
 				27CBC34F174AFF7500EE526D /* Bone.h */,
+				3B03F5B2175AAECD00B8D0F6 /* Scene.h */,
+				3B03F5B3175AAF0200B8D0F6 /* MeshUtils.h */,
 				3B03F5AE175A5F3B00B8D0F6 /* skeletons */,
+				3B03F56B175A5ABA00B8D0F6 /* scenes */,
 			);
 			name = SharedCode;
 			path = ../SharedCode;
@@ -722,8 +724,6 @@
 				3B03F59E175A5B5700B8D0F6 /* StraightenFingersScene.h */,
 				3B03F59F175A5B5700B8D0F6 /* TwitchScene.cpp */,
 				3B03F5A0175A5B5700B8D0F6 /* TwitchScene.h */,
-				3B03F5A1175A5B5700B8D0F6 /* WigglingWristScene.cpp */,
-				3B03F5A2175A5B5700B8D0F6 /* WigglingWristScene.h */,
 				3B03F56C175A5B0A00B8D0F6 /* EqualizeScene.cpp */,
 				3B03F56D175A5B0A00B8D0F6 /* EqualizeScene.h */,
 				3B03F56E175A5B0A00B8D0F6 /* LissajousScene.cpp */,
@@ -748,6 +748,7 @@
 				3B03F581175A5B0A00B8D0F6 /* WobbleScene.h */,
 			);
 			name = scenes;
+			path = ../MeshDeformer/src;
 			sourceTree = "<group>";
 		};
 		3B03F5AE175A5F3B00B8D0F6 /* skeletons */ = {
@@ -1004,7 +1005,6 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				3B03F56B175A5ABA00B8D0F6 /* scenes */,
 				2790D1B7174966D200118422 /* ofApp.cpp */,
 				2790D1B8174966D200118422 /* ofApp.h */,
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
@@ -1348,7 +1348,6 @@
 				3B03F5AA175A5B5700B8D0F6 /* StartrekScene.cpp in Sources */,
 				3B03F5AB175A5B5700B8D0F6 /* StraightenFingersScene.cpp in Sources */,
 				3B03F5AC175A5B5700B8D0F6 /* TwitchScene.cpp in Sources */,
-				3B03F5AD175A5B5700B8D0F6 /* WigglingWristScene.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
