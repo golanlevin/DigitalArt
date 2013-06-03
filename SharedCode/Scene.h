@@ -29,7 +29,7 @@ public:
 		this->beginSceneTimeSet = false;
 		this->beginSceneTime = 0;
 
-		this->startMouseControl = true;
+		this->startShowImage = true;
 		this->startShowWireframe = false;
 		this->startShowSkeleton = true;
 		this->startMouseControl = false;
@@ -44,7 +44,7 @@ public:
 		this->beginSceneTimeSet = false;
 		this->beginSceneTime = 0;
 
-		this->startMouseControl = true;
+		this->startShowImage = true;
 		this->startShowWireframe = false;
 		this->startShowSkeleton = false;
 		this->startMouseControl = false;
