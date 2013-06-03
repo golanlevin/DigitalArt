@@ -33,18 +33,15 @@ void ofApp::setup() {
 	scenes.push_back(new PinkyPuppeteerScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton));
 	scenes.push_back(new FingerLengthPuppeteerScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton));
 
-	//----------------------------
-	// Set up the main GUI. N.b, sharedSetup() has to happen first. 
-	sharedSetup();
-	setupGui();
+	// set up the main gui
 
-	//----------------------------
-	// Set up the mesh.
-	/*
-	// This was the previous mesh, of the 532-point synthetic hand
-	hand.loadImage("hand/genericHandCentered.jpg");
-	mesh.load("hand/handmarks.ply");
-	*/
+	setupGui();
+	sharedSetup();
+	//setupGui();
+
+	// set up the mesh
+	//hand.loadImage("hand/genericHandCentered.jpg");
+	//mesh.load("hand/handmarks.ply");
 	
 	// This is the NEW mesh, produced by the MeshGenerator
 	hand.loadImage("hand/genericHandCenteredNew.jpg");
@@ -82,6 +79,8 @@ void ofApp::setup() {
 	showSkeleton  = true;
 	frameBasedAnimation = false;
 
+	showGuis = true;
+
 	// set the initial skeleton
 	setSkeleton(&handSkeleton);
 }
@@ -114,7 +113,7 @@ void ofApp::setupGui() {
 	gui->autoSizeToFitWidgets();
 	
 	// set the initial scene
-	sceneRadio->getToggles()[scenes.size()-1]->setValue(true);
+	sceneRadio->getToggles()[0/*scenes.size()-1*/]->setValue(true);
 }
 
 int getSelection(ofxUIRadio* radio) {
@@ -166,10 +165,18 @@ void ofApp::update() {
 		showSkeleton = scenes[scene]->isStartShowSkeleton();
 		mouseControl = scenes[scene]->isStartMouseControl();
 	}
-	
-	scenes[scene]->setFrameBasedAnimation (frameBasedAnimation);
 
-	
+	if (!showGuis) {
+		this->gui->setVisible(false);
+		for(int i=0; i < scenes.size(); i++) {
+			scenes[i]->turnOffGui();
+			scenes[i]->turnOffMouse();
+		}
+	}
+	else {
+		this->gui->setVisible(true);
+	}
+
 	// update skeleton
 	scenes[scene]->update();
 	setSkeleton(scenes[scene]->getSkeleton());
@@ -199,6 +206,11 @@ void ofApp::draw() {
 }
 
 void ofApp::keyPressed(int key) {
+	showGuis = !showGuis;
+
+	for (int i=0; i < scenes.size(); i++) {
+		scenes[i]->setShowGuis(showGuis);
+	}
 }
 
 void ofApp::setSkeleton(Skeleton* skeleton) {

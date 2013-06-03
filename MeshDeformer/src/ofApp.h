@@ -52,13 +52,9 @@ public:
 	ofxUICanvas** guis;
 	ofxUIRadio *sceneRadio;
 	
-	bool showImage;
-	bool showWireframe;
-	bool showSkeleton;
-	bool mouseControl;
-	bool showSceneSkeletons;
-	bool frameBasedAnimation;
-	
+	bool showGuis;
+	bool showImage, showWireframe, showSkeleton, mouseControl;
+
 	ofMesh mesh;
 	ofImage hand;
 	ofxPuppet puppet;
