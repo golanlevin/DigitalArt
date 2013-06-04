@@ -54,6 +54,7 @@ public:
 	
 	bool showGuis;
 	bool showImage, showWireframe, showSkeleton, mouseControl;
+	bool frameBasedAnimation; 
 
 	ofMesh mesh;
 	ofImage hand;
