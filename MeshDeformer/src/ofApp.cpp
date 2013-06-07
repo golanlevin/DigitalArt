@@ -8,7 +8,8 @@ void updatePuppet(Skeleton* skeleton, ofxPuppet& puppet) {
 }
 
 void ofApp::setup() {
-	
+	prevScene = curScene = -1;
+
 	//----------------------------
 	// Create all of the scenes
 	scenes.push_back(new NoneScene(&puppet, &handSkeleton, &immutableHandSkeleton));
@@ -118,7 +119,7 @@ void ofApp::setupGui() {
 	gui->autoSizeToFitWidgets();
 	
 	// set the initial scene
-	sceneRadio->getToggles()[0/*scenes.size()-1*/]->setValue(true);
+	sceneRadio->getToggles()[scenes.size()-1]->setValue(true);
 }
 
 int getSelection(ofxUIRadio* radio) {
@@ -145,46 +146,60 @@ void ofApp::update() {
 	immutableWristSpineSkeleton.setup(mesh);
 
 	// get the current scene
-	int scene = getSelection(sceneRadio);
+	//int scene = getSelection(sceneRadio);
+	prevScene = curScene;
+	curScene = getSelection(sceneRadio);
 
 	// turn off all other scenes
 	for (int i=0; i < scenes.size(); i++) {
-		if (i != scene) scenes[i]->turnOff();
+		if (i != curScene) scenes[i]->turnOff();
 	}
 	
 	if (mouseControl) {
 		// turn on mouse gui for current scene
-		if (!scenes[scene]->mouseGuiIsOn()) scenes[scene]->turnOnMouse();
+		if (scenes[curScene]->isShowGuis()) {
+			if (!scenes[curScene]->mouseGuiIsOn()) 
+				scenes[curScene]->turnOnMouse();
+		}
+		else {
+			scenes[curScene]->turnOffMouse();
+		}
 		// update the mouse
-		scenes[scene]->updateMouse(mouseX, mouseY);
+		scenes[curScene]->updateMouse(mouseX, mouseY);
 	}
 	else {
-		scenes[scene]->turnOffMouse();
+		scenes[curScene]->turnOffMouse();
 	}
 
 	// turn on the gui for the current scene
-	if (!scenes[scene]->guiIsOn()) {
-		scenes[scene]->turnOn();
-		showImage = scenes[scene]->isStartShowImage();
-		showWireframe = scenes[scene]->isStartShowWireframe();
-		showSkeleton = scenes[scene]->isStartShowSkeleton();
-		mouseControl = scenes[scene]->isStartMouseControl();
+	if (scenes[curScene]->isShowGuis()) {
+		if (!scenes[curScene]->guiIsOn()) {
+			if (curScene == prevScene) {
+				scenes[curScene]->turnOnGui();
+			}
+			else {
+				scenes[curScene]->turnOn();
+				showImage = scenes[curScene]->isStartShowImage();
+				showWireframe = scenes[curScene]->isStartShowWireframe();
+				showSkeleton = scenes[curScene]->isStartShowSkeleton();
+				mouseControl = scenes[curScene]->isStartMouseControl();
+			}
+		}
+	}
+	else {
+		scenes[curScene]->turnOffGui();
 	}
 
 	if (!showGuis) {
 		this->gui->setVisible(false);
-		for(int i=0; i < scenes.size(); i++) {
-			scenes[i]->turnOffGui();
-			scenes[i]->turnOffMouse();
-		}
 	}
 	else {
 		this->gui->setVisible(true);
 	}
 
 	// update skeleton
-	scenes[scene]->update();
-	setSkeleton(scenes[scene]->getSkeleton());
+	scenes[curScene]->update();
+	setSkeleton(scenes[curScene]->getSkeleton());
 
 	// update the puppet using the current scene's skeleton
 	updatePuppet(currentSkeleton, puppet);
@@ -206,8 +221,7 @@ void ofApp::draw() {
 		currentSkeleton->draw();
 	}
 
-	int scene = getSelection(sceneRadio);
-	scenes[scene]->draw();
+	scenes[curScene]->draw();
 }
 
 void ofApp::keyPressed(int key) {

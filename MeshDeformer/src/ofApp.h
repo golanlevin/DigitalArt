@@ -47,6 +47,7 @@ public:
 	void setSkeleton(Skeleton* skeleton);
 
 	vector<Scene*> scenes;
+	int curScene, prevScene;
 
 	ofxUICanvas* gui;
 	ofxUICanvas** guis;
