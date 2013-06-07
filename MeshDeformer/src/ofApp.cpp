@@ -34,28 +34,24 @@ void ofApp::setup() {
 	scenes.push_back(new FingerLengthPuppeteerScene(&puppet, &handWithFingertipsSkeleton, &immutableHandWithFingertipsSkeleton));
 
 	// set up the main gui
-
-	// setupGui();
+	setupGui();
 	
 	// Golan needs it in this order:
 	sharedSetup();
-	setupGui();
+	//setupGui();
 
 	// set up the mesh
 	//hand.loadImage("hand/genericHandCentered.jpg");
 	//mesh.load("hand/handmarks.ply");
 	
-	/*
 	// This is the NEW mesh, of Kyle's hand, produced by the MeshGenerator
 	hand.loadImage("hand/genericHandCenteredNew.jpg");
 	mesh.load("hand/handmarksNew.ply");
-	 */
-	
+	 
 	// This is golan's hand
-	hand.loadImage("hand/golanHand.jpg");
-	mesh.load("hand/golanHand.ply");
+	//hand.loadImage("hand/golanHand.jpg");
+	//mesh.load("hand/golanHand.ply");
 
-	
 	for (int i = 0; i < mesh.getNumVertices(); i++) {
 		mesh.addTexCoord(mesh.getVertex(i));
 	}

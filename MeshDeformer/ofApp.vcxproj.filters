@@ -127,6 +127,72 @@
     <ClCompile Include="src\ofApp.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\SharedCode\EqualizeScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\FingerLengthPuppeteerScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\GrowingMiddleFingerScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\LissajousScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\MeanderScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\MiddleDifferentLengthScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\NoneScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\NorthScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\PinkyPuppeteerScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\PropogatingWiggleScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\PulsatingPalmScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\RetractingFingersScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\SinusoidalLengthScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\SinusoidalWiggleScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\SplayFingersScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\StartrekScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\StraightenFingersScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\TwitchScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\WaveScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\WiggleScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\WigglingWristScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SharedCode\WobbleScene.cpp">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="addons">
@@ -272,6 +338,12 @@
     </Filter>
     <Filter Include="SharedCode">
       <UniqueIdentifier>{32df6836-4f0b-41ff-a089-6a865beb0628}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SharedCode\Scenes">
+      <UniqueIdentifier>{30e567c2-345f-48ba-a408-17c69f24dfb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SharedCode\Skeletons">
+      <UniqueIdentifier>{a228308d-6606-460b-bd8d-8f538bf25cd1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -829,6 +901,96 @@
     </ClInclude>
     <ClInclude Include="..\SharedCode\Skeleton.h">
       <Filter>SharedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\Bone.h">
+      <Filter>SharedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\MeshUtils.h">
+      <Filter>SharedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\Scene.h">
+      <Filter>SharedCode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\EqualizeScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\FingerLengthPuppeteerScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\GrowingMiddleFingerScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\HandSkeleton.h">
+      <Filter>SharedCode\Skeletons</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\HandWithFingertipsSkeleton.h">
+      <Filter>SharedCode\Skeletons</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\LissajousScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\MeanderScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\MiddleDifferentLengthScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\NoneScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\NorthScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\PalmSkeleton.h">
+      <Filter>SharedCode\Skeletons</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\PinkyPuppeteerScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\PropogatingWiggleScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\PulsatingPalmScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\RetractingFingersScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\SinusoidalLengthScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\SinusoidalWiggleScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\SplayFingersScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\StartrekScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\StraightenFingersScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\ThreePointSkeleton.h">
+      <Filter>SharedCode\Skeletons</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\TwitchScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\WaveScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\WiggleScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\WigglingWristScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\WobbleScene.h">
+      <Filter>SharedCode\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SharedCode\WristSpineSkeleton.h">
+      <Filter>SharedCode\Skeletons</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
