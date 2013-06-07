@@ -6,6 +6,8 @@ StartrekScene::StartrekScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, Hand
 	Scene::Scene();
 	Scene::setup("Startrek", "Startrek (Hand)", puppet, (Skeleton*)handSkeleton, (Skeleton*)immutableHandSkeleton);
 
+	this->posOffset = 38;
+
 	this->maxPalmAngleLeft = 60;
 	this->maxPalmAngleRight = -60;
 	this->maxBaseAngleLeft = 20;
@@ -16,6 +18,8 @@ StartrekScene::StartrekScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, Hand
 }
 void StartrekScene::setupGui() {
 	StartrekScene::initializeGui();
+
+	this->gui->addSlider("Position Offset", 20, 100, &posOffset);
 
 	this->gui->autoSizeToFitWidgets();
 }
@@ -46,44 +50,50 @@ void StartrekScene::update() {
 	ofVec2f imitateTop;
 	ofVec2f imitateMid;
 	ofVec2f imitateBase;
+	ofVec2f setBase;
 	for(int i = 0; i < toSetCount; i++) {
 		ofVec2f xAxis(1, 0);
 		ofVec2f yAxis(0, -1);
 
-		imitateTop = handSkeleton->getPositionAbsolute(toImitateTop[i]);
+		//imitateTop = handSkeleton->getPositionAbsolute(toImitateTop[i]);
+		//imitateBase = handSkeleton->getPositionAbsolute(toImitateBase[i]);
+		//ofVec2f dir = imitateTop - imitateBase;
+
+		//float fromY = dir.angle(yAxis);
+
+		//float angleOffset = ofMap(abs(fromY), 0, 60, 0, 25);
+		//if (i % 2 == 1) angleOffset = -angleOffset;
+		//handSkeleton->setRotation(toImitateBase[i], angleOffset, false, false);
+
 		imitateBase = handSkeleton->getPositionAbsolute(toImitateBase[i]);
-		ofVec2f dir = imitateTop - imitateBase;
-
-		float fromY = dir.angle(yAxis);
-
-		float angleOffset = ofMap(abs(fromY), 0, 60, 0, 25);
-		if (i % 2 == 1) angleOffset = -angleOffset;
-		handSkeleton->setRotation(toImitateBase[i], angleOffset, false, false);
+		setBase = handSkeleton->getPositionAbsolute(toSetBase[i]);
+		ofVec2f moveDir = setBase - imitateBase;
+		moveDir.normalize();
+		moveDir *= posOffset;
+		ofVec2f test(0, 0);
+		handSkeleton->setPosition(toSetBase[i], imitateBase, true, false);
+		handSkeleton->setPosition(toSetBase[i], moveDir, false, false);
 
 		imitateMid = handSkeleton->getPositionAbsolute(toImitateMid[i]);
 		imitateBase = handSkeleton->getPositionAbsolute(toImitateBase[i]);
 			
 		ofVec2f dirBase = imitateMid - imitateBase;
 		float baseAngle = dirBase.angle(xAxis);
-
-		int setBase = toSetBase[i];
-		handSkeleton->setRotation(setBase, -(baseAngle), true, false);
+		handSkeleton->setRotation(toSetBase[i], -(baseAngle), true, false);
 
 		imitateTop = handSkeleton->getPositionAbsolute(toImitateTop[i]);
 		imitateMid = handSkeleton->getPositionAbsolute(toImitateMid[i]);
 	
 		ofVec2f dirMid = imitateTop - imitateMid;
 		float midAngle = dirMid.angle(xAxis);
+		handSkeleton->setRotation(toSetMid[i], -(midAngle), true, false);
 
-		int setMid = toSetMid[i];
-		handSkeleton->setRotation(setMid, -(midAngle), true, false);
-
-		ofVec2f original = handSkeleton->getPositionAbsolute(setBase);
-		ofVec2f position = imitateBase - original;
-		position.normalize();
-		position *= 35;
-		handSkeleton->setPosition(toImitateBase[i], original, true, false);
-		handSkeleton->setPosition(toImitateBase[i], position, false, false);
+		//ofVec2f original = handSkeleton->getPositionAbsolute(setBase);
+		//ofVec2f position = imitateBase - original;
+		//position.normalize();
+		//position *= 35;
+		//handSkeleton->setPosition(toImitateBase[i], original, true, false);
+		//handSkeleton->setPosition(toImitateBase[i], position, false, false);
 	}
 }
 void StartrekScene::updateMouse(float mx, float my) {
@@ -119,9 +129,6 @@ void StartrekScene::updateMouse(float mx, float my) {
 	float newRot;
 	curPalmRot = 0;
 	newPalmRot = 0;
-	float correction = 0;
-	float baseCorrection[] = {26.75, -3, 9.75};
-	float midCorrection[] = {6.75, 2, -3.5};
 
 	switch(getSelection(mouseRadio)) {
 		case 0: // palm position
@@ -134,10 +141,10 @@ void StartrekScene::updateMouse(float mx, float my) {
 			curPalmRot = origPalmDir.angle(xAxis);
 
 			if (mx <= 384) {
-				newPalmRot = ofMap(mx, 0, 384, -(curPalmRot+correction+maxPalmAngleLeft), -(curPalmRot+correction));
+				newPalmRot = ofMap(mx, 0, 384, -(curPalmRot+maxPalmAngleLeft), -(curPalmRot));
 			}
 			else {
-				newPalmRot = ofMap(mx, 384, 768, -(curPalmRot+correction), -(curPalmRot+correction+maxPalmAngleRight));
+				newPalmRot = ofMap(mx, 384, 768, -(curPalmRot), -(curPalmRot+maxPalmAngleRight));
 			}
 
 			handSkeleton->setRotation(palm, newPalmRot, true, false);
@@ -145,14 +152,14 @@ void StartrekScene::updateMouse(float mx, float my) {
 			break;
 		case 2: // finger base rotation
 			for (int i=0; i < fingerCount; i++) {
-				origFingerDir = origBasePos[i] - origPalmPos;
+				origFingerDir = origMidPos[i] - origBasePos[i];
 				curRot = origFingerDir.angle(xAxis);
 
 				if (mx <= 384) {
-					newRot = ofMap(mx, 0, 384, -(curRot+baseCorrection[i]+maxBaseAngleLeft), -(curRot+baseCorrection[i]));
+					newRot = ofMap(mx, 0, 384, -(curRot+maxBaseAngleLeft), -(curRot));
 				}
 				else {
-					newRot = ofMap(mx, 384, 768, -(curRot+baseCorrection[i]), -(curRot+baseCorrection[i]+maxBaseAngleRight));
+					newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxBaseAngleRight));
 				}
 
 				handSkeleton->setRotation(base[i], newRot, true, false);

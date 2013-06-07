@@ -46,7 +46,12 @@ void LissajousScene::setupMouseGui() {
 void LissajousScene::update() {
 	ThreePointSkeleton* threePointSkeleton = (ThreePointSkeleton*)this->skeleton;
 
-	float t = frequency * ofGetElapsedTimef() * TWO_PI;
+	float timeVal = ofGetElapsedTimef();
+	if (bUseFrameBasedAnimation){
+		timeVal = (float)ofGetFrameNum()/ 60.0;
+	}
+
+	float t = frequency * timeVal * TWO_PI;
 	ofVec2f position;
 	switch(getSelection(lissajousRadio)) {
 		case 0: // circle
@@ -90,14 +95,13 @@ void LissajousScene::updateMouse(float mx, float my) {
 			ofVec2f origPalmDir = origPalmPos - origWristPos;
 			
 			float curRot = origPalmDir.angle(xAxis);
-			float correction = 0;
 
 			float newRot;
 			if (mx <= 384) {
-				newRot = ofMap(mx, 0, 384, -(curRot+correction+maxPalmAngleLeft), -(curRot+correction));
+				newRot = ofMap(mx, 0, 384, -(curRot+maxPalmAngleLeft), -(curRot));
 			}
 			else {
-				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxPalmAngleRight));
+				newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxPalmAngleRight));
 			}
 
 			threePointSkeleton->setRotation(palm, newRot, true, false);

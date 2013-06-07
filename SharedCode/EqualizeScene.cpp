@@ -13,12 +13,12 @@ EqualizeScene::EqualizeScene(ofxPuppet* puppet, HandSkeleton* handSkeleton, Hand
 	this->maxMidAngleLeft = 45;
 	this->maxMidAngleRight = -30;
 
-	this->equalizeLength = 40;
+	this->equalizeLength = 60;
 }
 void EqualizeScene::setupGui() {
 	EqualizeScene::initializeGui();
 
-	this->gui->addSlider("Equalize Length", 0, 100, &equalizeLength);
+	this->gui->addSlider("Equalize Length", 0, 200, &equalizeLength);
 	this->gui->addSpacer();
 
 	this->gui->autoSizeToFitWidgets();
@@ -88,10 +88,6 @@ ofVec2f mouse(mx, my);
 	float curRot;
 	float newRot;
 
-	float correction = 0;
-	float baseCorrection[] = {26.75, -3, 1.75, 7.75, 9.75};
-	float midCorrection[] = {6.75, 2, -1.5, -1.75, -3.5};
-
 	switch(getSelection(mouseRadio)) {
 		case 0: // palm position
 			handSkeleton->setPosition(HandSkeleton::PALM, mouse, true);
@@ -104,10 +100,10 @@ ofVec2f mouse(mx, my);
 
 			newRot;
 			if (mx <= 384) {
-				newRot = ofMap(mx, 0, 384, -(curRot+correction+maxPalmAngleLeft), -(curRot+correction));
+				newRot = ofMap(mx, 0, 384, -(curRot+maxPalmAngleLeft), -(curRot));
 			}
 			else {
-				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxPalmAngleRight));
+				newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxPalmAngleRight));
 			}
 
 			handSkeleton->setRotation(palm, newRot, true, false);
@@ -115,14 +111,14 @@ ofVec2f mouse(mx, my);
 			break;
 		case 2: // finger base rotation
 			for (int i=0; i < fingerCount; i++) {
-				origFingerDir = origBasePos[i] - origPalmPos;
+				origFingerDir = origMidPos[i] - origBasePos[i];
 				curRot = origFingerDir.angle(xAxis);
 
 				if (mx <= 384) {
-					newRot = ofMap(mx, 0, 384, -(curRot+baseCorrection[i]+maxBaseAngleLeft), -(curRot+baseCorrection[i]));
+					newRot = ofMap(mx, 0, 384, -(curRot+maxBaseAngleLeft), -(curRot));
 				}
 				else {
-					newRot = ofMap(mx, 384, 768, -(curRot+baseCorrection[i]), -(curRot+baseCorrection[i]+maxBaseAngleRight));
+					newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxBaseAngleRight));
 				}
 
 				handSkeleton->setRotation(base[i], newRot, true, false);
@@ -131,14 +127,14 @@ ofVec2f mouse(mx, my);
 			break;
 		case 3: // finger mid rotation
 			for (int i=0; i < fingerCount; i++) {
-				origFingerDir = origMidPos[i] - origBasePos[i];
+				origFingerDir = origTopPos[i] - origMidPos[i];
 				curRot = origFingerDir.angle(xAxis);
 
 				if (mx <= 384) {
-					newRot = ofMap(mx, 0, 384, -(curRot+midCorrection[i]+maxMidAngleLeft), -(curRot+midCorrection[i]));
+					newRot = ofMap(mx, 0, 384, -(curRot+maxMidAngleLeft), -(curRot));
 				}
 				else {
-					newRot = ofMap(mx, 384, 768, -(curRot+midCorrection[i]), -(curRot+midCorrection[i]+maxMidAngleRight));
+					newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxMidAngleRight));
 				}
 
 				handSkeleton->setRotation(mid[i], newRot, true, false);

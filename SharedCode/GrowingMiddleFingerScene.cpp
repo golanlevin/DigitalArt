@@ -18,7 +18,7 @@ GrowingMiddleFingerScene::GrowingMiddleFingerScene(ofxPuppet* puppet, HandWithFi
 	this->baseAngleRange = 60;
 	this->midAngleRange = 30;
 	this->topAngleRange = 15;
-	this->maxLen = 225;
+	this->maxLen = 300;
 	this->growthAmount = 1.2;
 	this->speedUp = 2;
 	this->phaseOffset = 0.5;
@@ -32,7 +32,7 @@ void GrowingMiddleFingerScene::setupGui() {
 	this->gui->addSpacer();
 	this->gui->addSlider("Top Angle Range", 10, 90, &topAngleRange);
 	this->gui->addSpacer();
-	this->gui->addSlider("Max Length", 200, 300, &maxLen);
+	this->gui->addSlider("Max Length", 200, 500, &maxLen);
 	this->gui->addSpacer();
 	this->gui->addSlider("Growth Amount", 1, 2, &growthAmount);
 	this->gui->addSpacer();
@@ -120,27 +120,25 @@ void GrowingMiddleFingerScene::updateMouse(float mx, float my) {
 	int base[] = {HandWithFingertipsSkeleton::THUMB_BASE, HandWithFingertipsSkeleton::INDEX_BASE, HandWithFingertipsSkeleton::MIDDLE_BASE, HandWithFingertipsSkeleton::RING_BASE, HandWithFingertipsSkeleton::PINKY_BASE};
 	int mid[] = {HandWithFingertipsSkeleton::THUMB_MID, HandWithFingertipsSkeleton::INDEX_MID, HandWithFingertipsSkeleton::MIDDLE_MID, HandWithFingertipsSkeleton::RING_MID, HandWithFingertipsSkeleton::PINKY_MID};
 	int top[] = {HandWithFingertipsSkeleton::THUMB_TOP, HandWithFingertipsSkeleton::INDEX_TOP, HandWithFingertipsSkeleton::MIDDLE_TOP, HandWithFingertipsSkeleton::RING_TOP, HandWithFingertipsSkeleton::PINKY_TOP};
+	int tip[] = {HandWithFingertipsSkeleton::THUMB_TIP, HandWithFingertipsSkeleton::INDEX_TIP, HandWithFingertipsSkeleton::MIDDLE_TIP, HandWithFingertipsSkeleton::RING_TIP, HandWithFingertipsSkeleton::PINKY_TIP};
 
 	ofVec2f origWristPos = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(wrist));
 	ofVec2f origPalmPos = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(palm));
 	ofVec2f origBasePos[fingerCount]; 
 	ofVec2f origMidPos[fingerCount]; 
 	ofVec2f origTopPos[fingerCount]; 
+	ofVec2f origTipPos[fingerCount];
 	for (int i=0; i < fingerCount; i++) {
 		origBasePos[i] = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(base[i]));
 		origMidPos[i] = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(mid[i]));
 		origTopPos[i] = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(top[i]));
+		origTipPos[i] = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(tip[i]));
 	}
 
 	ofVec2f origPalmDir;
 	ofVec2f origFingerDir;
 	float curRot;
 	float newRot;
-
-	float correction = 0;
-	float baseCorrection[] = {26.75, -3, 1.75, 7.75, 9.75};
-	float midCorrection[] = {6.75, 2, -1.5, -1.75, -3.5};
-	float topCorrection[] = {-16, 3, 3.5, 2.25, 0.5};
 
 	switch(getSelection(mouseRadio)) {
 		case 0: // palm position
@@ -155,10 +153,10 @@ void GrowingMiddleFingerScene::updateMouse(float mx, float my) {
 
 			newRot;
 			if (mx <= 384) {
-				newRot = ofMap(mx, 0, 384, -(curRot+correction+maxPalmAngleLeft), -(curRot+correction));
+				newRot = ofMap(mx, 0, 384, -(curRot+maxPalmAngleLeft), -(curRot));
 			}
 			else {
-				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxPalmAngleRight));
+				newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxPalmAngleRight));
 			}
 
 			handWithFingertipsSkeleton->setRotation(palm, newRot, true, false);
@@ -166,14 +164,14 @@ void GrowingMiddleFingerScene::updateMouse(float mx, float my) {
 			break;
 		case 2: // finger base rotation
 			for (int i=0; i < fingerCount; i++) {
-				origFingerDir = origBasePos[i] - origPalmPos;
+				origFingerDir = origMidPos[i] - origBasePos[i];
 				curRot = origFingerDir.angle(xAxis);
 
 				if (mx <= 384) {
-					newRot = ofMap(mx, 0, 384, -(curRot+baseCorrection[i]+maxBaseAngleLeft), -(curRot+baseCorrection[i]));
+					newRot = ofMap(mx, 0, 384, -(curRot+maxBaseAngleLeft), -(curRot));
 				}
 				else {
-					newRot = ofMap(mx, 384, 768, -(curRot+baseCorrection[i]), -(curRot+baseCorrection[i]+maxBaseAngleRight));
+					newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxBaseAngleRight));
 				}
 
 				handWithFingertipsSkeleton->setRotation(base[i], newRot, true, false);
@@ -182,14 +180,14 @@ void GrowingMiddleFingerScene::updateMouse(float mx, float my) {
 			break;
 		case 3: // finger mid rotation
 			for (int i=0; i < fingerCount; i++) {
-				origFingerDir = origMidPos[i] - origBasePos[i];
+				origFingerDir = origTopPos[i] - origMidPos[i];
 				curRot = origFingerDir.angle(xAxis);
 
 				if (mx <= 384) {
-					newRot = ofMap(mx, 0, 384, -(curRot+midCorrection[i]+maxMidAngleLeft), -(curRot+midCorrection[i]));
+					newRot = ofMap(mx, 0, 384, -(curRot+maxMidAngleLeft), -(curRot));
 				}
 				else {
-					newRot = ofMap(mx, 384, 768, -(curRot+midCorrection[i]), -(curRot+midCorrection[i]+maxMidAngleRight));
+					newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxMidAngleRight));
 				}
 
 				handWithFingertipsSkeleton->setRotation(mid[i], newRot, true, false);
@@ -198,14 +196,14 @@ void GrowingMiddleFingerScene::updateMouse(float mx, float my) {
 			break;
 		case 4: // finger top rotation
 			for (int i=0; i < fingerCount; i++) {
-				origFingerDir = origTopPos[i] - origMidPos[i];
+				origFingerDir = origTipPos[i] - origTopPos[i];
 				curRot = origFingerDir.angle(xAxis);
 
 				if (mx <= 384) {
-					newRot = ofMap(mx, 0, 384, -(curRot+topCorrection[i]+maxTopAngleLeft), -(curRot+topCorrection[i]));
+					newRot = ofMap(mx, 0, 384, -(curRot+maxTopAngleLeft), -(curRot));
 				}
 				else {
-					newRot = ofMap(mx, 384, 768, -(curRot+topCorrection[i]), -(curRot+topCorrection[i]+maxTopAngleRight));
+					newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxTopAngleRight));
 				}
 
 				handWithFingertipsSkeleton->setRotation(top[i], newRot, true, false);

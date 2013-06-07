@@ -5,6 +5,8 @@
 
 class StartrekScene : public Scene {
 protected:
+	float posOffset;
+
 	float maxPalmAngleLeft, maxPalmAngleRight;
 	float maxBaseAngleLeft, maxBaseAngleRight;
 

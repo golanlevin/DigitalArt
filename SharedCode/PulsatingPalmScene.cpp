@@ -37,9 +37,14 @@ void PulsatingPalmScene::setupMouseGui() {
 void PulsatingPalmScene::update() {
 	PalmSkeleton* palmSkeleton = (PalmSkeleton*)this->skeleton;
 
-int toPulsate[] = {PalmSkeleton::TOP, PalmSkeleton::RIGHT_BASE, PalmSkeleton::RIGHT_MID, PalmSkeleton::RIGHT_TOP, PalmSkeleton::LEFT_BASE, PalmSkeleton::LEFT_MID, PalmSkeleton::LEFT_TOP};
+	int toPulsate[] = {PalmSkeleton::TOP, PalmSkeleton::RIGHT_BASE, PalmSkeleton::RIGHT_MID, PalmSkeleton::RIGHT_TOP, PalmSkeleton::LEFT_BASE, PalmSkeleton::LEFT_MID, PalmSkeleton::LEFT_TOP};
 	int toPulsateCount = 7;
-	float t = ofGetElapsedTimef();
+	
+
+	float timeVal = ofGetElapsedTimef();
+	if (bUseFrameBasedAnimation){
+		timeVal = (float)ofGetFrameNum()/ 60.0;
+	}
 	
 	for(int i = 0; i < toPulsateCount; i++) {
 		int index = toPulsate[i];
@@ -47,7 +52,7 @@ int toPulsate[] = {PalmSkeleton::TOP, PalmSkeleton::RIGHT_BASE, PalmSkeleton::RI
 		ofVec2f parent = puppet->getOriginalMesh().getVertex(palmSkeleton->getControlIndex(PalmSkeleton::CENTROID));
 		ofVec2f position(original-parent);
 		position.normalize();
-		position = position * (maxLength*sin(speedUp*t));
+		position = position * (maxLength*sin(speedUp*timeVal));
 		palmSkeleton->setPosition(index, position, false, false);
 	}
 }
@@ -74,14 +79,13 @@ void PulsatingPalmScene::updateMouse(float mx, float my) {
 			ofVec2f origPalmDir = origPalmPos - origWristPos;
 			
 			float curRot = origPalmDir.angle(xAxis);
-			float correction = 0;
 
 			float newRot;
 			if (mx <= 384) {
-				newRot = ofMap(mx, 0, 384, -(curRot+correction+maxPalmAngleLeft), -(curRot+correction));
+				newRot = ofMap(mx, 0, 384, -(curRot+maxPalmAngleLeft), -(curRot));
 			}
 			else {
-				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxPalmAngleRight));
+				newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxPalmAngleRight));
 			}
 
 			palmSkeleton->setRotation(palm, newRot, true, false);

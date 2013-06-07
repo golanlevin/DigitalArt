@@ -235,60 +235,59 @@ void FingerLengthPuppeteerScene::updateMouse(float mx, float my) {
 	int thumbBase = HandWithFingertipsSkeleton::THUMB_BASE;
 	int thumbMid = HandWithFingertipsSkeleton::THUMB_MID;
 	int thumbTop = HandWithFingertipsSkeleton::THUMB_TOP;
+	int thumbTip = HandWithFingertipsSkeleton::THUMB_TIP;
 
 	ofVec2f origPalmPos = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(palm));
 	ofVec2f origThumbBasePos = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(thumbBase));
 	ofVec2f origThumbMidPos = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(thumbMid));
 	ofVec2f origThumbTopPos = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(thumbTop));
+	ofVec2f origThumbTipPos = puppet->getOriginalMesh().getVertex(handWithFingertipsSkeleton->getControlIndex(thumbTip));
 
 	ofVec2f origThumbDir;
 	float curRot;
 	float newRot;
-	float correction;
+
 	switch(getSelection(mouseRadio)) {
 		case 0: // thumb base rotation
-			origThumbDir = origThumbBasePos - origPalmPos;
+			origThumbDir = origThumbMidPos - origThumbBasePos;
 			
 			curRot = origThumbDir.angle(xAxis);
-			correction = 26.75;
 
 			if (mx <= 384) {
-				newRot = ofMap(mx, 0, 384, -(curRot+correction+maxThumbBaseAngleLeft), -(curRot+correction));
+				newRot = ofMap(mx, 0, 384, -(curRot+maxThumbBaseAngleLeft), -(curRot));
 			}
 			else {
-				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxThumbBaseAngleRight));
+				newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxThumbBaseAngleRight));
 			}
 
 			handWithFingertipsSkeleton->setRotation(thumbBase, newRot, true, false);
 			immutableHandWithFingertipsSkeleton->setRotation(thumbBase, newRot, true, false);
 			break;
 		case 1: // thumb mid rotation
-			origThumbDir = origThumbMidPos - origThumbBasePos;
+			origThumbDir = origThumbTopPos - origThumbMidPos;
 			
 			curRot = origThumbDir.angle(xAxis);
-			correction = 6.75;
 
 			if (mx <= 384) {
-				newRot = ofMap(mx, 0, 384, -(curRot+correction+maxThumbMidAngleLeft), -(curRot+correction));
+				newRot = ofMap(mx, 0, 384, -(curRot+maxThumbMidAngleLeft), -(curRot));
 			}
 			else {
-				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxThumbMidAngleRight));
+				newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxThumbMidAngleRight));
 			}
 
 			handWithFingertipsSkeleton->setRotation(thumbMid, newRot, true, false);
 			immutableHandWithFingertipsSkeleton->setRotation(thumbMid, newRot, true, false);
 			break;
 		case 2: // thumb top rotation
-			origThumbDir = origThumbTopPos - origThumbMidPos;
+			origThumbDir = origThumbTipPos - origThumbTopPos;
 			
 			curRot = origThumbDir.angle(xAxis);
-			correction = -16;
 
 			if (mx <= 384) {
-				newRot = ofMap(mx, 0, 384, -(curRot+correction+maxThumbTopAngleLeft), -(curRot+correction));
+				newRot = ofMap(mx, 0, 384, -(curRot+maxThumbTopAngleLeft), -(curRot));
 			}
 			else {
-				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxThumbTopAngleRight));
+				newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxThumbTopAngleRight));
 			}
 
 			handWithFingertipsSkeleton->setRotation(thumbTop, newRot, true, false);

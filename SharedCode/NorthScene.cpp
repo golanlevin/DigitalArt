@@ -35,6 +35,33 @@ void NorthScene::setupMouseGui() {
 void NorthScene::update() {
 	HandSkeleton* handSkeleton = (HandSkeleton*)this->skeleton;
 
+	// get the original positions 
+	ofVec2f origPBasePos      = puppet->getOriginalMesh().getVertex(handSkeleton->getControlIndex(HandSkeleton::PINKY_BASE));
+	ofVec2f origRBasePos      = puppet->getOriginalMesh().getVertex(handSkeleton->getControlIndex(HandSkeleton::RING_BASE));
+	ofVec2f origMBasePos      = puppet->getOriginalMesh().getVertex(handSkeleton->getControlIndex(HandSkeleton::MIDDLE_BASE));
+	ofVec2f origIBasePos      = puppet->getOriginalMesh().getVertex(handSkeleton->getControlIndex(HandSkeleton::INDEX_BASE));
+	
+	ofVec2f  RMI = (origRBasePos + origMBasePos + origIBasePos) / 3.0;
+	ofVec2f  PMI = (origPBasePos + origMBasePos + origIBasePos) / 3.0;
+	ofVec2f  PRI = (origPBasePos + origRBasePos + origIBasePos) / 3.0;
+	ofVec2f  PRM = (origPBasePos + origRBasePos + origMBasePos) / 3.0;
+	
+	ofVec2f dRMI = RMI - origPBasePos;
+	ofVec2f dPMI = PMI - origRBasePos;
+	ofVec2f dPRI = PRI - origMBasePos;
+	ofVec2f dPRM = PRM - origIBasePos;
+	
+	float baseMoveAmount = -0.25;
+	ofVec2f newP = baseMoveAmount * dRMI;
+	ofVec2f newR = baseMoveAmount * dPMI;
+	ofVec2f newM = baseMoveAmount * dPRI;
+	ofVec2f newI = baseMoveAmount * dPRM;
+	
+	handSkeleton->setPosition(HandSkeleton::PINKY_BASE,  newP, false, false);
+	handSkeleton->setPosition(HandSkeleton::RING_BASE,   newR, false, false);
+	handSkeleton->setPosition(HandSkeleton::MIDDLE_BASE, newM, false, false);
+	handSkeleton->setPosition(HandSkeleton::INDEX_BASE,  newI, false, false);
+
 	int toRotate[] = {HandSkeleton::PINKY_BASE, HandSkeleton::RING_BASE, HandSkeleton::MIDDLE_BASE, HandSkeleton::INDEX_BASE,
 		HandSkeleton::PINKY_MID, HandSkeleton::RING_MID, HandSkeleton::MIDDLE_MID, HandSkeleton::INDEX_MID};
 	int toRotateCount = 8;
@@ -75,10 +102,6 @@ void NorthScene::updateMouse(float mx, float my) {
 	float curRot;
 	float newRot;
 
-	float correction = 0;
-	float baseCorrection[] = {26.75, -3, 1.75, 7.75, 9.75};
-	float midCorrection[] = {6.75, 2, -1.5, -1.75, -3.5};
-
 	switch(getSelection(mouseRadio)) {
 		case 0: // palm position
 			handSkeleton->setPosition(HandSkeleton::PALM, mouse, true);
@@ -91,10 +114,10 @@ void NorthScene::updateMouse(float mx, float my) {
 
 			newRot;
 			if (mx <= 384) {
-				newRot = ofMap(mx, 0, 384, -(curRot+correction+maxPalmAngleLeft), -(curRot+correction));
+				newRot = ofMap(mx, 0, 384, -(curRot+maxPalmAngleLeft), -(curRot));
 			}
 			else {
-				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxPalmAngleRight));
+				newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxPalmAngleRight));
 			}
 
 			handSkeleton->setRotation(palm, newRot, true, false);
@@ -102,14 +125,14 @@ void NorthScene::updateMouse(float mx, float my) {
 			break;
 		case 2: // finger base rotation
 			for (int i=0; i < fingerCount; i++) {
-				origFingerDir = origBasePos[i] - origPalmPos;
+				origFingerDir = origMidPos[i] - origBasePos[i];
 				curRot = origFingerDir.angle(xAxis);
 
 				if (mx <= 384) {
-					newRot = ofMap(mx, 0, 384, -(curRot+baseCorrection[i]+maxBaseAngleLeft), -(curRot+baseCorrection[i]));
+					newRot = ofMap(mx, 0, 384, -(curRot+maxBaseAngleLeft), -(curRot));
 				}
 				else {
-					newRot = ofMap(mx, 384, 768, -(curRot+baseCorrection[i]), -(curRot+baseCorrection[i]+maxBaseAngleRight));
+					newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxBaseAngleRight));
 				}
 
 				handSkeleton->setRotation(base[i], newRot, true, false);
@@ -118,14 +141,14 @@ void NorthScene::updateMouse(float mx, float my) {
 			break;
 		case 3: // finger mid rotation
 			for (int i=0; i < fingerCount; i++) {
-				origFingerDir = origMidPos[i] - origBasePos[i];
+				origFingerDir = origTopPos[i] - origMidPos[i];
 				curRot = origFingerDir.angle(xAxis);
 
 				if (mx <= 384) {
-					newRot = ofMap(mx, 0, 384, -(curRot+midCorrection[i]+maxMidAngleLeft), -(curRot+midCorrection[i]));
+					newRot = ofMap(mx, 0, 384, -(curRot+maxMidAngleLeft), -(curRot));
 				}
 				else {
-					newRot = ofMap(mx, 384, 768, -(curRot+midCorrection[i]), -(curRot+midCorrection[i]+maxMidAngleRight));
+					newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxMidAngleRight));
 				}
 
 				handSkeleton->setRotation(mid[i], newRot, true, false);

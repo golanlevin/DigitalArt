@@ -30,11 +30,11 @@ public:
 
 		this->beginSceneTimeSet  = false;
 		this->beginSceneTime     = 0;
+		this->bUseFrameBasedAnimation = false;
 
 		this->startShowImage = true;
 		this->startShowWireframe = false;
-
-		this->startShowSkeleton = true;
+		this->startShowSkeleton = false;
 		this->startMouseControl = false;
 
 		this->showGuis = true;
@@ -48,6 +48,7 @@ public:
 
 		this->beginSceneTimeSet = false;
 		this->beginSceneTime = 0;
+		this->bUseFrameBasedAnimation = false;
 
 		this->startShowImage = true;
 		this->startShowWireframe = false;
@@ -134,14 +135,12 @@ public:
 	bool isStartMouseControl() {
 		return this->startMouseControl;
 	}
-	
 	bool isUsingFrameBasedAnimation(){
 		return this->bUseFrameBasedAnimation;
 	}
 	void setFrameBasedAnimation (bool fba){
 		this->bUseFrameBasedAnimation = fba;
     }
-	
 	bool isShowGuis() {
 		return this->showGuis;
 	}

@@ -25,7 +25,7 @@ public:
 		
 		// new
 		int controlIndicesRaw[] = {
-			289, 366, 363, 293, 299, 304, 309
+			289, 366, 363, 293, 298, 303, 308
 		};
 		
 		int parentsRaw[] = {

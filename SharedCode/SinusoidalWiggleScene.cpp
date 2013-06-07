@@ -124,14 +124,13 @@ void SinusoidalWiggleScene::updateMouse(float mx, float my) {
 			ofVec2f origPalmDir = origPalmPos - origWristPos;
 			
 			float curRot = origPalmDir.angle(xAxis);
-			float correction = 0;
 
 			float newRot;
 			if (mx <= 384) {
-				newRot = ofMap(mx, 0, 384, -(curRot+correction+maxPalmAngleLeft), -(curRot+correction));
+				newRot = ofMap(mx, 0, 384, -(curRot+maxPalmAngleLeft), -(curRot));
 			}
 			else {
-				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxPalmAngleRight));
+				newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxPalmAngleRight));
 			}
 
 			handWithFingertipsSkeleton->setRotation         (palm, newRot, true, false);

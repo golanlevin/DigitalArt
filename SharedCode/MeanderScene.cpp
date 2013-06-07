@@ -39,9 +39,14 @@ void MeanderScene::update() {
 
 	int toMove[] = {HandSkeleton::PINKY_BASE, HandSkeleton::RING_BASE, HandSkeleton::MIDDLE_BASE, HandSkeleton::INDEX_BASE};
 	int toMoveCount = 4;
-	float t = ofGetElapsedTimef();
+
+	float timeVal = ofGetElapsedTimef();
+	if (bUseFrameBasedAnimation){
+		timeVal = (float)ofGetFrameNum()/ 60.0;
+	}
+
 	for(int i = 0; i < toMoveCount; i++) {
-		handSkeleton->setRotation(toMove[i], meanderAmount * ofSignedNoise(i, t));
+		handSkeleton->setRotation(toMove[i], meanderAmount * ofSignedNoise(i, timeVal));
 	}
 }
 void MeanderScene::updateMouse(float mx, float my) {
@@ -76,10 +81,6 @@ void MeanderScene::updateMouse(float mx, float my) {
 	float curRot;
 	float newRot;
 
-	float correction = 0;
-	float baseCorrection[] = {26.75, -3, 1.75, 7.75, 9.75};
-	float midCorrection[] = {6.75, 2, -1.5, -1.75, -3.5};
-
 	switch(getSelection(mouseRadio)) {
 		case 0: // palm position
 			handSkeleton->setPosition(HandSkeleton::PALM, mouse, true);
@@ -92,10 +93,10 @@ void MeanderScene::updateMouse(float mx, float my) {
 
 			newRot;
 			if (mx <= 384) {
-				newRot = ofMap(mx, 0, 384, -(curRot+correction+maxPalmAngleLeft), -(curRot+correction));
+				newRot = ofMap(mx, 0, 384, -(curRot+maxPalmAngleLeft), -(curRot));
 			}
 			else {
-				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxPalmAngleRight));
+				newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxPalmAngleRight));
 			}
 
 			handSkeleton->setRotation(palm, newRot, true, false);
@@ -103,14 +104,14 @@ void MeanderScene::updateMouse(float mx, float my) {
 			break;
 		case 2: // finger mid rotation
 			for (int i=0; i < fingerCount; i++) {
-				origFingerDir = origMidPos[i] - origBasePos[i];
+				origFingerDir = origTopPos[i] - origMidPos[i];
 				curRot = origFingerDir.angle(xAxis);
 
 				if (mx <= 384) {
-					newRot = ofMap(mx, 0, 384, -(curRot+midCorrection[i]+maxMidAngleLeft), -(curRot+midCorrection[i]));
+					newRot = ofMap(mx, 0, 384, -(curRot+maxMidAngleLeft), -(curRot));
 				}
 				else {
-					newRot = ofMap(mx, 384, 768, -(curRot+midCorrection[i]), -(curRot+midCorrection[i]+maxMidAngleRight));
+					newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxMidAngleRight));
 				}
 
 				handSkeleton->setRotation(mid[i], newRot, true, false);

@@ -51,6 +51,11 @@ void PropogatingWiggleScene::update() {
 	int top[] = {HandWithFingertipsSkeleton::PINKY_TOP, HandWithFingertipsSkeleton::RING_TOP, HandWithFingertipsSkeleton::MIDDLE_TOP, HandWithFingertipsSkeleton::INDEX_TOP};
 	int fingerCount = 4;
 
+	float timeVal = ofGetElapsedTimef();
+	if (bUseFrameBasedAnimation){
+		timeVal = (float)ofGetFrameNum()/ 60.0;
+	}
+
 	int index;
 	float theta;
 	for (int i=0; i < fingerCount; i++) {
@@ -59,15 +64,15 @@ void PropogatingWiggleScene::update() {
 		float topOffset = 2*phaseOffset + i;
 
 		index = base[i];
-		theta = ofMap(sin(speedUp*ofGetElapsedTimef() + baseOffset), -1, 1, -(baseAngleRange/2.0), baseAngleRange/2.0);
+		theta = ofMap(sin(speedUp*timeVal + baseOffset), -1, 1, -(baseAngleRange/2.0), baseAngleRange/2.0);
 		handWithFingertipsSkeleton->setRotation(index, theta, false, false);
 	
 		index = mid[i];
-		theta = -ofMap(sin(speedUp*ofGetElapsedTimef() + midOffset), -1, 1, -(midAngleRange/2.0), midAngleRange/2.0);
+		theta = -ofMap(sin(speedUp*timeVal + midOffset), -1, 1, -(midAngleRange/2.0), midAngleRange/2.0);
 		handWithFingertipsSkeleton->setRotation(index, theta, false, false);
 
 		index = top[i];
-		theta = ofMap(sin(speedUp*ofGetElapsedTimef() + topOffset), -1, 1, -(topAngleRange/2.0), topAngleRange/2.0);
+		theta = ofMap(sin(speedUp*timeVal + topOffset), -1, 1, -(topAngleRange/2.0), topAngleRange/2.0);
 		handWithFingertipsSkeleton->setRotation(index, theta, false , false);
 	}
 }
@@ -94,14 +99,13 @@ void PropogatingWiggleScene::updateMouse(float mx, float my) {
 			ofVec2f origPalmDir = origPalmPos - origWristPos;
 			
 			float curRot = origPalmDir.angle(xAxis);
-			float correction = 0;
 
 			float newRot;
 			if (mx <= 384) {
-				newRot = ofMap(mx, 0, 384, -(curRot+correction+maxPalmAngleLeft), -(curRot+correction));
+				newRot = ofMap(mx, 0, 384, -(curRot+maxPalmAngleLeft), -(curRot));
 			}
 			else {
-				newRot = ofMap(mx, 384, 768, -(curRot+correction), -(curRot+correction+maxPalmAngleRight));
+				newRot = ofMap(mx, 384, 768, -(curRot), -(curRot+maxPalmAngleRight));
 			}
 
 			handWithFingertipsSkeleton->setRotation(palm, newRot, true, false);
