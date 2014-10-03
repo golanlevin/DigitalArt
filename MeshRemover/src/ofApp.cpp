@@ -10,17 +10,17 @@ void ofApp::setup() {
 	showWireframe = true;
 	showRemoval = true;
 	
-	hand.loadImage("hand/genericHandCenteredNew.jpg");
-	mesh.load("hand/handmarksNew.ply");
+	hand.loadImage("hand/hand.png");
+	mesh.load("hand/hand.ply");
 	for(int i = 0; i < mesh.getNumVertices(); i++) {
 		mesh.addTexCoord(mesh.getVertex(i));
 	}
 	
     // step 1: build these points
 	removalRegion.close();
-	int toRemove[] = {176, 290, 374, 373, 372, 371, 370, 369, 293, 363, 364, 365, 366, 367, 368, 289, 119, 177, 182, 187, 192, 197, 202, 207, 212, 217, 222, 227, 228, 229, 226, 221, 216, 211, 206, 201, 196, 191, 186, 181
+	int toRemove[] = {119, 126, 143, 128, 148, 110, 149, 129, 144, 127, 120, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30
 	};
-	int toRemoveCount = 40;
+	int toRemoveCount = 26;
 	for(int i = 0; i < toRemoveCount; i++) {
 		removalRegion.addVertex(mesh.getVertex(toRemove[i]));
     }
@@ -28,11 +28,11 @@ void ofApp::setup() {
     // step 2: remove the triangles for the remaining indices
 //    removeTriangles(mesh, removalRegion);
 //    mesh = dropUnusedVertices(mesh);
-	
+
 	// post-removal indices, not original indices
-    int toStitchLeft[] = {173, 234, 318, 317, 316, 315, 314, 313};
-    int toStitchRight[] = {119, 233, 312, 311, 310, 309, 308, 307};
-	int toStitchCount = 8;
+    int toStitchLeft[] = {97, 104, 121, 106, 126};
+    int toStitchRight[] = {98, 105, 122, 107, 127};
+    int toStitchCount = 5;
 	for(int i = 0; i < toStitchCount; i++) {
 		stitch.push_back(pair<ofIndexType, ofIndexType>(toStitchLeft[i], toStitchRight[i]));
 	}
