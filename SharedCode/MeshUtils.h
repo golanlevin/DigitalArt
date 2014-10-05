@@ -24,27 +24,42 @@ void removeTriangles(ofMesh& mesh, ofPolyline& region) {
 }
 
 ofMesh dropUnusedVertices(ofMesh& mesh) {
-	int n = mesh.getNumIndices();
-	ofMesh out;
-	vector<bool> used(n);
-	for(int i = 0; i < n; i++) {
-		used[mesh.getIndex(i)] = true;
-	}
-	int total = 0;
-	vector<ofIndexType> newIndex(n);
-	for(int i = 0; i < n; i++) {
-		if(used[i]) {
-			newIndex[i] = total++;
-			out.addVertex(mesh.getVertex(i));
-			if(mesh.hasTexCoords()) {
-				out.addTexCoord(mesh.getTexCoord(i));
-			}
-		}
-	}
-	for(int i = 0; i < n; i++) {
-		out.addIndex(newIndex[mesh.getIndex(i)]);
+    ofMesh out;
+    int nv = mesh.getNumVertices();
+    int ni = mesh.getNumIndices();
+    vector<bool> used(nv, false);
+    vector<ofIndexType> newIndex(nv);
+    int total = 0;
+	for(int i = 0; i < ni; i++) {
+        int oldIndex = mesh.getIndex(i);
+        if(!used[oldIndex]) {
+            used[oldIndex] = true;
+            out.addVertex(mesh.getVertex(oldIndex));
+            if(mesh.hasTexCoords()) {
+                out.addTexCoord(mesh.getTexCoord(oldIndex));
+            }
+            newIndex[oldIndex] = total++;
+        }
+        out.addIndex(newIndex[oldIndex]);
 	}
 	return out;
+}
+
+ofMesh copySubmesh(ofMesh& mesh, ofPolyline& region) {
+    ofMesh copyMesh;
+    copyMesh = mesh;
+    copyMesh.clearIndices();
+    for(int i = 0; i < mesh.getNumIndices(); i += 3) {
+        int i0 = mesh.getIndex(i + 0), i1 = mesh.getIndex(i + 1), i2 = mesh.getIndex(i + 2);
+        ofVec2f vi0 = mesh.getVertex(i0), vi1 = mesh.getVertex(i1), vi2 = mesh.getVertex(i2);
+        ofVec2f avg = (vi0 + vi1 + vi2) / 3;
+        if(region.inside(avg)) {
+            copyMesh.addIndex(i0);
+            copyMesh.addIndex(i1);
+            copyMesh.addIndex(i2);
+        }
+    }
+    return dropUnusedVertices(copyMesh);
 }
 
 void mergeCoincidentVertices(ofMesh& mesh, float epsilon = 10e-5) {

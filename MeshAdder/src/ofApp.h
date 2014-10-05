@@ -17,15 +17,19 @@ public:
 	void keyPressed(int key);
 	
 	ofxUICanvas* gui;
-	bool showImage, showWireframe, showSplit, showCopy;
+    bool showImage, showWireframe, showSplit, showExtra, showSides;
 	
-	ofMesh mesh;
 	ofImage hand;
-	ofxPuppetInteractive puppet;
+    ofMesh handMesh;
+	ofxPuppet handPuppet;
+    ofxPuppet fingerPuppet;
 	
-	ofPolyline splitPath;
+    ofMesh leftBaseMesh, rightBaseMesh;
+    
+    ofPolyline splitPath;
+    ofPolyline extraLeftPath, extraRightPath;
+    ofPolyline splitLeftPath, splitRightPath;
 	vector<ofIndexType> indices;
 	
-	ofPolyline copyRegion;
-	ofMesh copyMesh;
+	ofMesh extraMesh;
 };
