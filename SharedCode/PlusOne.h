@@ -7,6 +7,8 @@
 class PlusOne : public TopologyModifier {
 protected:
     ofPolyline extraRegion;
+    ofMesh extraMesh;
+    
     ofxPuppet handPuppet;
     ofxPuppet fingerPuppet;
     
@@ -16,7 +18,7 @@ protected:
     ofPolyline extraLeftPath, extraRightPath;
     ofPolyline splitLeftPath, splitRightPath;
     
-    ofMesh extraMesh;
+    ofMesh final;
     
 public:
     void update(const ofMesh& mesh);

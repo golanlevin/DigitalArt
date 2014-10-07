@@ -146,13 +146,24 @@ void PlusOne::update(const ofMesh& mesh) {
         leftBaseMesh.getVertices()[leftBaseIndices[i]] = fromVertex;
         rightBaseMesh.getVertices()[rightBaseIndices[i]] = fromVertex;
     }
+    
+    final = handPuppet.getDeformedMesh();
+    final.append(extraMesh);
+    
+    // this step is required for subdivision
+    // but it kills the texture mapping
+    mergeCoincidentVertices(final);
 }
 
 ofMesh& PlusOne::getModifiedMesh() {
-    return handPuppet.getDeformedMesh();
+    return final;
 }
 
 void PlusOne::drawBlends() {
-    leftBaseMesh.drawFaces();
-    rightBaseMesh.drawFaces();
+    // this can be used to draw over poor texture mapping
+    extraMesh.drawFaces();
+    
+    // these are necessary for proper blending at the base
+//    leftBaseMesh.drawFaces();
+//    rightBaseMesh.drawFaces();
 }

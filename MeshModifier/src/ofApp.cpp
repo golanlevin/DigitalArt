@@ -7,7 +7,10 @@ float scaleFactor = 2;
 
 void ofApp::setup() {
 	sharedSetup();
-	setupGui();
+    setupGui();
+    
+    modifier = &plusOne;
+    modifier = &minusOne;
 	
 	showImage = true;
 	showWireframe = true;
@@ -28,7 +31,7 @@ void ofApp::loadMesh(string handFile) {
     hand.loadImage("hand/"+handFile+".jpg");
 	handMesh.load("hand/"+handFile+".ply");
     
-    plusOne.update(handMesh);
+    modifier->update(handMesh);
 }
 
 void ofApp::setupGui() {	
@@ -48,10 +51,10 @@ void ofApp::draw() {
     ofBackground(0);
     ofScale(scaleFactor, scaleFactor);
     if (showImage) {
-        plusOne.draw(hand.getTextureReference());
+        modifier->draw(hand.getTextureReference());
 	}	
     if(showWireframe) {
-        plusOne.getModifiedMesh().drawWireframe();
+        modifier->getModifiedMesh().drawWireframe();
     }
     ofPopMatrix();
 }
@@ -59,5 +62,20 @@ void ofApp::draw() {
 void ofApp::keyPressed(int key) {
     if(key == '\t') {
         nextFile();
+    }
+    if(key == ' ') {
+        ofMesh& mesh = modifier->getModifiedMesh();
+        int vertexIndex;
+        ofVec2f target(mouseX, mouseY);
+        target /= scaleFactor;
+        float bestDistance = 0;
+        for(int i = 0; i < mesh.getNumVertices(); i++) {
+            float distance = target.distance(mesh.getVertex(i));
+            if(distance < bestDistance || i == 0) {
+                bestDistance = distance;
+                vertexIndex = i;
+            }
+        }
+        cout << vertexIndex << ", ";
     }
 }

@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		279034DA19E3962700058595 /* PlusOne.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 279034D919E3962700058595 /* PlusOne.cpp */; };
+		279034DC19E396AA00058595 /* MeshUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 279034DB19E396AA00058595 /* MeshUtils.cpp */; };
+		27ADD70D19E39F4600590C07 /* MinusOne.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27ADD70B19E39F4600590C07 /* MinusOne.cpp */; };
 		27F3B66919D1D25800DB2C91 /* ofxUI2DGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B60C19D1D25800DB2C91 /* ofxUI2DGraph.cpp */; };
 		27F3B66A19D1D25800DB2C91 /* ofxUI2DPad.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B60E19D1D25800DB2C91 /* ofxUI2DPad.cpp */; };
 		27F3B66B19D1D25800DB2C91 /* ofxUIBaseDraws.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B61019D1D25800DB2C91 /* ofxUIBaseDraws.cpp */; };
@@ -86,28 +89,6 @@
 		27F3B71F19D1D30D00DB2C91 /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B71A19D1D30D00DB2C91 /* tinyxml.cpp */; };
 		27F3B72019D1D30D00DB2C91 /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B71C19D1D30D00DB2C91 /* tinyxmlerror.cpp */; };
 		27F3B72119D1D30D00DB2C91 /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B71D19D1D30D00DB2C91 /* tinyxmlparser.cpp */; };
-		27F3B75A19D1D32500DB2C91 /* EqualizeScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B72519D1D32500DB2C91 /* EqualizeScene.cpp */; };
-		27F3B75B19D1D32500DB2C91 /* FingerLengthPuppeteerScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B72719D1D32500DB2C91 /* FingerLengthPuppeteerScene.cpp */; };
-		27F3B75C19D1D32500DB2C91 /* GrowingMiddleFingerScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B72919D1D32500DB2C91 /* GrowingMiddleFingerScene.cpp */; };
-		27F3B75D19D1D32500DB2C91 /* LissajousScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B72D19D1D32500DB2C91 /* LissajousScene.cpp */; };
-		27F3B75E19D1D32500DB2C91 /* MeanderScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B72F19D1D32500DB2C91 /* MeanderScene.cpp */; };
-		27F3B75F19D1D32500DB2C91 /* MiddleDifferentLengthScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B73219D1D32500DB2C91 /* MiddleDifferentLengthScene.cpp */; };
-		27F3B76019D1D32500DB2C91 /* NoneScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B73419D1D32500DB2C91 /* NoneScene.cpp */; };
-		27F3B76119D1D32500DB2C91 /* NorthScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B73619D1D32500DB2C91 /* NorthScene.cpp */; };
-		27F3B76219D1D32500DB2C91 /* PinkyPuppeteerScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B73919D1D32500DB2C91 /* PinkyPuppeteerScene.cpp */; };
-		27F3B76319D1D32500DB2C91 /* PropogatingWiggleScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B73B19D1D32500DB2C91 /* PropogatingWiggleScene.cpp */; };
-		27F3B76419D1D32500DB2C91 /* PulsatingPalmScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B73D19D1D32500DB2C91 /* PulsatingPalmScene.cpp */; };
-		27F3B76519D1D32500DB2C91 /* RetractingFingersScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B73F19D1D32500DB2C91 /* RetractingFingersScene.cpp */; };
-		27F3B76619D1D32500DB2C91 /* SinusoidalLengthScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B74319D1D32500DB2C91 /* SinusoidalLengthScene.cpp */; };
-		27F3B76719D1D32500DB2C91 /* SinusoidalWiggleScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B74519D1D32500DB2C91 /* SinusoidalWiggleScene.cpp */; };
-		27F3B76819D1D32500DB2C91 /* SplayFingersScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B74819D1D32500DB2C91 /* SplayFingersScene.cpp */; };
-		27F3B76919D1D32500DB2C91 /* StartrekScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B74A19D1D32500DB2C91 /* StartrekScene.cpp */; };
-		27F3B76A19D1D32500DB2C91 /* StraightenFingersScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B74C19D1D32500DB2C91 /* StraightenFingersScene.cpp */; };
-		27F3B76B19D1D32500DB2C91 /* TwitchScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B74F19D1D32500DB2C91 /* TwitchScene.cpp */; };
-		27F3B76C19D1D32500DB2C91 /* WaveScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B75119D1D32500DB2C91 /* WaveScene.cpp */; };
-		27F3B76D19D1D32500DB2C91 /* WiggleScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B75319D1D32500DB2C91 /* WiggleScene.cpp */; };
-		27F3B76E19D1D32500DB2C91 /* WigglingWristScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B75519D1D32500DB2C91 /* WigglingWristScene.cpp */; };
-		27F3B76F19D1D32500DB2C91 /* WobbleScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27F3B75719D1D32500DB2C91 /* WobbleScene.cpp */; };
 		BBAB23CB13894F3D00AA2426 /* GLUT.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = BBAB23BE13894E4700AA2426 /* GLUT.framework */; };
 		E4328149138ABC9F0047C5CB /* openFrameworksDebug.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E4328148138ABC890047C5CB /* openFrameworksDebug.a */; };
 		E45BE97B0E8CC7DD009D7055 /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E45BE9710E8CC7DD009D7055 /* AGL.framework */; };
@@ -160,8 +141,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		275AF6A619E389C5009D98D5 /* TopologyModifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TopologyModifier.h; sourceTree = "<group>"; };
-		275AF6A719E38BAF009D98D5 /* PlusOne.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlusOne.h; sourceTree = "<group>"; };
+		2790349819E394B700058595 /* MeshUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshUtils.h; sourceTree = "<group>"; };
+		279034A219E394B700058595 /* PlusOne.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlusOne.h; sourceTree = "<group>"; };
+		279034AA19E394B700058595 /* SharedUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SharedUtils.h; sourceTree = "<group>"; };
+		279034D919E3962700058595 /* PlusOne.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlusOne.cpp; sourceTree = "<group>"; };
+		279034DB19E396AA00058595 /* MeshUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MeshUtils.cpp; sourceTree = "<group>"; };
+		27ADD70B19E39F4600590C07 /* MinusOne.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MinusOne.cpp; sourceTree = "<group>"; };
+		27ADD70C19E39F4600590C07 /* MinusOne.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MinusOne.h; sourceTree = "<group>"; };
+		27ADD70F19E39F6600590C07 /* TopologyModifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TopologyModifier.h; sourceTree = "<group>"; };
 		27F3B60B19D1D25800DB2C91 /* ofxUI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ofxUI.h; sourceTree = "<group>"; };
 		27F3B60C19D1D25800DB2C91 /* ofxUI2DGraph.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ofxUI2DGraph.cpp; sourceTree = "<group>"; };
 		27F3B60D19D1D25800DB2C91 /* ofxUI2DGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ofxUI2DGraph.h; sourceTree = "<group>"; };
@@ -339,61 +326,6 @@
 		27F3B71B19D1D30D00DB2C91 /* tinyxml.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tinyxml.h; sourceTree = "<group>"; };
 		27F3B71C19D1D30D00DB2C91 /* tinyxmlerror.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxmlerror.cpp; sourceTree = "<group>"; };
 		27F3B71D19D1D30D00DB2C91 /* tinyxmlparser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxmlparser.cpp; sourceTree = "<group>"; };
-		27F3B72319D1D32500DB2C91 /* Bone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bone.h; sourceTree = "<group>"; };
-		27F3B72419D1D32500DB2C91 /* BufferedVideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BufferedVideo.h; sourceTree = "<group>"; };
-		27F3B72519D1D32500DB2C91 /* EqualizeScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EqualizeScene.cpp; sourceTree = "<group>"; };
-		27F3B72619D1D32500DB2C91 /* EqualizeScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EqualizeScene.h; sourceTree = "<group>"; };
-		27F3B72719D1D32500DB2C91 /* FingerLengthPuppeteerScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FingerLengthPuppeteerScene.cpp; sourceTree = "<group>"; };
-		27F3B72819D1D32500DB2C91 /* FingerLengthPuppeteerScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FingerLengthPuppeteerScene.h; sourceTree = "<group>"; };
-		27F3B72919D1D32500DB2C91 /* GrowingMiddleFingerScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GrowingMiddleFingerScene.cpp; sourceTree = "<group>"; };
-		27F3B72A19D1D32500DB2C91 /* GrowingMiddleFingerScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GrowingMiddleFingerScene.h; sourceTree = "<group>"; };
-		27F3B72B19D1D32500DB2C91 /* HandSkeleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HandSkeleton.h; sourceTree = "<group>"; };
-		27F3B72C19D1D32500DB2C91 /* HandWithFingertipsSkeleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HandWithFingertipsSkeleton.h; sourceTree = "<group>"; };
-		27F3B72D19D1D32500DB2C91 /* LissajousScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LissajousScene.cpp; sourceTree = "<group>"; };
-		27F3B72E19D1D32500DB2C91 /* LissajousScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LissajousScene.h; sourceTree = "<group>"; };
-		27F3B72F19D1D32500DB2C91 /* MeanderScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MeanderScene.cpp; sourceTree = "<group>"; };
-		27F3B73019D1D32500DB2C91 /* MeanderScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeanderScene.h; sourceTree = "<group>"; };
-		27F3B73119D1D32500DB2C91 /* MeshUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshUtils.h; sourceTree = "<group>"; };
-		27F3B73219D1D32500DB2C91 /* MiddleDifferentLengthScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MiddleDifferentLengthScene.cpp; sourceTree = "<group>"; };
-		27F3B73319D1D32500DB2C91 /* MiddleDifferentLengthScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MiddleDifferentLengthScene.h; sourceTree = "<group>"; };
-		27F3B73419D1D32500DB2C91 /* NoneScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NoneScene.cpp; sourceTree = "<group>"; };
-		27F3B73519D1D32500DB2C91 /* NoneScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoneScene.h; sourceTree = "<group>"; };
-		27F3B73619D1D32500DB2C91 /* NorthScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NorthScene.cpp; sourceTree = "<group>"; };
-		27F3B73719D1D32500DB2C91 /* NorthScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NorthScene.h; sourceTree = "<group>"; };
-		27F3B73819D1D32500DB2C91 /* PalmSkeleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PalmSkeleton.h; sourceTree = "<group>"; };
-		27F3B73919D1D32500DB2C91 /* PinkyPuppeteerScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PinkyPuppeteerScene.cpp; sourceTree = "<group>"; };
-		27F3B73A19D1D32500DB2C91 /* PinkyPuppeteerScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PinkyPuppeteerScene.h; sourceTree = "<group>"; };
-		27F3B73B19D1D32500DB2C91 /* PropogatingWiggleScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PropogatingWiggleScene.cpp; sourceTree = "<group>"; };
-		27F3B73C19D1D32500DB2C91 /* PropogatingWiggleScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PropogatingWiggleScene.h; sourceTree = "<group>"; };
-		27F3B73D19D1D32500DB2C91 /* PulsatingPalmScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PulsatingPalmScene.cpp; sourceTree = "<group>"; };
-		27F3B73E19D1D32500DB2C91 /* PulsatingPalmScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PulsatingPalmScene.h; sourceTree = "<group>"; };
-		27F3B73F19D1D32500DB2C91 /* RetractingFingersScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RetractingFingersScene.cpp; sourceTree = "<group>"; };
-		27F3B74019D1D32500DB2C91 /* RetractingFingersScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RetractingFingersScene.h; sourceTree = "<group>"; };
-		27F3B74119D1D32500DB2C91 /* Scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Scene.h; sourceTree = "<group>"; };
-		27F3B74219D1D32500DB2C91 /* SharedUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SharedUtils.h; sourceTree = "<group>"; };
-		27F3B74319D1D32500DB2C91 /* SinusoidalLengthScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SinusoidalLengthScene.cpp; sourceTree = "<group>"; };
-		27F3B74419D1D32500DB2C91 /* SinusoidalLengthScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SinusoidalLengthScene.h; sourceTree = "<group>"; };
-		27F3B74519D1D32500DB2C91 /* SinusoidalWiggleScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SinusoidalWiggleScene.cpp; sourceTree = "<group>"; };
-		27F3B74619D1D32500DB2C91 /* SinusoidalWiggleScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SinusoidalWiggleScene.h; sourceTree = "<group>"; };
-		27F3B74719D1D32500DB2C91 /* Skeleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Skeleton.h; sourceTree = "<group>"; };
-		27F3B74819D1D32500DB2C91 /* SplayFingersScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SplayFingersScene.cpp; sourceTree = "<group>"; };
-		27F3B74919D1D32500DB2C91 /* SplayFingersScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SplayFingersScene.h; sourceTree = "<group>"; };
-		27F3B74A19D1D32500DB2C91 /* StartrekScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StartrekScene.cpp; sourceTree = "<group>"; };
-		27F3B74B19D1D32500DB2C91 /* StartrekScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StartrekScene.h; sourceTree = "<group>"; };
-		27F3B74C19D1D32500DB2C91 /* StraightenFingersScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StraightenFingersScene.cpp; sourceTree = "<group>"; };
-		27F3B74D19D1D32500DB2C91 /* StraightenFingersScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StraightenFingersScene.h; sourceTree = "<group>"; };
-		27F3B74E19D1D32500DB2C91 /* ThreePointSkeleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThreePointSkeleton.h; sourceTree = "<group>"; };
-		27F3B74F19D1D32500DB2C91 /* TwitchScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TwitchScene.cpp; sourceTree = "<group>"; };
-		27F3B75019D1D32500DB2C91 /* TwitchScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TwitchScene.h; sourceTree = "<group>"; };
-		27F3B75119D1D32500DB2C91 /* WaveScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WaveScene.cpp; sourceTree = "<group>"; };
-		27F3B75219D1D32500DB2C91 /* WaveScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WaveScene.h; sourceTree = "<group>"; };
-		27F3B75319D1D32500DB2C91 /* WiggleScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WiggleScene.cpp; sourceTree = "<group>"; };
-		27F3B75419D1D32500DB2C91 /* WiggleScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WiggleScene.h; sourceTree = "<group>"; };
-		27F3B75519D1D32500DB2C91 /* WigglingWristScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WigglingWristScene.cpp; sourceTree = "<group>"; };
-		27F3B75619D1D32500DB2C91 /* WigglingWristScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WigglingWristScene.h; sourceTree = "<group>"; };
-		27F3B75719D1D32500DB2C91 /* WobbleScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WobbleScene.cpp; sourceTree = "<group>"; };
-		27F3B75819D1D32500DB2C91 /* WobbleScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WobbleScene.h; sourceTree = "<group>"; };
-		27F3B75919D1D32500DB2C91 /* WristSpineSkeleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WristSpineSkeleton.h; sourceTree = "<group>"; };
 		BBAB23BE13894E4700AA2426 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = ../../../libs/glut/lib/osx/GLUT.framework; sourceTree = "<group>"; };
 		E4328143138ABC890047C5CB /* openFrameworksLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = openFrameworksLib.xcodeproj; path = ../../../libs/openFrameworksCompiled/project/osx/openFrameworksLib.xcodeproj; sourceTree = SOURCE_ROOT; };
 		E45BE9710E8CC7DD009D7055 /* AGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AGL.framework; path = /System/Library/Frameworks/AGL.framework; sourceTree = "<absolute>"; };
@@ -447,6 +379,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2790348919E394B700058595 /* SharedCode */ = {
+			isa = PBXGroup;
+			children = (
+				27ADD70F19E39F6600590C07 /* TopologyModifier.h */,
+				27ADD70B19E39F4600590C07 /* MinusOne.cpp */,
+				27ADD70C19E39F4600590C07 /* MinusOne.h */,
+				2790349819E394B700058595 /* MeshUtils.h */,
+				279034DB19E396AA00058595 /* MeshUtils.cpp */,
+				279034A219E394B700058595 /* PlusOne.h */,
+				279034D919E3962700058595 /* PlusOne.cpp */,
+				279034AA19E394B700058595 /* SharedUtils.h */,
+			);
+			name = SharedCode;
+			path = ../../SharedCode;
+			sourceTree = "<group>";
+		};
 		27F3B60919D1D25800DB2C91 /* ofxUI */ = {
 			isa = PBXGroup;
 			children = (
@@ -827,71 +775,6 @@
 			path = ../../../addons/ofxXmlSettings/libs;
 			sourceTree = "<group>";
 		};
-		27F3B72219D1D32500DB2C91 /* SharedCode */ = {
-			isa = PBXGroup;
-			children = (
-				27F3B72319D1D32500DB2C91 /* Bone.h */,
-				27F3B72419D1D32500DB2C91 /* BufferedVideo.h */,
-				27F3B72519D1D32500DB2C91 /* EqualizeScene.cpp */,
-				27F3B72619D1D32500DB2C91 /* EqualizeScene.h */,
-				27F3B72719D1D32500DB2C91 /* FingerLengthPuppeteerScene.cpp */,
-				27F3B72819D1D32500DB2C91 /* FingerLengthPuppeteerScene.h */,
-				27F3B72919D1D32500DB2C91 /* GrowingMiddleFingerScene.cpp */,
-				27F3B72A19D1D32500DB2C91 /* GrowingMiddleFingerScene.h */,
-				27F3B72B19D1D32500DB2C91 /* HandSkeleton.h */,
-				27F3B72C19D1D32500DB2C91 /* HandWithFingertipsSkeleton.h */,
-				27F3B72D19D1D32500DB2C91 /* LissajousScene.cpp */,
-				27F3B72E19D1D32500DB2C91 /* LissajousScene.h */,
-				27F3B72F19D1D32500DB2C91 /* MeanderScene.cpp */,
-				27F3B73019D1D32500DB2C91 /* MeanderScene.h */,
-				27F3B73119D1D32500DB2C91 /* MeshUtils.h */,
-				27F3B73219D1D32500DB2C91 /* MiddleDifferentLengthScene.cpp */,
-				27F3B73319D1D32500DB2C91 /* MiddleDifferentLengthScene.h */,
-				27F3B73419D1D32500DB2C91 /* NoneScene.cpp */,
-				27F3B73519D1D32500DB2C91 /* NoneScene.h */,
-				27F3B73619D1D32500DB2C91 /* NorthScene.cpp */,
-				27F3B73719D1D32500DB2C91 /* NorthScene.h */,
-				27F3B73819D1D32500DB2C91 /* PalmSkeleton.h */,
-				27F3B73919D1D32500DB2C91 /* PinkyPuppeteerScene.cpp */,
-				27F3B73A19D1D32500DB2C91 /* PinkyPuppeteerScene.h */,
-				27F3B73B19D1D32500DB2C91 /* PropogatingWiggleScene.cpp */,
-				27F3B73C19D1D32500DB2C91 /* PropogatingWiggleScene.h */,
-				27F3B73D19D1D32500DB2C91 /* PulsatingPalmScene.cpp */,
-				27F3B73E19D1D32500DB2C91 /* PulsatingPalmScene.h */,
-				27F3B73F19D1D32500DB2C91 /* RetractingFingersScene.cpp */,
-				27F3B74019D1D32500DB2C91 /* RetractingFingersScene.h */,
-				27F3B74119D1D32500DB2C91 /* Scene.h */,
-				27F3B74219D1D32500DB2C91 /* SharedUtils.h */,
-				27F3B74319D1D32500DB2C91 /* SinusoidalLengthScene.cpp */,
-				27F3B74419D1D32500DB2C91 /* SinusoidalLengthScene.h */,
-				27F3B74519D1D32500DB2C91 /* SinusoidalWiggleScene.cpp */,
-				27F3B74619D1D32500DB2C91 /* SinusoidalWiggleScene.h */,
-				27F3B74719D1D32500DB2C91 /* Skeleton.h */,
-				27F3B74819D1D32500DB2C91 /* SplayFingersScene.cpp */,
-				27F3B74919D1D32500DB2C91 /* SplayFingersScene.h */,
-				27F3B74A19D1D32500DB2C91 /* StartrekScene.cpp */,
-				27F3B74B19D1D32500DB2C91 /* StartrekScene.h */,
-				27F3B74C19D1D32500DB2C91 /* StraightenFingersScene.cpp */,
-				27F3B74D19D1D32500DB2C91 /* StraightenFingersScene.h */,
-				27F3B74E19D1D32500DB2C91 /* ThreePointSkeleton.h */,
-				27F3B74F19D1D32500DB2C91 /* TwitchScene.cpp */,
-				27F3B75019D1D32500DB2C91 /* TwitchScene.h */,
-				27F3B75119D1D32500DB2C91 /* WaveScene.cpp */,
-				27F3B75219D1D32500DB2C91 /* WaveScene.h */,
-				27F3B75319D1D32500DB2C91 /* WiggleScene.cpp */,
-				27F3B75419D1D32500DB2C91 /* WiggleScene.h */,
-				27F3B75519D1D32500DB2C91 /* WigglingWristScene.cpp */,
-				27F3B75619D1D32500DB2C91 /* WigglingWristScene.h */,
-				27F3B75719D1D32500DB2C91 /* WobbleScene.cpp */,
-				27F3B75819D1D32500DB2C91 /* WobbleScene.h */,
-				27F3B75919D1D32500DB2C91 /* WristSpineSkeleton.h */,
-				275AF6A619E389C5009D98D5 /* TopologyModifier.h */,
-				275AF6A719E38BAF009D98D5 /* PlusOne.h */,
-			);
-			name = SharedCode;
-			path = ../../SharedCode;
-			sourceTree = "<group>";
-		};
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
@@ -966,7 +849,7 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				27F3B72219D1D32500DB2C91 /* SharedCode */,
+				2790348919E394B700058595 /* SharedCode */,
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
 				E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */,
 				E4B69E1F0A3A1BDC003C02F2 /* ofApp.h */,
@@ -1070,53 +953,39 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				27F3B76919D1D32500DB2C91 /* StartrekScene.cpp in Sources */,
-				27F3B76319D1D32500DB2C91 /* PropogatingWiggleScene.cpp in Sources */,
 				27F3B66919D1D25800DB2C91 /* ofxUI2DGraph.cpp in Sources */,
 				27F3B67D19D1D25800DB2C91 /* ofxUIMinimalSlider.cpp in Sources */,
-				27F3B76A19D1D32500DB2C91 /* StraightenFingersScene.cpp in Sources */,
 				27F3B70919D1D30500DB2C91 /* Calibration.cpp in Sources */,
 				27F3B70D19D1D30500DB2C91 /* Helpers.cpp in Sources */,
 				27F3B67E19D1D25800DB2C91 /* ofxUIMovingGraph.cpp in Sources */,
 				27F3B70819D1D30500DB2C91 /* fdog.cpp in Sources */,
-				27F3B76F19D1D32500DB2C91 /* WobbleScene.cpp in Sources */,
-				27F3B75A19D1D32500DB2C91 /* EqualizeScene.cpp in Sources */,
-				27F3B76219D1D32500DB2C91 /* PinkyPuppeteerScene.cpp in Sources */,
 				27F3B71E19D1D30D00DB2C91 /* ofxXmlSettings.cpp in Sources */,
 				27F3B6D519D1D2FB00DB2C91 /* WmlGMatrix.cpp in Sources */,
 				27F3B6D419D1D2FB00DB2C91 /* WmlBox2.cpp in Sources */,
 				27F3B6CC19D1D2FB00DB2C91 /* ofxPuppet.cpp in Sources */,
 				27F3B6D719D1D2FB00DB2C91 /* WmlLinearSystem.cpp in Sources */,
-				27F3B76C19D1D32500DB2C91 /* WaveScene.cpp in Sources */,
-				27F3B76819D1D32500DB2C91 /* SplayFingersScene.cpp in Sources */,
 				27F3B68019D1D25800DB2C91 /* ofxUIMultiImageToggle.cpp in Sources */,
 				27F3B68119D1D25800DB2C91 /* ofxUINumberDialer.cpp in Sources */,
 				27F3B67119D1D25800DB2C91 /* ofxUIDropDownList.cpp in Sources */,
 				27F3B67A19D1D25800DB2C91 /* ofxUILabel.cpp in Sources */,
 				27F3B66A19D1D25800DB2C91 /* ofxUI2DPad.cpp in Sources */,
 				27F3B68919D1D25800DB2C91 /* ofxUISpacer.cpp in Sources */,
-				27F3B76B19D1D32500DB2C91 /* TwitchScene.cpp in Sources */,
 				27F3B66C19D1D25800DB2C91 /* ofxUIBiLabelSlider.cpp in Sources */,
 				27F3B67719D1D25800DB2C91 /* ofxUIImageSampler.cpp in Sources */,
 				27F3B71F19D1D30D00DB2C91 /* tinyxml.cpp in Sources */,
-				27F3B75E19D1D32500DB2C91 /* MeanderScene.cpp in Sources */,
 				27F3B68E19D1D25800DB2C91 /* ofxUITextInput.cpp in Sources */,
 				27F3B69019D1D25800DB2C91 /* ofxUIToggleMatrix.cpp in Sources */,
-				27F3B76119D1D32500DB2C91 /* NorthScene.cpp in Sources */,
 				27F3B67419D1D25800DB2C91 /* ofxUIFPSSlider.cpp in Sources */,
 				27F3B66B19D1D25800DB2C91 /* ofxUIBaseDraws.cpp in Sources */,
 				27F3B67219D1D25800DB2C91 /* ofxUIEventArgs.cpp in Sources */,
-				27F3B75F19D1D32500DB2C91 /* MiddleDifferentLengthScene.cpp in Sources */,
-				27F3B75B19D1D32500DB2C91 /* FingerLengthPuppeteerScene.cpp in Sources */,
+				279034DA19E3962700058595 /* PlusOne.cpp in Sources */,
 				27F3B69419D1D25800DB2C91 /* ofxUIWidgetWithLabel.cpp in Sources */,
 				27F3B6CD19D1D2FB00DB2C91 /* ofxPuppetInteractive.cpp in Sources */,
-				27F3B76519D1D32500DB2C91 /* RetractingFingersScene.cpp in Sources */,
 				27F3B68219D1D25800DB2C91 /* ofxUIRadio.cpp in Sources */,
 				27F3B70719D1D30500DB2C91 /* ETF.cpp in Sources */,
 				27F3B6D219D1D2FB00DB2C91 /* WmlLinearSystemExt.cpp in Sources */,
 				27F3B66D19D1D25800DB2C91 /* ofxUIButton.cpp in Sources */,
 				27F3B70E19D1D30500DB2C91 /* Kalman.cpp in Sources */,
-				27F3B75D19D1D32500DB2C91 /* LissajousScene.cpp in Sources */,
 				27F3B71019D1D30500DB2C91 /* RunningBackground.cpp in Sources */,
 				27F3B69319D1D25800DB2C91 /* ofxUIWidget.cpp in Sources */,
 				27F3B70A19D1D30500DB2C91 /* ContourFinder.cpp in Sources */,
@@ -1125,10 +994,10 @@
 				27F3B6D919D1D2FB00DB2C91 /* WmlMatrix4.cpp in Sources */,
 				27F3B69119D1D25800DB2C91 /* ofxUIValuePlotter.cpp in Sources */,
 				27F3B68319D1D25800DB2C91 /* ofxUIRangeSlider.cpp in Sources */,
+				27ADD70D19E39F4600590C07 /* MinusOne.cpp in Sources */,
 				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
 				27F3B6DA19D1D2FB00DB2C91 /* WmlVector2.cpp in Sources */,
 				27F3B6D819D1D2FB00DB2C91 /* WmlMath.cpp in Sources */,
-				27F3B76419D1D32500DB2C91 /* PulsatingPalmScene.cpp in Sources */,
 				27F3B71319D1D30500DB2C91 /* Wrappers.cpp in Sources */,
 				27F3B67819D1D25800DB2C91 /* ofxUIImageSlider.cpp in Sources */,
 				27F3B6DB19D1D2FB00DB2C91 /* WmlVector3.cpp in Sources */,
@@ -1136,15 +1005,13 @@
 				27F3B67319D1D25800DB2C91 /* ofxUIFPS.cpp in Sources */,
 				27F3B71219D1D30500DB2C91 /* Utilities.cpp in Sources */,
 				27F3B68B19D1D25800DB2C91 /* ofxUISuperCanvas.cpp in Sources */,
-				27F3B76E19D1D32500DB2C91 /* WigglingWristScene.cpp in Sources */,
-				27F3B76019D1D32500DB2C91 /* NoneScene.cpp in Sources */,
 				27F3B68A19D1D25800DB2C91 /* ofxUISpectrum.cpp in Sources */,
 				27F3B6CE19D1D2FB00DB2C91 /* LinearAlgebra.cpp in Sources */,
 				27F3B70B19D1D30500DB2C91 /* Distance.cpp in Sources */,
 				27F3B6D019D1D2FB00DB2C91 /* TriangleMesh.cpp in Sources */,
 				27F3B70F19D1D30500DB2C91 /* ObjectFinder.cpp in Sources */,
 				27F3B71119D1D30500DB2C91 /* Tracker.cpp in Sources */,
-				27F3B75C19D1D32500DB2C91 /* GrowingMiddleFingerScene.cpp in Sources */,
+				279034DC19E396AA00058595 /* MeshUtils.cpp in Sources */,
 				27F3B67F19D1D25800DB2C91 /* ofxUIMultiImageButton.cpp in Sources */,
 				27F3B68619D1D25800DB2C91 /* ofxUIScrollableCanvas.cpp in Sources */,
 				27F3B67519D1D25800DB2C91 /* ofxUIImage.cpp in Sources */,
@@ -1153,7 +1020,6 @@
 				27F3B70C19D1D30500DB2C91 /* Flow.cpp in Sources */,
 				27F3B68819D1D25800DB2C91 /* ofxUISortableList.cpp in Sources */,
 				27F3B69219D1D25800DB2C91 /* ofxUIWaveform.cpp in Sources */,
-				27F3B76619D1D32500DB2C91 /* SinusoidalLengthScene.cpp in Sources */,
 				27F3B68C19D1D25800DB2C91 /* ofxUITabBar.cpp in Sources */,
 				27F3B6D119D1D2FB00DB2C91 /* WmlExtTriangleUtils.cpp in Sources */,
 				27F3B66F19D1D25800DB2C91 /* ofxUICircleSlider.cpp in Sources */,
@@ -1161,14 +1027,12 @@
 				27F3B72119D1D30D00DB2C91 /* tinyxmlparser.cpp in Sources */,
 				27F3B67B19D1D25800DB2C91 /* ofxUILabelButton.cpp in Sources */,
 				27F3B68719D1D25800DB2C91 /* ofxUISlider.cpp in Sources */,
-				27F3B76D19D1D32500DB2C91 /* WiggleScene.cpp in Sources */,
 				27F3B6D619D1D2FB00DB2C91 /* WmlGVector.cpp in Sources */,
 				27F3B67919D1D25800DB2C91 /* ofxUIImageToggle.cpp in Sources */,
 				27F3B68419D1D25800DB2C91 /* ofxUIRectangle.cpp in Sources */,
 				27F3B6CF19D1D2FB00DB2C91 /* RigidMeshDeformer2D.cpp in Sources */,
 				27F3B67019D1D25800DB2C91 /* ofxUIDragableLabelButton.cpp in Sources */,
 				27F3B66E19D1D25800DB2C91 /* ofxUICanvas.cpp in Sources */,
-				27F3B76719D1D32500DB2C91 /* SinusoidalWiggleScene.cpp in Sources */,
 				27F3B68519D1D25800DB2C91 /* ofxUIRotarySlider.cpp in Sources */,
 				27F3B67C19D1D25800DB2C91 /* ofxUILabelToggle.cpp in Sources */,
 				27F3B67619D1D25800DB2C91 /* ofxUIImageButton.cpp in Sources */,

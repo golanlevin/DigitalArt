@@ -3,9 +3,9 @@
 #include "ofMain.h"
 #include "ofxCv.h"
 #include "ofxUI.h"
-#include "ofxPuppetInteractive.h"
 
 #include "PlusOne.h"
+#include "MinusONe.h"
 
 using namespace ofxCv;
 using namespace cv;
@@ -18,17 +18,18 @@ public:
 	void draw();
 	void keyPressed(int key);
     
-    void loadMesh(string handFile);
-	
     ofDirectory dir;
     int curFile;
     void nextFile();
     
+    ofImage hand;
+    ofMesh handMesh;
+    void loadMesh(string handFile);
+    
     PlusOne plusOne;
+    MinusOne minusOne;
+    TopologyModifier* modifier;
     
 	ofxUICanvas* gui;
     bool showImage, showWireframe;
-	
-	ofImage hand;
-    ofMesh handMesh;
 };

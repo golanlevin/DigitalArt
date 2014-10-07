@@ -1,4 +1,0 @@
-ofxOpenCv
-ofxXmlSettings
-ofxCv
-ofxUI
