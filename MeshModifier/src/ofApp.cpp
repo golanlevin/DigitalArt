@@ -10,7 +10,7 @@ void ofApp::setup() {
     setupGui();
     
     modifier = &plusOne;
-    modifier = &minusOne;
+//    modifier = &minusOne;
 	
 	showImage = true;
 	showWireframe = true;
@@ -34,12 +34,12 @@ void ofApp::loadMesh(string handFile) {
     modifier->update(handMesh);
 }
 
-void ofApp::setupGui() {	
+void ofApp::setupGui() {
 	gui = new ofxUICanvas();
 	gui->addLabel("Mesh Adder");
 	gui->addSpacer();
 	gui->addLabelToggle("Show Image", &showImage);
-	gui->addLabelToggle("Show Wireframe", &showWireframe);
+    gui->addLabelToggle("Show Wireframe", &showWireframe);
 	gui->autoSizeToFitWidgets();
 }
 

@@ -164,6 +164,6 @@ void PlusOne::drawBlends() {
     extraMesh.drawFaces();
     
     // these are necessary for proper blending at the base
-//    leftBaseMesh.drawFaces();
-//    rightBaseMesh.drawFaces();
+    leftBaseMesh.drawFaces();
+    rightBaseMesh.drawFaces();
 }
