@@ -160,6 +160,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		275AF6A619E389C5009D98D5 /* TopologyModifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TopologyModifier.h; sourceTree = "<group>"; };
+		275AF6A719E38BAF009D98D5 /* PlusOne.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlusOne.h; sourceTree = "<group>"; };
 		27F3B60B19D1D25800DB2C91 /* ofxUI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ofxUI.h; sourceTree = "<group>"; };
 		27F3B60C19D1D25800DB2C91 /* ofxUI2DGraph.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ofxUI2DGraph.cpp; sourceTree = "<group>"; };
 		27F3B60D19D1D25800DB2C91 /* ofxUI2DGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ofxUI2DGraph.h; sourceTree = "<group>"; };
@@ -883,6 +885,8 @@
 				27F3B75719D1D32500DB2C91 /* WobbleScene.cpp */,
 				27F3B75819D1D32500DB2C91 /* WobbleScene.h */,
 				27F3B75919D1D32500DB2C91 /* WristSpineSkeleton.h */,
+				275AF6A619E389C5009D98D5 /* TopologyModifier.h */,
+				275AF6A719E38BAF009D98D5 /* PlusOne.h */,
 			);
 			name = SharedCode;
 			path = ../../SharedCode;

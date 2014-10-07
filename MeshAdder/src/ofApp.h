@@ -5,6 +5,8 @@
 #include "ofxUI.h"
 #include "ofxPuppetInteractive.h"
 
+#include "PlusOne.h"
+
 using namespace ofxCv;
 using namespace cv;
 
@@ -22,20 +24,11 @@ public:
     int curFile;
     void nextFile();
     
+    PlusOne plusOne;
+    
 	ofxUICanvas* gui;
-    bool showImage, showWireframe, showSplit, showExtra, showSides, showIndices;
+    bool showImage, showWireframe;
 	
 	ofImage hand;
     ofMesh handMesh;
-    ofPolyline extraRegion;
-	ofxPuppet handPuppet;
-    ofxPuppet fingerPuppet;
-	
-    ofMesh leftBaseMesh, rightBaseMesh;
-    
-    ofPolyline splitPath;
-    ofPolyline extraLeftPath, extraRightPath;
-    ofPolyline splitLeftPath, splitRightPath;
-	
-	ofMesh extraMesh;
 };

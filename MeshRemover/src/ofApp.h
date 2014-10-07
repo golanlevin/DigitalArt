@@ -4,6 +4,7 @@
 #include "ofxCv.h"
 #include "ofxUI.h"
 #include "ofxPuppetInteractive.h"
+#include "PlusOne.h"
 
 using namespace ofxCv;
 using namespace cv;
@@ -15,7 +16,9 @@ public:
 	void update();
 	void draw();
 	void keyPressed(int key);
-	
+    
+    PlusOne plusOne;
+    
 	ofxUICanvas* gui;
 	bool showImage, showWireframe, showRemoval;
 	

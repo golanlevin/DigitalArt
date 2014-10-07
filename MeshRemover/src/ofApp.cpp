@@ -12,14 +12,14 @@ void ofApp::setup() {
 	showWireframe = true;
 	showRemoval = true;
 	
-    string handFile = "handmesh-48";
+    string handFile = "handmesh-57";
     hand.loadImage("hand/"+handFile+".jpg");
     handMesh.load("hand/"+handFile+".ply");
     
-    handMesh.clearTexCoords();
-    for(int i = 0; i < handMesh.getNumVertices(); i++) {
-        handMesh.addTexCoord(ofVec2f(handMesh.getVertex(i)));
-    }
+//    handMesh.clearTexCoords();
+//    for(int i = 0; i < handMesh.getNumVertices(); i++) {
+//        handMesh.addTexCoord(ofVec2f(handMesh.getVertex(i)));
+//    }
 	
     // build these points
 	removalRegion.close();
