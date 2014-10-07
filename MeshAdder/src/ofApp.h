@@ -15,12 +15,19 @@ public:
 	void update();
 	void draw();
 	void keyPressed(int key);
+    
+    void loadMesh(string handFile);
 	
+    ofDirectory dir;
+    int curFile;
+    void nextFile();
+    
 	ofxUICanvas* gui;
-    bool showImage, showWireframe, showSplit, showExtra, showSides;
+    bool showImage, showWireframe, showSplit, showExtra, showSides, showIndices;
 	
 	ofImage hand;
     ofMesh handMesh;
+    ofPolyline extraRegion;
 	ofxPuppet handPuppet;
     ofxPuppet fingerPuppet;
 	
@@ -29,7 +36,6 @@ public:
     ofPolyline splitPath;
     ofPolyline extraLeftPath, extraRightPath;
     ofPolyline splitLeftPath, splitRightPath;
-	vector<ofIndexType> indices;
 	
 	ofMesh extraMesh;
 };

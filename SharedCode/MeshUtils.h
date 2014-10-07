@@ -2,6 +2,59 @@
 
 #include "ofxPuppet.h"
 
+void addAttributes(const ofMesh& src, int index, ofMesh& dst) {
+    if(src.hasVertices()) {
+        dst.addVertex(src.getVertex(index));
+    }
+    if(src.hasTexCoords()) {
+        dst.addTexCoord(src.getTexCoord(index));
+    }
+    if(src.hasNormals()) {
+        dst.addNormal(src.getNormal(index));
+    }
+    if(src.hasColors()) {
+        dst.addColor(src.getColor(index));
+    }
+}
+
+void orientMesh(ofMesh& mesh,
+                ofVec2f fromStart, ofVec2f fromEnd,
+                ofVec2f toStart, ofVec2f toEnd) {
+    ofVec2f translation = toStart - fromStart;
+    ofVec2f fromVec = fromEnd - fromStart;
+    ofVec2f toVec = toEnd - toStart;
+    float angle = fromVec.angle(toVec); // degrees
+    ofVec3f z(0, 0, 1);
+    for(int i = 0; i < mesh.getNumVertices(); i++) {
+        ofVec3f& cur = mesh.getVertices()[i];
+        cur.rotate(angle, fromStart, z);
+        cur += translation;
+    }
+}
+
+void orientPolyline(ofPolyline& polyline,
+                    ofVec2f fromStart, ofVec2f fromEnd,
+                    ofVec2f toStart, ofVec2f toEnd) {
+    ofVec2f translation = toStart - fromStart;
+    ofVec2f fromVec = fromEnd - fromStart;
+    ofVec2f toVec = toEnd - toStart;
+    float angle = fromVec.angle(toVec); // degrees
+    ofVec3f z(0, 0, 1);
+    for(int i = 0; i < polyline.size(); i++) {
+        ofVec3f& cur = polyline[i];
+        cur.rotate(angle, fromStart, z);
+        cur += translation;
+    }
+}
+
+ofPolyline buildPolyline(ofMesh& mesh, int indices[], int count) {
+    ofPolyline line;
+    for(int i = 0; i < count; i++) {
+        line.addVertex(mesh.getVertex(indices[i]));
+    }
+    return line;
+}
+
 void removeTriangles(ofMesh& mesh, ofPolyline& region) {
 	int n = mesh.getNumIndices();
 	vector<ofIndexType> indices;
@@ -23,25 +76,31 @@ void removeTriangles(ofMesh& mesh, ofPolyline& region) {
 	mesh.addIndices(indices);
 }
 
+// preserves ordering of vertices and indices
 ofMesh dropUnusedVertices(ofMesh& mesh) {
     ofMesh out;
     int nv = mesh.getNumVertices();
     int ni = mesh.getNumIndices();
+    // mark all used vertices
     vector<bool> used(nv, false);
-    vector<ofIndexType> newIndex(nv);
-    int total = 0;
 	for(int i = 0; i < ni; i++) {
         int oldIndex = mesh.getIndex(i);
-        if(!used[oldIndex]) {
-            used[oldIndex] = true;
-            out.addVertex(mesh.getVertex(oldIndex));
-            if(mesh.hasTexCoords()) {
-                out.addTexCoord(mesh.getTexCoord(oldIndex));
-            }
-            newIndex[oldIndex] = total++;
+        used[oldIndex] = true;
+    }
+    // add vertices and track new indices
+    int total = 0;
+    vector<ofIndexType> newIndex(nv);
+    for(int i = 0; i < nv; i++) {
+        if(used[i]) {
+            addAttributes(mesh, i, out);
+            newIndex[i] = total++;
         }
+    }
+    // add all new indices
+    for(int i = 0; i < ni; i++) {
+        int oldIndex = mesh.getIndex(i);
         out.addIndex(newIndex[oldIndex]);
-	}
+    }
 	return out;
 }
 
@@ -87,10 +146,8 @@ void mergeCoincidentVertices(ofMesh& mesh, float epsilon = 10e-5) {
 	}
 }
 
-ofMesh removeAndStitch(ofMesh& mesh, ofPolyline& removalRegion, vector<pair<ofIndexType, ofIndexType> >& stitch) {
+ofMesh stitch(ofMesh& mesh, vector<pair<ofIndexType, ofIndexType> >& stitch) {
 	ofMesh out = mesh;
-	removeTriangles(out, removalRegion);
-	out = dropUnusedVertices(out);
 	ofxPuppet puppet;
 	puppet.setup(out);
 	puppet.update();
@@ -102,10 +159,10 @@ ofMesh removeAndStitch(ofMesh& mesh, ofPolyline& removalRegion, vector<pair<ofIn
 	}
 	puppet.update();
 	out = puppet.getDeformedMesh();
-	mergeCoincidentVertices(out); // could do this using stitch pairs instead?
 	return dropUnusedVertices(out);
 }
 
+// is c left of the line a-b
 bool isLeft(ofVec2f a, ofVec2f b, ofVec2f c){
 	return ((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) > 0;
 }
@@ -149,36 +206,61 @@ bool sideTest(ofPolyline& polyline, ofVec2f position) {
 
 void split(ofMesh& mesh, vector<ofIndexType>& indices) {
 	int n = mesh.getNumIndices();
-	vector<ofIndexType> newIndices;
+    
 	ofPolyline polyline;
 	for(int i = 0; i < indices.size(); i++) {
 		polyline.addVertex(mesh.getVertex(indices[i]));
 	}
+    
+    // duplicate vertices along the split
+    vector<ofIndexType> newIndices;
 	for(int i = 0; i < indices.size(); i++) {
 		newIndices.push_back(mesh.getNumVertices());
 		int index = indices[i];
-		mesh.addVertex(mesh.getVertex(index));
-		if(mesh.hasTexCoords()) {
-			mesh.addTexCoord(mesh.getTexCoord(index));
-		}
+        addAttributes(mesh, index, mesh);
 	}
-	cout << ofToString(newIndices) << endl;
+    
+    ofVec2f front = mesh.getVertex(indices.front());
+    ofVec2f back = mesh.getVertex(indices.back());
+    
+    // with all the triangles
+    bool referenceSet = false;
+    bool reference;
 	for(int i = 0; i < n; i += 3) {
 		ofIndexType i0 = mesh.getIndex(i + 0);
 		ofIndexType i1 = mesh.getIndex(i + 1);
 		ofIndexType i2 = mesh.getIndex(i + 2);
 		
+        // if one of the indices matches a split index
 		for(int j = 0; j < indices.size(); j++) {
 			if(i0 == indices[j] || i1 == indices[j] || i2 == indices[j]) {
+                
+                // and we made a boolean decision that's only true for one side
 				ofVec2f vi0 = mesh.getVertex(i0);
 				ofVec2f vi1 = mesh.getVertex(i1);
 				ofVec2f vi2 = mesh.getVertex(i2);
-				ofVec2f avg = (vi0 + vi1 + vi2) / 3;
-				
-				if(sideTest(polyline, avg)) {
+                ofVec2f avg = (vi0 + vi1 + vi2) / 3;
+                // sideTest is slower than isLeft but works for nonlinear splits
+//                bool reassign = sideTest(polyline, avg);
+                bool reassign = isLeft(front, back, avg);
+                
+                // this flips the reassignments based on the side of the first
+                // this preserves topology based on indices instead of
+                // only orientation
+                if(!referenceSet) {
+                    reference = reassign;
+                    referenceSet = true;
+                }
+                if(reference) {
+                    reassign = !reassign;
+                }
+            
+				if(reassign) {
+                    // swap all matching indices to other side
 					for(int k = 0; k < 3; k++) {
-						if(mesh.getIndex(i + k) == indices[j]) {
-							mesh.setIndex(i + k, newIndices[j]);							
+                        ofIndexType& index = mesh.getIndices()[i + k];
+						if(index == indices[j]) {
+                            index = newIndices[j];
 						}
 					}
 				}

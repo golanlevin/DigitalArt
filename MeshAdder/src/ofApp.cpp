@@ -4,42 +4,50 @@
 
 float scaleFactor = 2;
 
-void orientMesh(ofMesh& mesh,
-                ofVec2f fromStart, ofVec2f fromEnd,
-                ofVec2f toStart, ofVec2f toEnd) {
-    ofVec2f translation = toStart - fromStart;
-    ofVec2f fromVec = fromEnd - fromStart;
-    ofVec2f toVec = toEnd - toStart;
-    float angle = fromVec.angle(toVec); // degrees
-    ofVec3f z(0, 0, 1);
-    for(int i = 0; i < mesh.getNumVertices(); i++) {
-        ofVec3f& cur = mesh.getVertices()[i];
-        cur.rotate(angle, fromStart, z);
-        cur += translation;
-    }
+void ofDrawBitmapStringOutlined(string text, int x, int y) {
+    ofPushStyle();
+    ofSetColor(0);
+    float offset = .5; // scale dependent
+    ofDrawBitmapString(text, x-offset, y-offset);
+    ofDrawBitmapString(text, x+offset, y-offset);
+    ofDrawBitmapString(text, x-offset, y+offset);
+    ofDrawBitmapString(text, x+offset, y+offset);
+    ofDrawBitmapString(text, x-offset, y);
+    ofDrawBitmapString(text, x+offset, y);
+    ofDrawBitmapString(text, x, y+offset);
+    ofDrawBitmapString(text, x, y-offset);
+    ofPopStyle();
+    ofDrawBitmapString(text, x, y);
 }
 
-void orientPolyline(ofPolyline& polyline,
-                ofVec2f fromStart, ofVec2f fromEnd,
-                ofVec2f toStart, ofVec2f toEnd) {
-    ofVec2f translation = toStart - fromStart;
-    ofVec2f fromVec = fromEnd - fromStart;
-    ofVec2f toVec = toEnd - toStart;
-    float angle = fromVec.angle(toVec); // degrees
-    ofVec3f z(0, 0, 1);
-    for(int i = 0; i < polyline.size(); i++) {
-        ofVec3f& cur = polyline[i];
-        cur.rotate(angle, fromStart, z);
-        cur += translation;
-    }
+void drawCornerIndex(int i, ofVec2f& left, ofVec2f& mid, ofVec2f& right) {
+    ofVec2f pos = (mid * 4 + left + right) / 6;
+//    ofDrawBitmapStringOutlined(ofToString(i), pos.x, pos.y);
+    
+    ofPushStyle();
+    int hue = ofMap(i % 8, 0, 8, 0, 255);
+    ofSetColor(ofColor::fromHsb(hue, 255, 255));
+    ofPushMatrix();
+    ofTranslate(pos);
+    ofRect(-1, -1, 2, 2);
+    ofPopStyle();
+    ofPopMatrix();
 }
 
-ofPolyline buildPolyline(ofMesh& mesh, int indices[], int count) {
-    ofPolyline line;
-    for(int i = 0; i < count; i++) {
-        line.addVertex(mesh.getVertex(indices[i]));
+void drawIndices(ofMesh& mesh) {
+    ofPushStyle();
+    for(int i = 0; i < mesh.getNumIndices(); i+=3) {
+        int i0 = mesh.getIndex(i+0);
+        int i1 = mesh.getIndex(i+1);
+        int i2 = mesh.getIndex(i+2);
+        ofVec2f v0 = mesh.getVertex(i0);
+        ofVec2f v1 = mesh.getVertex(i1);
+        ofVec2f v2 = mesh.getVertex(i2);
+        drawCornerIndex(i0, v2, v0, v1);
+        drawCornerIndex(i1, v0, v1, v2);
+        drawCornerIndex(i2, v1, v2, v0);
     }
-    return line;
+    ofPopStyle();
 }
 
 void ofApp::setup() {
@@ -51,27 +59,38 @@ void ofApp::setup() {
 	showSplit = false;
 	showExtra = false;
     showSides = false;
-	
-    string handFile = "handmesh-226";
-	hand.loadImage("hand/"+handFile+".jpg");
-    hand.getPixelsRef().swapRgb();
-    hand.update();
+    showIndices = true;
+    
+    dir.allowExt("ply");
+    dir.listDir("hand");
+    curFile = 0;
+    nextFile();
+}
+
+void ofApp::nextFile() {
+    string curName = dir.getFile(curFile).getBaseName();
+    loadMesh(curName);
+    curFile = (curFile + 1) % dir.size();
+}
+
+void ofApp::loadMesh(string handFile) {
+    hand.loadImage("hand/"+handFile+".jpg");
 	handMesh.load("hand/"+handFile+".ply");
     
-    handMesh.clearTexCoords();
-	for(int i = 0; i < handMesh.getNumVertices(); i++) {
-        handMesh.addTexCoord(ofVec2f(handMesh.getVertex(i)));
-	}
+//    handMesh.clearTexCoords();
+//    for(int i = 0; i < handMesh.getNumVertices(); i++) {
+//        handMesh.addTexCoord(ofVec2f(handMesh.getVertex(i)));
+//    }
 	
     // copy of the ring finger
 	int toCopy[] = {
         115, 119, 124, 129, 134, 140, 63, 66, 69, 72, 75, 78, 81, 82, 83, 80, 77, 74, 71, 68, 65, 142, 135, 130, 125, 120};
-    ofPolyline extraRegion = buildPolyline(handMesh, toCopy, 26);
+    extraRegion = buildPolyline(handMesh, toCopy, 26);
 	extraRegion.close();
     extraMesh = copySubmesh(handMesh, extraRegion);
 
     // place the extra finger in approximately the right place
-    int extraRootIndex = 23, extraKnuckleIndex = 31;
+    int extraRootIndex = 21, extraKnuckleIndex = 31;
     int splitRootIndex = 115, splitCrotchIndex = 140;
     orientMesh(extraMesh,
                extraMesh.getVertex(extraRootIndex),
@@ -82,14 +101,16 @@ void ofApp::setup() {
     int leftCount = 6, rightCount = 6;
 
     // find the sides of the copied mesh
-    int extraLeftIndices[] = {23, 21, 24, 26, 28, 30};
+    int extraLeftIndices[] = {21, 22, 24, 26, 28, 30};
     extraLeftPath = buildPolyline(extraMesh, extraLeftIndices, leftCount);
-    int extraRightIndices[] = {23, 22, 25, 27, 29, 32};
+    int extraRightIndices[] = {21, 23, 25, 27, 29, 32};
     extraRightPath = buildPolyline(extraMesh, extraRightIndices, rightCount);
 
     // split path
     int toSplit[] = {119, 124, 129, 134, 140};
     int toSplitCount = 5;
+    splitPath = ofPolyline();
+    vector<ofIndexType> indices;
     for(int i = 0; i < toSplitCount; i++) {
         splitPath.addVertex(handMesh.getVertex(toSplit[i]));
         indices.push_back(toSplit[i]);
@@ -108,13 +129,14 @@ void ofApp::setup() {
                    *splitLeftPath.rbegin(),
                    *extraLeftPath.begin(),
                    *extraLeftPath.rbegin());
-    
+
     orientPolyline(splitRightPath,
                    *splitRightPath.begin(),
                    *splitRightPath.rbegin(),
                    *extraRightPath.begin(),
                    *extraRightPath.rbegin());
-    
+
+    handPuppet = ofxPuppet();
     handPuppet.setup(handMesh);
 
     // put control points along hand's left seam
@@ -130,7 +152,7 @@ void ofApp::setup() {
         ofVec2f splitVertex = splitRightPath[i];
         handPuppet.setControlPoint(splitIndex, splitVertex);
     }
-    
+
     // bends the hand into shape
     handPuppet.update();
     handMesh = handPuppet.getDeformedMesh();
@@ -166,7 +188,7 @@ void ofApp::setup() {
     extraMesh = fingerPuppet.getDeformedMesh();
 
     // extract a mesh from the base of the ring finger
-    int baseRegionCount = 15;
+    int baseRegionCount = 14;
     int leftBaseRegionIndices[] = {
         115, 118, 123, 128, 133, 138, 42, 43, 44, 140, 134, 129, 124, 119};
     ofPolyline leftBaseRegion = buildPolyline(handMesh, leftBaseRegionIndices, baseRegionCount);
@@ -180,26 +202,28 @@ void ofApp::setup() {
 
     // set the colors of the left base to fade from right to left
     // and the right base to fade from left to right
-    int baseIndices[] = {2, 0, 3, 5, 7, 9, 10, 14, 13, 12, 8, 6, 4, 1, 11};
-    float leftBaseOpacity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, .5};
-    float rightBaseOpacity[] = {0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, .5};
+    // the indices start at the base, go around clockwise (for a left hand)
+    // and the last vertex is the kunckle
+    int leftBaseIndices[] = {3, 4, 6, 8, 10, 12, 0, 1, 2, 14, 11, 9, 7, 5, 13};
+    int rightBaseIndices[] = {3, 10, 11, 12, 13, 14, 0, 1, 2, 9, 7, 6, 5, 4, 8};
+    float leftBaseOpacity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0};
+    float rightBaseOpacity[] = {0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     int baseCount = 15;
     vector<ofFloatColor> leftBaseColors(baseCount), rightBaseColors(baseCount);
     for(int i = 0; i < baseCount; i++) {
-        leftBaseColors[baseIndices[i]] = ofFloatColor(1, leftBaseOpacity[i]);
-        rightBaseColors[baseIndices[i]] = ofFloatColor(1, rightBaseOpacity[i]);
+        leftBaseColors[leftBaseIndices[i]] = ofFloatColor(1, leftBaseOpacity[i]);
+        rightBaseColors[rightBaseIndices[i]] = ofFloatColor(1, rightBaseOpacity[i]);
     }
     leftBaseMesh.addColors(leftBaseColors);
     rightBaseMesh.addColors(rightBaseColors);
 
     // make sure the vertices of the index base match the position of the extra finger
-    int extraMeshBaseIndices[] = {23, 21, 24, 26, 28, 30, 0, 2, 4, 32, 29, 27, 25, 22, 31};
+    int extraMeshBaseIndices[] = {21, 22, 24, 26, 28, 30, 0, 1, 2, 32, 29, 27, 25, 23, 31};
     for(int i = 0; i < baseCount; i++) {
         int fromIndex = extraMeshBaseIndices[i];
-        int toIndex = baseIndices[i];
         ofVec3f& fromVertex = extraMesh.getVertices()[fromIndex];
-        rightBaseMesh.getVertices()[toIndex] = fromVertex;
-        leftBaseMesh.getVertices()[toIndex] = fromVertex;
+        leftBaseMesh.getVertices()[leftBaseIndices[i]] = fromVertex;
+        rightBaseMesh.getVertices()[rightBaseIndices[i]] = fromVertex;
     }
 }
 
@@ -212,11 +236,11 @@ void ofApp::setupGui() {
 	gui->addLabelToggle("Show Split", &showSplit);
     gui->addLabelToggle("Show Extra", &showExtra);
     gui->addLabelToggle("Show Sides", &showSides);
+    gui->addLabelToggle("Show Indices", &showIndices);
 	gui->autoSizeToFitWidgets();
 }
 
 void ofApp::update() {
-    handPuppet.update();
 }
 
 void ofApp::draw() {
@@ -233,12 +257,16 @@ void ofApp::draw() {
 		hand.getTextureReference().unbind();
 	}	
     if(showWireframe) {
-        handMesh.drawWireframe();
+//        handMesh.drawWireframe();
         handPuppet.drawWireframe();
         fingerPuppet.drawWireframe();
         handPuppet.drawControlPoints();
         fingerPuppet.drawControlPoints();
-	}
+        if(showIndices) {
+//            drawIndices(handMesh);
+            drawIndices(handPuppet.getDeformedMesh());
+        }
+    }
 	if(showSplit) {
 		ofPushStyle();
 		ofSetLineWidth(3);
@@ -250,17 +278,24 @@ void ofApp::draw() {
 		ofPushStyle();
 		ofSetLineWidth(1);
         extraMesh.drawWireframe();
+        ofSetColor(ofColor::blue);
+        extraRegion.draw();
         ofPopStyle();
+        if(showIndices) {
+            drawIndices(extraMesh);
+        }
 	}
     if(showSides) {
         ofPushStyle();
         ofSetLineWidth(2);
-        ofSetColor(ofColor::green);
-        extraLeftPath.draw();
-        extraRightPath.draw();
-        ofSetColor(ofColor::orange);
-        splitLeftPath.draw();
-        splitRightPath.draw();
+//        ofSetColor(ofColor::red);
+//        extraLeftPath.draw();
+//        ofSetColor(ofColor::blue);
+//        extraRightPath.draw();
+//        ofSetColor(ofColor::red);
+//        splitLeftPath.draw();
+//        ofSetColor(ofColor::blue);
+//        splitRightPath.draw();
         ofPopStyle();
     }
     ofPopMatrix();
@@ -268,7 +303,9 @@ void ofApp::draw() {
 
 void ofApp::keyPressed(int key) {
     if(key == ' ') {
+//        ofMesh& mesh = handPuppet.getDeformedMesh();
 //        ofMesh& mesh = rightBaseMesh;
+//        ofMesh& mesh = leftBaseMesh;
 //        ofMesh& mesh = handMesh;
         ofMesh& mesh = extraMesh;
 //        ofMesh& mesh = indexBaseMesh;
@@ -285,4 +322,7 @@ void ofApp::keyPressed(int key) {
 		}
 		cout << vertexIndex << ", ";
 	}
+    if(key == '\t') {
+        nextFile();
+    }
 }

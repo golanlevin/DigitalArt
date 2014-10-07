@@ -2,6 +2,8 @@
 #include "SharedUtils.h"
 #include "MeshUtils.h"
 
+float scaleFactor = 2;
+
 void ofApp::setup() {
 	sharedSetup();
 	setupGui();
@@ -10,37 +12,52 @@ void ofApp::setup() {
 	showWireframe = true;
 	showRemoval = true;
 	
-	hand.loadImage("hand/hand.png");
-	mesh.load("hand/hand.ply");
-	for(int i = 0; i < mesh.getNumVertices(); i++) {
-		mesh.addTexCoord(mesh.getVertex(i));
-	}
+    string handFile = "handmesh-48";
+    hand.loadImage("hand/"+handFile+".jpg");
+    handMesh.load("hand/"+handFile+".ply");
+    
+    handMesh.clearTexCoords();
+    for(int i = 0; i < handMesh.getNumVertices(); i++) {
+        handMesh.addTexCoord(ofVec2f(handMesh.getVertex(i)));
+    }
 	
-    // step 1: build these points
+    // build these points
 	removalRegion.close();
-	int toRemove[] = {119, 126, 143, 128, 148, 110, 149, 129, 144, 127, 120, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30
+	int toRemove[] = {115, 120, 125, 130, 135, 142, 65, 68, 71, 74, 77, 80, 83, 82, 81, 78, 75, 72, 69, 66, 63, 140, 134, 129, 124, 119
 	};
 	int toRemoveCount = 26;
 	for(int i = 0; i < toRemoveCount; i++) {
-		removalRegion.addVertex(mesh.getVertex(toRemove[i]));
+		removalRegion.addVertex(handMesh.getVertex(toRemove[i]));
     }
     
-    // step 2: remove the triangles for the remaining indices
-//    removeTriangles(mesh, removalRegion);
-//    mesh = dropUnusedVertices(mesh);
+    // make a copy of the removal region, to be used for blending
+    int baseRegionCount = 14;
+    int baseRegionIndices[] = {
+        115, 119, 124, 129, 134, 140, 63, 64, 65, 142, 135, 130, 125, 120
+    };
+    ofPolyline baseRegion = buildPolyline(handMesh, baseRegionIndices, baseRegionCount);
+    removedMesh = copySubmesh(handMesh, removalRegion);
+    
+    // remove the triangles for the remaining indices
+    removeTriangles(handMesh, removalRegion);
+    handMesh = dropUnusedVertices(handMesh);
 
 	// post-removal indices, not original indices
-    int toStitchLeft[] = {97, 104, 121, 106, 126};
-    int toStitchRight[] = {98, 105, 122, 107, 127};
+    int toStitchLeft[] = {99, 104, 109, 114, 120};
+    int toStitchRight[] = {98, 103, 108, 113, 119};
     int toStitchCount = 5;
 	for(int i = 0; i < toStitchCount; i++) {
-		stitch.push_back(pair<ofIndexType, ofIndexType>(toStitchLeft[i], toStitchRight[i]));
+		stitchIndices.push_back(pair<ofIndexType, ofIndexType>(toStitchLeft[i], toStitchRight[i]));
 	}
+
+    // stitch sides together
+	handMesh = stitch(handMesh, stitchIndices);
     
-    // step 3: remove and stitch
-	mesh = removeAndStitch(mesh, removalRegion, stitch);
-	
-	puppet.setup(mesh);
+    float opacity[] = {
+        0,
+        0,0,0,0,0,0,0,0,0,0,0,0,
+        .5,
+        1,1,1,1,1,1,1,1,1,1,1,1};
 }
 
 void ofApp::setupGui() {	
@@ -56,19 +73,20 @@ void ofApp::setupGui() {
 }
 
 void ofApp::update() {
-	puppet.update();
 }
 
 void ofApp::draw() {
-	ofBackground(0);
+    ofPushMatrix();
+    ofBackground(0);
+    ofScale(scaleFactor, scaleFactor);
 	if (showImage) {
 		hand.getTextureReference().bind();
-		puppet.drawFaces();
+		handMesh.drawFaces();
 		hand.getTextureReference().unbind();
 	}	
 	if(showWireframe) {
-		puppet.drawWireframe();
-		puppet.drawControlPoints();
+//		handMesh.drawWireframe();
+        removedMesh.drawWireframe();
 	}
 	if(showRemoval) {
 		ofPushStyle();
@@ -77,12 +95,15 @@ void ofApp::draw() {
 		removalRegion.draw();
 		ofPopStyle();
 	}
+    ofPopMatrix();
 }
 
 void ofApp::keyPressed(int key) {
 	if(key == ' ') {
+        ofMesh& mesh = handMesh;
 		int vertexIndex;
-		ofVec2f target(mouseX, mouseY);
+        ofVec2f target(mouseX, mouseY);
+        target /= scaleFactor;
 		float bestDistance = 0;
 		for(int i = 0; i < mesh.getNumVertices(); i++) {
 			float distance = target.distance(mesh.getVertex(i));

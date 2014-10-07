@@ -19,10 +19,9 @@ public:
 	ofxUICanvas* gui;
 	bool showImage, showWireframe, showRemoval;
 	
-	ofMesh mesh;
+    ofMesh handMesh, removedMesh;
 	ofImage hand;
-	ofxPuppetInteractive puppet;
 	
 	ofPolyline removalRegion;
-	vector<pair<ofIndexType, ofIndexType> > stitch;
+	vector<pair<ofIndexType, ofIndexType> > stitchIndices;
 };
